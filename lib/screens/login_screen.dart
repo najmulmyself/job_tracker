@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
-import 'home_screen.dart';
+import 'main_navigation_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -26,7 +26,7 @@ class _LoginScreenState extends State<LoginScreen>
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       if (authProvider.isAuthenticated) {
         Navigator.of(context).pushReplacement(
-          CupertinoPageRoute(builder: (_) => const HomeScreen()),
+          CupertinoPageRoute(builder: (_) => const MainNavigationScreen()),
         );
       }
     });
@@ -61,9 +61,9 @@ class _LoginScreenState extends State<LoginScreen>
     final success = await authProvider.signInWithGoogle();
 
     if (success && mounted) {
-      Navigator.of(
-        context,
-      ).pushReplacement(CupertinoPageRoute(builder: (_) => const HomeScreen()));
+      Navigator.of(context).pushReplacement(
+        CupertinoPageRoute(builder: (_) => const MainNavigationScreen()),
+      );
     } else if (authProvider.error != null && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

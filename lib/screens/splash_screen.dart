@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import 'login_screen.dart';
-import 'home_screen.dart';
+import 'main_navigation_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -29,7 +29,7 @@ class _SplashScreenState extends State<SplashScreen> {
       // Navigate based on auth state
       if (authProvider.isAuthenticated) {
         Navigator.of(context).pushReplacement(
-          CupertinoPageRoute(builder: (_) => const HomeScreen()),
+          CupertinoPageRoute(builder: (_) => const MainNavigationScreen()),
         );
       } else {
         Navigator.of(context).pushReplacement(

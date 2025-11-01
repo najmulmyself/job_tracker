@@ -28,6 +28,10 @@ class JobProvider with ChangeNotifier {
       _jobs.where((job) => job.stage == ApplicationStage.applied).length;
   int get interviewCount =>
       _jobs.where((job) => job.stage == ApplicationStage.interview).length;
+  int get offerCount =>
+      _jobs.where((job) => job.stage == ApplicationStage.offer).length;
+  int get rejectedCount =>
+      _jobs.where((job) => job.stage == ApplicationStage.rejected).length;
 
   void listenToJobs(String userId) {
     _firestoreService.getJobApplicationsStream(userId).listen((jobs) {
