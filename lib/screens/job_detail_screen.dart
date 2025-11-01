@@ -34,7 +34,8 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
     if (widget.job.salaryRange != null && widget.job.salaryRange!.isNotEmpty) {
       return widget.job.salaryRange!;
     }
-    if (widget.job.expectedSalary != null && widget.job.expectedSalary!.isNotEmpty) {
+    if (widget.job.expectedSalary != null &&
+        widget.job.expectedSalary!.isNotEmpty) {
       return widget.job.expectedSalary!;
     }
     return 'Not specified';
@@ -54,14 +55,12 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
     setState(() {
       reminderEnabled = value;
     });
-    
+
     // Update in provider - for now just update the state
     // You can add reminderEnabled field to the model later
     final jobProvider = Provider.of<JobProvider>(context, listen: false);
-    final updatedJob = widget.job.copyWith(
-      updatedAt: DateTime.now(),
-    );
-    
+    final updatedJob = widget.job.copyWith(updatedAt: DateTime.now());
+
     await jobProvider.updateJob(updatedJob);
   }
 
@@ -70,7 +69,9 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Delete Application'),
-        content: const Text('Are you sure you want to delete this application? This action cannot be undone.'),
+        content: const Text(
+          'Are you sure you want to delete this application? This action cannot be undone.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
@@ -79,7 +80,10 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
           TextButton(
             onPressed: () async {
               Navigator.of(ctx).pop();
-              final jobProvider = Provider.of<JobProvider>(context, listen: false);
+              final jobProvider = Provider.of<JobProvider>(
+                context,
+                listen: false,
+              );
               await jobProvider.deleteJob(widget.job.userId, widget.job.id);
               if (mounted) {
                 Navigator.of(context).pop(); // Go back to home screen
@@ -95,9 +99,11 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Scaffold(
-      backgroundColor: isDark ? AppColors.darkBackground : AppColors.lightBackground,
+      backgroundColor: isDark
+          ? AppColors.darkBackground
+          : AppColors.lightBackground,
       appBar: AppBar(
         title: Text(widget.job.companyName),
         actions: [
@@ -114,7 +120,10 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                   children: [
                     Icon(Icons.delete, color: Colors.red),
                     SizedBox(width: 8),
-                    Text('Delete Application', style: TextStyle(color: Colors.red)),
+                    Text(
+                      'Delete Application',
+                      style: TextStyle(color: Colors.red),
+                    ),
                   ],
                 ),
               ),
@@ -142,12 +151,15 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Status Badges
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
                         decoration: BoxDecoration(
                           color: _getStatusColor(),
                           borderRadius: BorderRadius.circular(8),
@@ -163,11 +175,14 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                       ),
                       const SizedBox(width: 12),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
                         decoration: BoxDecoration(
-                          color: isDark 
-                            ? AppColors.darkSurface.withOpacity(0.5)
-                            : Colors.grey[300],
+                          color: isDark
+                              ? AppColors.darkSurface.withOpacity(0.5)
+                              : Colors.grey[300],
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
@@ -218,7 +233,10 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                   isDark: isDark,
                   trailing: Text(
                     _formatDate(widget.job.applicationDate),
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
                 _buildDetailItem(
@@ -227,7 +245,10 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                   isDark: isDark,
                   trailing: Text(
                     _formatDate(widget.job.deadline),
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
                 _buildDetailItem(
@@ -237,7 +258,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                   trailing: Switch(
                     value: reminderEnabled,
                     onChanged: _toggleReminder,
-                    activeColor: AppColors.primaryBlue,
+                    activeThumbColor: AppColors.primaryBlue,
                   ),
                 ),
               ],
@@ -253,7 +274,10 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                 isDark: isDark,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 12,
+                    ),
                     child: Text(
                       widget.job.notes,
                       style: TextStyle(
@@ -308,10 +332,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                   SizedBox(width: 8),
                   Text(
                     'Edit Application',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                 ],
               ),
@@ -335,10 +356,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
           child: Text(
             title,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
         ),
         Container(
@@ -347,9 +365,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
             color: isDark ? AppColors.darkCard : Colors.white,
             borderRadius: BorderRadius.circular(16),
           ),
-          child: Column(
-            children: children,
-          ),
+          child: Column(children: children),
         ),
       ],
     );
@@ -368,9 +384,9 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: isDark 
-                ? AppColors.darkSurface.withOpacity(0.5)
-                : Colors.grey[100],
+              color: isDark
+                  ? AppColors.darkSurface.withOpacity(0.5)
+                  : Colors.grey[100],
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(
