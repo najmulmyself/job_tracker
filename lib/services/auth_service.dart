@@ -19,13 +19,14 @@ class AuthService {
     try {
       // Trigger the authentication flow
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      
+
       if (googleUser == null) {
         return null; // User canceled the sign-in
       }
 
       // Obtain the auth details from the request
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
 
       // Create a new credential
       final credential = GoogleAuthProvider.credential(
@@ -34,8 +35,9 @@ class AuthService {
       );
 
       // Sign in to Firebase with the Google credential
-      final UserCredential userCredential = 
-          await _auth.signInWithCredential(credential);
+      final UserCredential userCredential = await _auth.signInWithCredential(
+        credential,
+      );
 
       // Create or update user document in Firestore
       if (userCredential.user != null) {
@@ -60,8 +62,12 @@ class AuthService {
           }
         } catch (firestoreError) {
           // Firestore error - authentication still succeeded
-          print('⚠️ Warning: Could not save user to Firestore: $firestoreError');
-          print('ℹ️ Authentication successful, but Firestore may not be enabled.');
+          print(
+            '⚠️ Warning: Could not save user to Firestore: $firestoreError',
+          );
+          print(
+            'ℹ️ Authentication successful, but Firestore may not be enabled.',
+          );
           print('ℹ️ Please follow instructions in ENABLE_FIRESTORE.md');
           // Don't rethrow - authentication was successful
         }
@@ -77,10 +83,7 @@ class AuthService {
   // Sign out
   Future<void> signOut() async {
     try {
-      await Future.wait([
-        _auth.signOut(),
-        _googleSignIn.signOut(),
-      ]);
+      await Future.wait([_auth.signOut(), _googleSignIn.signOut()]);
     } catch (e) {
       print('Error signing out: $e');
       rethrow;
@@ -94,10 +97,10 @@ class AuthService {
       if (user != null) {
         // Delete user data from Firestore
         await _firestoreService.deleteUserData(user.uid);
-        
+
         // Delete the Firebase Auth account
         await user.delete();
-        
+
         // Sign out from Google
         await _googleSignIn.signOut();
       }

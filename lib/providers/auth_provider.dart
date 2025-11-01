@@ -25,7 +25,7 @@ class AuthProvider with ChangeNotifier {
 
   Future<void> _onAuthStateChanged(User? user) async {
     _firebaseUser = user;
-    
+
     if (user != null) {
       try {
         _userModel = await _firestoreService.getUser(user.uid);
@@ -58,13 +58,14 @@ class AuthProvider with ChangeNotifier {
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
         );
-        _error = '⚠️ Firestore not enabled. Please follow instructions in ENABLE_FIRESTORE.md';
+        _error =
+            '⚠️ Firestore not enabled. Please follow instructions in ENABLE_FIRESTORE.md';
         print('ℹ️ Using temporary user data from Firebase Auth');
       }
     } else {
       _userModel = null;
     }
-    
+
     notifyListeners();
   }
 
@@ -75,7 +76,7 @@ class AuthProvider with ChangeNotifier {
       notifyListeners();
 
       final credential = await _authService.signInWithGoogle();
-      
+
       if (credential == null) {
         _error = 'Sign in cancelled';
         _isLoading = false;

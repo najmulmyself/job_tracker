@@ -16,7 +16,7 @@ class ResumeProvider with ChangeNotifier {
   List<ResumeModel> get resumes => _resumes;
   bool get isLoading => _isLoading;
   String? get error => _error;
-  ResumeModel? get defaultResume => 
+  ResumeModel? get defaultResume =>
       _resumes.where((r) => r.isDefault).firstOrNull;
 
   void listenToResumes(String userId) {

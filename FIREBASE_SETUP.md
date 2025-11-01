@@ -63,15 +63,15 @@
      match /databases/{database}/documents {
        match /users/{userId} {
          allow read, write: if request.auth != null && request.auth.uid == userId;
-         
+
          match /jobs/{jobId} {
            allow read, write: if request.auth != null && request.auth.uid == userId;
-           
+
            match /coverLetters/{letterId} {
              allow read, write: if request.auth != null && request.auth.uid == userId;
            }
          }
-         
+
          match /resumes/{resumeId} {
            allow read, write: if request.auth != null && request.auth.uid == userId;
          }
@@ -116,6 +116,7 @@
 
 1. Open `ios/Runner/Info.plist`
 2. Add URL Scheme for Google Sign-In:
+
    ```xml
    <key>CFBundleURLTypes</key>
    <array>
@@ -151,6 +152,7 @@ flutter run
 ## ⚠️ Important Notes
 
 1. **Never commit Firebase config files to public repositories**
+
    - Add to `.gitignore`:
      ```
      # Firebase
@@ -169,16 +171,19 @@ flutter run
 ## 🔧 Troubleshooting
 
 ### Android Issues:
+
 - **SHA-1 certificate error**: Make sure you added the correct SHA-1 to Firebase
 - **Build fails**: Run `flutter clean` and rebuild
 - **Google Sign-In fails**: Check package name matches in all places
 
 ### iOS Issues:
+
 - **Sign-In fails**: Verify `REVERSED_CLIENT_ID` is correct in Info.plist
 - **Build fails in Xcode**: Run `pod install` in `ios/` directory
 - **CocoaPods issues**: Run `pod repo update`
 
 ### General Issues:
+
 - **Offline mode not working**: Check Firestore persistence settings
 - **Notifications not working**: Verify permissions are requested and granted
 

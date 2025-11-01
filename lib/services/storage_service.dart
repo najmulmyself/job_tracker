@@ -9,7 +9,7 @@ class StorageService {
     try {
       final String path = 'users/$userId/resumes/$fileName';
       final Reference ref = _storage.ref().child(path);
-      
+
       final UploadTask uploadTask = ref.putFile(
         file,
         SettableMetadata(
@@ -23,7 +23,7 @@ class StorageService {
 
       final TaskSnapshot snapshot = await uploadTask;
       final String downloadUrl = await snapshot.ref.getDownloadURL();
-      
+
       return downloadUrl;
     } catch (e) {
       print('Error uploading resume: $e');
@@ -59,12 +59,12 @@ class StorageService {
     try {
       final Reference ref = _storage.ref().child('users/$userId');
       final ListResult result = await ref.listAll();
-      
+
       // Delete all files
       for (var item in result.items) {
         await item.delete();
       }
-      
+
       // Recursively delete all subdirectories
       for (var prefix in result.prefixes) {
         await _deleteDirectory(prefix);
@@ -78,11 +78,11 @@ class StorageService {
   // Helper method to recursively delete directories
   Future<void> _deleteDirectory(Reference ref) async {
     final ListResult result = await ref.listAll();
-    
+
     for (var item in result.items) {
       await item.delete();
     }
-    
+
     for (var prefix in result.prefixes) {
       await _deleteDirectory(prefix);
     }

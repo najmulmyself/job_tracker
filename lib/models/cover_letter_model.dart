@@ -1,8 +1,4 @@
-enum CoverLetterStatus {
-  draft,
-  generated,
-  submitted,
-}
+enum CoverLetterStatus { draft, generated, submitted }
 
 class CoverLetterModel {
   final String id;

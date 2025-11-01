@@ -24,8 +24,10 @@ class JobProvider with ChangeNotifier {
 
   int get totalJobs => _jobs.length;
   int get draftCount => _jobs.where((job) => job.isDraft).length;
-  int get appliedCount => _jobs.where((job) => job.stage == ApplicationStage.applied).length;
-  int get interviewCount => _jobs.where((job) => job.stage == ApplicationStage.interview).length;
+  int get appliedCount =>
+      _jobs.where((job) => job.stage == ApplicationStage.applied).length;
+  int get interviewCount =>
+      _jobs.where((job) => job.stage == ApplicationStage.interview).length;
 
   void listenToJobs(String userId) {
     _firestoreService.getJobApplicationsStream(userId).listen((jobs) {
@@ -55,7 +57,7 @@ class JobProvider with ChangeNotifier {
   Future<void> createJob(JobApplicationModel job) async {
     try {
       await _firestoreService.createJobApplication(job);
-      
+
       // Schedule notification if deadline is set and not a draft
       if (!job.isDraft && job.deadline != null) {
         await _notificationService.scheduleDeadlineReminder(
@@ -74,7 +76,7 @@ class JobProvider with ChangeNotifier {
   Future<void> updateJob(JobApplicationModel job) async {
     try {
       await _firestoreService.updateJobApplication(job);
-      
+
       // Update notification if deadline changed
       if (!job.isDraft && job.deadline != null) {
         await _notificationService.cancelNotification(job.id.hashCode);
@@ -116,11 +118,8 @@ class JobProvider with ChangeNotifier {
   // Auto-save draft
   Future<void> saveDraft(JobApplicationModel job) async {
     try {
-      final draftJob = job.copyWith(
-        isDraft: true,
-        updatedAt: DateTime.now(),
-      );
-      
+      final draftJob = job.copyWith(isDraft: true, updatedAt: DateTime.now());
+
       if (_jobs.any((j) => j.id == job.id)) {
         await updateJob(draftJob);
       } else {
@@ -170,9 +169,7 @@ class JobProvider with ChangeNotifier {
 
     // Apply draft filter
     if (_showDraftsOnly) {
-      _filteredJobs = _filteredJobs
-          .where((job) => job.isDraft)
-          .toList();
+      _filteredJobs = _filteredJobs.where((job) => job.isDraft).toList();
     }
 
     // Apply sorting

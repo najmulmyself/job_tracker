@@ -1,10 +1,4 @@
-enum ApplicationStage {
-  interested,
-  applied,
-  interview,
-  offer,
-  rejected,
-}
+enum ApplicationStage { interested, applied, interview, offer, rejected }
 
 enum JobSource {
   linkedin,

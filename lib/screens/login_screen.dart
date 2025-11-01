@@ -10,7 +10,8 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStateMixin {
+class _LoginScreenState extends State<LoginScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
@@ -23,9 +24,10 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
       vsync: this,
     );
 
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeIn),
-    );
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn));
 
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 0.5),
@@ -43,13 +45,13 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
 
   Future<void> _handleGoogleSignIn() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    
+
     final success = await authProvider.signInWithGoogle();
-    
+
     if (success && mounted) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
-      );
+      Navigator.of(
+        context,
+      ).pushReplacement(MaterialPageRoute(builder: (_) => const HomeScreen()));
     } else if (authProvider.error != null && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -111,7 +113,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                         ),
                       ),
                       const SizedBox(height: 40),
-                      
+
                       // App Title
                       const Text(
                         'Job Tracker',
@@ -124,14 +126,11 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                       const SizedBox(height: 10),
                       const Text(
                         'Your personal career assistant',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.white70,
-                        ),
+                        style: TextStyle(fontSize: 16, color: Colors.white70),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 60),
-                      
+
                       // Features List
                       _buildFeatureItem(
                         Icons.track_changes,
@@ -153,13 +152,15 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                         'Analyze your progress',
                       ),
                       const SizedBox(height: 60),
-                      
+
                       // Google Sign In Button
                       Consumer<AuthProvider>(
                         builder: (context, authProvider, _) {
                           return authProvider.isLoading
                               ? const CircularProgressIndicator(
-                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Colors.white,
+                                  ),
                                 )
                               : ElevatedButton.icon(
                                   onPressed: _handleGoogleSignIn,
@@ -167,7 +168,10 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                     'assets/google_logo.png',
                                     height: 24,
                                     errorBuilder: (context, error, stackTrace) {
-                                      return const Icon(Icons.login, color: Colors.white);
+                                      return const Icon(
+                                        Icons.login,
+                                        color: Colors.white,
+                                      );
                                     },
                                   ),
                                   label: const Text(
@@ -193,14 +197,11 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                         },
                       ),
                       const SizedBox(height: 40),
-                      
+
                       // Terms and Privacy
                       const Text(
                         'By signing in, you agree to our Terms of Service\nand Privacy Policy',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.white60,
-                        ),
+                        style: TextStyle(fontSize: 12, color: Colors.white60),
                         textAlign: TextAlign.center,
                       ),
                     ],

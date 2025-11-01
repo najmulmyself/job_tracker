@@ -11,19 +11,19 @@ import 'utils/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Initialize Firebase
   await Firebase.initializeApp();
-  
+
   // Enable Firestore offline persistence
   final firestoreService = FirestoreService();
   await firestoreService.enableOfflinePersistence();
-  
+
   // Initialize notifications
   final notificationService = NotificationService();
   await notificationService.initialize();
   await notificationService.requestPermissions();
-  
+
   runApp(const MyApp());
 }
 

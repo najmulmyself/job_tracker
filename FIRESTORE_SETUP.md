@@ -1,6 +1,7 @@
 # 🔥 Firestore Database Setup - REQUIRED!
 
 ## ⚠️ Current Issue
+
 The app is trying to access Firestore but the database hasn't been created yet.
 
 Error: `[cloud_firestore/unavailable] The service is currently unavailable`
@@ -19,6 +20,7 @@ Error: `[cloud_firestore/unavailable] The service is currently unavailable`
 You'll see two options:
 
 **Option 1: Production Mode (Recommended for now)**
+
 - Select **"Start in production mode"**
 - Click **"Next"**
 
@@ -27,10 +29,11 @@ You'll see two options:
 ### Step 3: Choose Location
 
 1. Select a location closest to your users
+
    - **Recommended:** `us-central1` (Iowa) - Good for North America
    - **Asia:** `asia-southeast1` (Singapore)
    - **Europe:** `europe-west1` (Belgium)
-   
+
    ⚠️ **Important:** Location cannot be changed later!
 
 2. Click **"Enable"**
@@ -52,21 +55,21 @@ service cloud.firestore {
     function isOwner(userId) {
       return request.auth != null && request.auth.uid == userId;
     }
-    
+
     // User documents
     match /users/{userId} {
       allow read, write: if isOwner(userId);
-      
+
       // Job applications
       match /jobs/{jobId} {
         allow read, write: if isOwner(userId);
-        
+
         // Cover letters
         match /coverLetters/{letterId} {
           allow read, write: if isOwner(userId);
         }
       }
-      
+
       // Resumes
       match /resumes/{resumeId} {
         allow read, write: if isOwner(userId);
@@ -98,7 +101,7 @@ rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
     match /users/{userId}/{allPaths=**} {
-      allow read, write: if request.auth != null 
+      allow read, write: if request.auth != null
                          && request.auth.uid == userId
                          && request.resource.size < 10 * 1024 * 1024; // 10MB limit
     }
@@ -114,7 +117,6 @@ After setting up Firestore:
 
 1. **Hot restart** the app (press `R` in terminal)
    OR close and relaunch
-   
 2. Try signing in with Google again
 
 3. You should see:
@@ -133,6 +135,7 @@ After signing in:
 ## 📊 What Data Gets Stored?
 
 ### In Firestore:
+
 ```
 users/{userId}
   - uid: string
@@ -151,6 +154,7 @@ users/{userId}/resumes/{resumeId}
 ```
 
 ### In Storage:
+
 ```
 users/{userId}/resumes/
   - resume_file_1.pdf
@@ -169,7 +173,7 @@ users/{userId}/resumes/
 
 ### Error: "PERMISSION_DENIED"
 
-**Solution:** 
+**Solution:**
 
 1. Make sure you're signed in
 2. Check security rules have `request.auth != null`
@@ -221,6 +225,7 @@ All data will automatically sync to Firestore! 🎉
 ## 🆘 Still Having Issues?
 
 ### Quick Checklist:
+
 1. ✅ Firebase project created
 2. ✅ Android app added with SHA-1
 3. ✅ google-services.json downloaded and placed correctly
@@ -229,6 +234,7 @@ All data will automatically sync to Firestore! 🎉
 6. ✅ Google Sign-In enabled in Authentication
 
 If all checked but still not working:
+
 - Check Firebase Console status page
 - Verify billing is enabled (free tier is fine)
 - Try creating a new test document manually in Firestore

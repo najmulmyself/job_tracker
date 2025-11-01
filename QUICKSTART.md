@@ -7,6 +7,7 @@ This guide will help you get your app running in 10 minutes.
 ## ✅ Prerequisites Checklist
 
 Before starting, make sure you have:
+
 - [ ] Flutter installed (run `flutter doctor`)
 - [ ] Android Studio or Xcode installed
 - [ ] A Google account for Firebase
@@ -15,6 +16,7 @@ Before starting, make sure you have:
 ## 🚀 5-Minute Setup
 
 ### Step 1: Get the Code (30 seconds)
+
 ```bash
 cd job_tracker
 flutter pub get
@@ -47,18 +49,21 @@ flutter pub get
 In Firebase Console:
 
 **Authentication:**
+
 1. Go to Authentication → Sign-in method
 2. Enable "Google"
 3. Add your email as support email
 4. Save
 
 **Firestore:**
+
 1. Go to Firestore Database
 2. Create database → Production mode
 3. Choose location (us-central1 recommended)
 4. Create
 
 **Storage:**
+
 1. Go to Storage
 2. Get started → Production mode
 3. Done
@@ -74,11 +79,13 @@ That's it! 🎉
 ## 📱 First Time Usage
 
 ### 1. Sign In
+
 - Tap "Sign in with Google"
 - Choose your Google account
 - Allow permissions
 
 ### 2. Add Your First Job
+
 - Tap the floating "+" button
 - Fill in:
   - Company name (e.g., "Google")
@@ -87,12 +94,14 @@ That's it! 🎉
 - Tap "Save Job"
 
 ### 3. Track Your Applications
+
 - View all jobs in the "All Jobs" tab
 - Filter by stage
 - Sort by deadline
 - Update stages as you progress
 
 ### 4. Upload Resume
+
 - Go to Profile (top-right icon)
 - Tap "Upload Resume"
 - Select PDF file
@@ -101,20 +110,24 @@ That's it! 🎉
 ## 🎯 Key Features to Try
 
 ### Dashboard Stats
+
 - See total applications, interviews, drafts
 - Quick access to recent applications
 
 ### Smart Filters
+
 - Filter by: Interested, Applied, Interview, Offer, Rejected
 - Sort by: Date, Deadline, Company
 - View drafts only
 
 ### Deadline Reminders
+
 - Set deadlines for applications
 - Get notified 24 hours before
 - Never miss a deadline!
 
 ### Drafts Auto-Save
+
 - Start filling a form
 - Exit anytime - it's saved as draft
 - Resume later from Dashboard
@@ -122,15 +135,18 @@ That's it! 🎉
 ## 🔧 Troubleshooting
 
 ### "Sign in failed"
+
 - Make sure you enabled Google Sign-In in Firebase Console
 - Check your internet connection
 - For Android: Add SHA-1 certificate to Firebase
 
 ### "Permission denied" in Firestore
+
 - Wait 1-2 minutes after creating database
 - Try signing out and back in
 
 ### App won't build
+
 ```bash
 flutter clean
 flutter pub get
@@ -138,6 +154,7 @@ flutter run
 ```
 
 ### iOS build issues
+
 ```bash
 cd ios
 pod install
@@ -150,14 +167,17 @@ flutter run
 Once you're comfortable with the basics:
 
 1. **Customize your profile**
+
    - Upload multiple resume variants
    - Set a default resume
 
 2. **Use advanced filters**
+
    - Combine filters for powerful searches
    - Save filter combinations
 
 3. **Track deadlines**
+
    - Set realistic deadlines
    - Enable notifications
 
@@ -168,6 +188,7 @@ Once you're comfortable with the basics:
 ## 💡 Pro Tips
 
 ### Efficient Job Tracking
+
 1. Add jobs immediately when you find them
 2. Use "Interested" stage for jobs you're researching
 3. Move to "Applied" when you submit
@@ -175,12 +196,14 @@ Once you're comfortable with the basics:
 5. Update stages promptly
 
 ### Organization
+
 1. Use consistent company names
 2. Add salary info for later comparison
 3. Use notes for follow-up tasks
 4. Tag resume variants clearly
 
 ### Notifications
+
 1. Enable all permissions for notifications
 2. Set deadlines as soon as you know them
 3. Check drafts daily

@@ -7,12 +7,14 @@
 A fully functional Flutter application for tracking job applications with the following features:
 
 #### 1. **Authentication System**
+
 - Google Sign-In integration
 - User profile management
 - Secure authentication flow
 - Session persistence
 
 #### 2. **Core Application Features**
+
 - **Job Entry Form** with comprehensive fields:
   - Company name and job title
   - Job source tracking (LinkedIn, Indeed, etc.)
@@ -22,30 +24,27 @@ A fully functional Flutter application for tracking job applications with the fo
   - Important dates (application date, deadline)
   - Resume variant tracking
   - Custom notes
-  
 - **Draft Management**:
   - Auto-save functionality
   - Resume incomplete applications anytime
   - Draft counter on dashboard
 
 #### 3. **User Interface**
+
 - **Dashboard Tab**:
   - Statistics cards (Total, Applied, Interviews, Drafts)
   - Recent applications quick view
   - Color-coded stage indicators
-  
 - **Jobs List Tab**:
   - Filterable by stage
   - Sortable by date, deadline, company
   - Draft-only view toggle
   - Search and filter combinations
-  
 - **Job Cards**:
   - Hero animations
   - Stage badges with custom colors
   - Info chips for source, salary, deadline
   - Visual deadline warnings
-  
 - **Modern Design**:
   - Material 3 design system
   - Custom color scheme per stage
@@ -53,28 +52,29 @@ A fully functional Flutter application for tracking job applications with the fo
   - Smooth animations and transitions
 
 #### 4. **Backend Infrastructure**
+
 - **Firebase Firestore**:
   - Real-time data synchronization
   - Offline persistence enabled
   - Efficient query structure
   - Secure data isolation per user
-  
 - **Firebase Storage**:
   - Resume PDF uploads
   - Secure file management
   - Download URL generation
-  
 - **Firebase Authentication**:
   - Google OAuth integration
   - User session management
 
 #### 5. **Notification System**
+
 - Deadline reminders (24 hours before)
 - Draft application reminders
 - Daily summary notifications
 - Customizable notification settings
 
 #### 6. **Resume Management**
+
 - Upload multiple resume variants
 - Set default resume
 - Track which resume used per application
@@ -82,6 +82,7 @@ A fully functional Flutter application for tracking job applications with the fo
 - Easy resume deletion
 
 #### 7. **State Management**
+
 - Provider pattern implementation
 - Three main providers:
   - AuthProvider (user authentication state)
@@ -143,6 +144,7 @@ job_tracker/
 ### 🎨 Design Features
 
 #### Color Scheme
+
 - **Interested**: Purple (#9C27B0)
 - **Applied**: Blue (#2196F3)
 - **Interview**: Orange (#FF9800)
@@ -150,6 +152,7 @@ job_tracker/
 - **Rejected**: Red (#F44336)
 
 #### Animations
+
 - Hero animations for job cards
 - Fade transitions on login
 - Smooth list animations
@@ -163,16 +166,16 @@ users/
   {userId}/
     - uid, email, displayName, photoUrl
     - defaultResumeId, createdAt, updatedAt
-    
+
     jobs/
       {jobId}/
         - All job application fields
         - isDraft, stage, dates
-        
+
         coverLetters/ (Phase 2)
           {coverLetterId}/
             - AI-generated content
-    
+
     resumes/
       {resumeId}/
         - name, fileUrl, fileName
@@ -182,18 +185,18 @@ users/
 
 ### 🔧 Technologies Used
 
-| Category | Technology | Purpose |
-|----------|-----------|---------|
-| Framework | Flutter 3.9.2+ | Cross-platform development |
-| Language | Dart 3.9.2+ | Programming language |
-| State Management | Provider | Reactive state management |
-| Backend | Firebase | BaaS (Authentication, Database, Storage) |
-| Database | Cloud Firestore | NoSQL cloud database |
-| Storage | Firebase Storage | File storage |
-| Auth | Firebase Auth | Google Sign-In |
-| Notifications | flutter_local_notifications | Local push notifications |
-| UI | Material 3 | Design system |
-| Animations | Flutter Animations | Built-in animation framework |
+| Category         | Technology                  | Purpose                                  |
+| ---------------- | --------------------------- | ---------------------------------------- |
+| Framework        | Flutter 3.9.2+              | Cross-platform development               |
+| Language         | Dart 3.9.2+                 | Programming language                     |
+| State Management | Provider                    | Reactive state management                |
+| Backend          | Firebase                    | BaaS (Authentication, Database, Storage) |
+| Database         | Cloud Firestore             | NoSQL cloud database                     |
+| Storage          | Firebase Storage            | File storage                             |
+| Auth             | Firebase Auth               | Google Sign-In                           |
+| Notifications    | flutter_local_notifications | Local push notifications                 |
+| UI               | Material 3                  | Design system                            |
+| Animations       | Flutter Animations          | Built-in animation framework             |
 
 ### 📦 Key Dependencies
 
@@ -216,12 +219,14 @@ uuid: ^4.5.1
 To run the app, you need:
 
 1. **Firebase Project**:
+
    - Create project at console.firebase.google.com
    - Enable Authentication (Google)
    - Create Firestore database
    - Enable Firebase Storage
 
 2. **Configuration Files**:
+
    - `android/app/google-services.json`
    - `ios/Runner/GoogleService-Info.plist`
 
@@ -258,12 +263,14 @@ flutter run
 See **ROADMAP.md** for detailed plans on:
 
 #### Phase 2: AI Integration (4-6 weeks)
+
 - AI-powered cover letter generator
 - Resume analysis and optimization
 - Job description analyzer
 - Smart application suggestions
 
 #### Phase 3: AI Job Hunter (8-12 weeks)
+
 - Automated job discovery
 - Intelligent job matching
 - Auto-draft applications
@@ -272,6 +279,7 @@ See **ROADMAP.md** for detailed plans on:
 ### 📈 Success Metrics
 
 The app is ready for:
+
 - ✅ Real-world usage
 - ✅ Beta testing
 - ✅ User feedback collection
@@ -307,6 +315,7 @@ The app is ready for:
 ### 🎓 Learning Outcomes
 
 This project demonstrates:
+
 - Flutter app architecture
 - Firebase integration
 - State management with Provider
@@ -323,12 +332,15 @@ This project demonstrates:
 ## 📞 Next Steps
 
 1. **Setup Firebase** (5 minutes)
+
    - Follow FIREBASE_SETUP.md
 
 2. **Run the App** (2 minutes)
+
    - `flutter pub get && flutter run`
 
 3. **Test Features** (10 minutes)
+
    - Sign in, add jobs, test filters
 
 4. **Plan Phase 2** (optional)
@@ -340,7 +352,7 @@ This project demonstrates:
 
 ## 🎊 Congratulations!
 
-You now have a fully functional job tracking application! 
+You now have a fully functional job tracking application!
 
 **Total Build Time**: ~15-20 hours of development
 **Lines of Code**: ~3,000+ lines

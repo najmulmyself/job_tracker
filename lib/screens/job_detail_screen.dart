@@ -51,10 +51,7 @@ class JobDetailScreen extends StatelessWidget {
                       const SizedBox(height: 8),
                       Text(
                         job.companyName,
-                        style: TextStyle(
-                          fontSize: 20,
-                          color: Colors.grey[600],
-                        ),
+                        style: TextStyle(fontSize: 20, color: Colors.grey[600]),
                       ),
                       const SizedBox(height: 16),
                       Container(
@@ -80,7 +77,7 @@ class JobDetailScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            
+
             // Job Description
             Card(
               child: Padding(
@@ -101,7 +98,7 @@ class JobDetailScreen extends StatelessWidget {
                 ),
               ),
             ),
-            
+
             // Additional details can be added here
           ],
         ),

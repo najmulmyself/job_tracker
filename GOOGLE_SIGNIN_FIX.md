@@ -1,11 +1,13 @@
 # 🔑 Google Sign-In Setup - IMPORTANT!
 
 ## Your SHA-1 Certificate Fingerprint
+
 ```
 6B:D3:60:F6:6F:7E:28:AC:A3:E8:5D:76:EE:15:57:81:32:2F:93:54
 ```
 
 ## ⚠️ Current Issue
+
 Google Sign-In is failing because the SHA-1 fingerprint is not added to Firebase.
 
 ## ✅ Solution - Follow These Steps:
@@ -44,6 +46,7 @@ Google Sign-In is failing because the SHA-1 fingerprint is not added to Firebase
 ### Step 3: Verify the File (30 seconds)
 
 Check that `android/app/google-services.json` contains:
+
 - Your project info
 - OAuth client information
 - Multiple client entries
@@ -51,6 +54,7 @@ Check that `android/app/google-services.json` contains:
 ### Step 4: Clean and Rebuild (1 minute)
 
 Run these commands:
+
 ```bash
 flutter clean
 flutter pub get
@@ -69,20 +73,24 @@ flutter run
 ### If sign-in still fails:
 
 1. **Verify SHA-1 was added:**
+
    - Go to Firebase Console
    - Project Settings → Your apps → Android app
    - Check SHA-1 fingerprints list
 
 2. **Verify google-services.json:**
+
    - Make sure it's the latest version
    - Check it's in `android/app/` directory
    - Not in `android/` or any other location
 
 3. **Clear app data:**
+
    - On device: Settings → Apps → Job Tracker → Storage → Clear data
    - Or uninstall and reinstall
 
 4. **Check OAuth consent screen:**
+
    - Firebase Console → Authentication → Settings
    - Make sure Google provider is enabled
    - Check support email is set
@@ -93,6 +101,7 @@ flutter run
 ## ✅ Success Indicators
 
 You'll know it's working when:
+
 - No "ApiException: 10" error
 - Google account picker appears
 - Can select account
@@ -102,6 +111,7 @@ You'll know it's working when:
 ## 📝 For Production Release
 
 When you create a release build, you'll need to:
+
 1. Generate release keystore
 2. Get SHA-1 from release keystore
 3. Add that SHA-1 to Firebase too
@@ -110,6 +120,7 @@ When you create a release build, you'll need to:
 ---
 
 **Your debug SHA-1 (copy this):**
+
 ```
 6B:D3:60:F6:6F:7E:28:AC:A3:E8:5D:76:EE:15:57:81:32:2F:93:54
 ```

@@ -10,17 +10,13 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Profile'),
-      ),
+      appBar: AppBar(title: const Text('Profile')),
       body: Consumer<AuthProvider>(
         builder: (context, authProvider, _) {
           final user = authProvider.firebaseUser;
-          
+
           if (user == null) {
-            return const Center(
-              child: Text('No user logged in'),
-            );
+            return const Center(child: Text('No user logged in'));
           }
 
           return ListView(
@@ -52,17 +48,14 @@ class ProfileScreen extends StatelessWidget {
                       const SizedBox(height: 8),
                       Text(
                         user.email ?? '',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey[600],
-                        ),
+                        style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                       ),
                     ],
                   ),
                 ),
               ),
               const SizedBox(height: 16),
-              
+
               // Resumes Section
               Card(
                 child: Padding(
@@ -85,17 +78,19 @@ class ProfileScreen extends StatelessWidget {
                           }
                           return Column(
                             children: resumeProvider.resumes
-                                .map((resume) => ListTile(
-                                      leading: const Icon(Icons.description),
-                                      title: Text(resume.name),
-                                      subtitle: Text(resume.fileSizeFormatted),
-                                      trailing: resume.isDefault
-                                          ? const Chip(
-                                              label: Text('Default'),
-                                              backgroundColor: Colors.green,
-                                            )
-                                          : null,
-                                    ))
+                                .map(
+                                  (resume) => ListTile(
+                                    leading: const Icon(Icons.description),
+                                    title: Text(resume.name),
+                                    subtitle: Text(resume.fileSizeFormatted),
+                                    trailing: resume.isDefault
+                                        ? const Chip(
+                                            label: Text('Default'),
+                                            backgroundColor: Colors.green,
+                                          )
+                                        : null,
+                                  ),
+                                )
                                 .toList(),
                           );
                         },
@@ -113,7 +108,7 @@ class ProfileScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              
+
               // Sign Out Button
               ElevatedButton(
                 onPressed: () async {

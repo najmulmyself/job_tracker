@@ -24,10 +24,10 @@ class NotificationService {
 
     const DarwinInitializationSettings iosSettings =
         DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestBadgePermission: true,
-      requestSoundPermission: true,
-    );
+          requestAlertPermission: true,
+          requestBadgePermission: true,
+          requestSoundPermission: true,
+        );
 
     const InitializationSettings settings = InitializationSettings(
       android: androidSettings,
@@ -52,12 +52,9 @@ class NotificationService {
   Future<bool> requestPermissions() async {
     final bool? result = await _notifications
         .resolvePlatformSpecificImplementation<
-            IOSFlutterLocalNotificationsPlugin>()
-        ?.requestPermissions(
-          alert: true,
-          badge: true,
-          sound: true,
-        );
+          IOSFlutterLocalNotificationsPlugin
+        >()
+        ?.requestPermissions(alert: true, badge: true, sound: true);
     return result ?? false;
   }
 
@@ -70,7 +67,7 @@ class NotificationService {
   }) async {
     // Schedule notification 1 day before deadline
     final scheduledDate = deadline.subtract(const Duration(days: 1));
-    
+
     if (scheduledDate.isBefore(DateTime.now())) {
       // If deadline is less than 1 day away, schedule for 1 hour before
       final alternateDate = deadline.subtract(const Duration(hours: 1));
@@ -78,7 +75,8 @@ class NotificationService {
         await _scheduleNotification(
           id: id,
           title: 'Application Deadline Soon!',
-          body: 'Your application for $jobTitle at $companyName is due in 1 hour.',
+          body:
+              'Your application for $jobTitle at $companyName is due in 1 hour.',
           scheduledDate: alternateDate,
           payload: 'deadline_$id',
         );
@@ -96,13 +94,11 @@ class NotificationService {
   }
 
   // Schedule draft reminder
-  Future<void> scheduleDraftReminder({
-    required int draftCount,
-  }) async {
+  Future<void> scheduleDraftReminder({required int draftCount}) async {
     // Schedule daily reminder at 9 AM
     final now = DateTime.now();
     var scheduledDate = DateTime(now.year, now.month, now.day, 9, 0);
-    
+
     // If 9 AM has passed today, schedule for tomorrow
     if (scheduledDate.isBefore(now)) {
       scheduledDate = scheduledDate.add(const Duration(days: 1));
@@ -134,7 +130,8 @@ class NotificationService {
         android: AndroidNotificationDetails(
           'job_tracker_channel',
           'Job Tracker Notifications',
-          channelDescription: 'Notifications for job application deadlines and reminders',
+          channelDescription:
+              'Notifications for job application deadlines and reminders',
           importance: Importance.high,
           priority: Priority.high,
         ),
@@ -162,7 +159,8 @@ class NotificationService {
         android: AndroidNotificationDetails(
           'job_tracker_channel',
           'Job Tracker Notifications',
-          channelDescription: 'Notifications for job application deadlines and reminders',
+          channelDescription:
+              'Notifications for job application deadlines and reminders',
           importance: Importance.high,
           priority: Priority.high,
         ),

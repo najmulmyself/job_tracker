@@ -3,6 +3,7 @@
 ## 🎯 Phase 1: MVP - Personal Job Tracker ✅ COMPLETED
 
 ### Features Implemented:
+
 - ✅ Google Sign-In Authentication
 - ✅ User Profile Management
 - ✅ Job Application Form (all fields)
@@ -19,25 +20,29 @@
 ## 🤖 Phase 2: AI Integration - Smart Apply Assistant
 
 ### Overview
+
 Integrate AI to generate personalized cover letters and analyze job applications.
 
 ### 2.1 AI Service Setup
 
 **Files to Create:**
+
 - `lib/services/ai_service.dart` - AI integration service
 - `lib/models/ai_request_model.dart` - AI request/response models
 - `lib/providers/ai_provider.dart` - State management for AI operations
 
 **Dependencies to Add:**
+
 ```yaml
 # OpenAI/Gemini/Claude
 http: ^1.2.2
-google_generative_ai: ^0.2.0  # For Gemini
+google_generative_ai: ^0.2.0 # For Gemini
 # OR
-openai_api: ^2.1.0  # For OpenAI GPT
+openai_api: ^2.1.0 # For OpenAI GPT
 ```
 
 **Key Features:**
+
 1. Multiple AI provider support (OpenAI, Gemini, Claude)
 2. API key configuration in settings
 3. Token usage tracking
@@ -46,10 +51,12 @@ openai_api: ^2.1.0  # For OpenAI GPT
 ### 2.2 Cover Letter Generator
 
 **Screen to Create:**
+
 - `lib/screens/cover_letter_screen.dart`
 - `lib/widgets/cover_letter_editor.dart`
 
 **Features:**
+
 1. AI-powered cover letter generation
 2. Input: Job Description + Selected Resume
 3. Customizable prompts and tone
@@ -58,6 +65,7 @@ openai_api: ^2.1.0  # For OpenAI GPT
 6. Export to PDF/Text
 
 **AI Prompt Template:**
+
 ```dart
 String generateCoverLetterPrompt({
   required String resume,
@@ -95,6 +103,7 @@ Generate the cover letter:
 ```
 
 **Implementation Steps:**
+
 1. Add "Generate Cover Letter" button in Job Detail screen
 2. Extract resume text (PDF parsing may need `pdf_text` package)
 3. Send prompt to AI service
@@ -105,15 +114,18 @@ Generate the cover letter:
 ### 2.3 Resume Analysis
 
 **Features:**
+
 1. AI resume review and suggestions
 2. ATS (Applicant Tracking System) compatibility check
 3. Keyword matching with job description
 4. Skill gap identification
 
 **Screen to Create:**
+
 - `lib/screens/resume_analysis_screen.dart`
 
 **AI Prompt Template:**
+
 ```dart
 String analyzeResumePrompt({
   required String resume,
@@ -143,15 +155,18 @@ Format as JSON for easy parsing.
 ### 2.4 Job Description Analyzer
 
 **Features:**
+
 1. Extract key requirements from JD
 2. Identify must-have vs nice-to-have skills
 3. Salary insights (if mentioned)
 4. Company culture indicators
 
 **Widget to Create:**
+
 - `lib/widgets/jd_analysis_card.dart`
 
 **Implementation:**
+
 - Auto-analyze when job description is pasted
 - Display insights in expandable card
 - Highlight keywords to include in application
@@ -159,6 +174,7 @@ Format as JSON for easy parsing.
 ### 2.5 Smart Suggestions
 
 **Features:**
+
 1. Suggest best resume variant for each job
 2. Recommend application timing
 3. Predict application success probability
@@ -167,9 +183,11 @@ Format as JSON for easy parsing.
 ### 2.6 Settings & Configuration
 
 **Screen to Update:**
+
 - `lib/screens/settings_screen.dart`
 
 **Add Settings For:**
+
 1. AI Provider selection (OpenAI, Gemini, Claude)
 2. API key management (secure storage)
 3. AI preferences (tone, length, style)
@@ -181,15 +199,18 @@ Format as JSON for easy parsing.
 ## 🧠 Phase 3: AI Job Hunter Agent
 
 ### Overview
+
 Automated job discovery, analysis, and recommendation system.
 
 ### 3.1 Job Scraping Service
 
 **Files to Create:**
+
 - `lib/services/job_scraper_service.dart`
 - `lib/models/scraped_job_model.dart`
 
 **Data Sources:**
+
 1. LinkedIn (via API or scraping)
 2. Indeed API
 3. RemoteOK API
@@ -198,15 +219,17 @@ Automated job discovery, analysis, and recommendation system.
 6. Custom RSS feeds
 
 **Implementation Approach:**
+
 - Use cloud functions (Firebase Functions) for server-side scraping
 - Store in separate "discovered_jobs" collection
 - Schedule daily/weekly scraping jobs
 
 **Cloud Function Example:**
+
 ```javascript
 // functions/index.js
 exports.scrapeJobs = functions.pubsub
-  .schedule('every 24 hours')
+  .schedule("every 24 hours")
   .onRun(async (context) => {
     // Scrape job boards
     const jobs = await scrapeJobBoards();
@@ -218,10 +241,12 @@ exports.scrapeJobs = functions.pubsub
 ### 3.2 Job Matching Engine
 
 **Files to Create:**
+
 - `lib/services/job_matcher_service.dart`
 - `lib/models/match_score_model.dart`
 
 **Features:**
+
 1. Calculate match score (0-100) for each job
 2. Consider:
    - Skills match
@@ -232,6 +257,7 @@ exports.scrapeJobs = functions.pubsub
    - Work style (remote/hybrid/office)
 
 **AI Matching Prompt:**
+
 ```dart
 String matchJobPrompt({
   required String resume,
@@ -264,21 +290,25 @@ Return as JSON array.
 ### 3.3 Smart Recommendations
 
 **Screen to Create:**
+
 - `lib/screens/recommended_jobs_screen.dart`
 - `lib/widgets/recommended_job_card.dart`
 
 **Features:**
+
 1. Weekly job recommendations
 2. "Why recommended" explanations
 3. One-tap import to job tracker
 4. Auto-generate cover letter for top matches
 
 **Notification:**
+
 - Send weekly digest: "5 new jobs match your profile"
 
 ### 3.4 Auto-Draft Applications
 
 **Features:**
+
 1. For high-match jobs, auto-generate:
    - Cover letter
    - Email draft
@@ -287,6 +317,7 @@ Return as JSON array.
 3. User reviews and approves before sending
 
 **Flow:**
+
 1. AI finds matching job
 2. Analyzes requirements
 3. Generates customized cover letter
@@ -298,6 +329,7 @@ Return as JSON array.
 ### 3.5 Intelligent Insights
 
 **Dashboard Additions:**
+
 - Success rate analysis
 - Best time to apply
 - Industry trends
@@ -305,18 +337,21 @@ Return as JSON array.
 - Application feedback analysis
 
 **Charts to Add:**
+
 - Applications over time
 - Response rate by source
 - Interview success rate
 - Time to offer analysis
 
 **Files to Create:**
+
 - `lib/screens/insights_screen.dart`
 - `lib/widgets/chart_widgets.dart`
 
 **Dependencies:**
+
 ```yaml
-fl_chart: ^0.68.0  # For charts
+fl_chart: ^0.68.0 # For charts
 ```
 
 ### 3.6 Integration Hub
@@ -324,15 +359,18 @@ fl_chart: ^0.68.0  # For charts
 **Third-Party Integrations:**
 
 1. **Gmail API**
+
    - Auto-import job emails
    - Send applications via Gmail
    - Track email responses
 
 2. **Calendar Integration**
+
    - Add interview dates to calendar
    - Deadline reminders sync with calendar
 
 3. **LinkedIn Integration**
+
    - Import LinkedIn profile
    - Track LinkedIn applications
    - Easy Apply automation
@@ -342,6 +380,7 @@ fl_chart: ^0.68.0  # For charts
    - Custom automation workflows
 
 **Files to Create:**
+
 - `lib/services/integration_service.dart`
 - `lib/screens/integrations_screen.dart`
 
@@ -350,28 +389,33 @@ fl_chart: ^0.68.0  # For charts
 ## 📊 Additional Features (Future Enhancements)
 
 ### Analytics & Reporting
+
 - Export analytics to PDF
 - Monthly progress reports
 - A/B test cover letters
 - Response rate tracking
 
 ### Collaboration Features
+
 - Share job postings with friends
 - Referral tracking
 - Group job search features
 
 ### Interview Preparation
+
 - AI interview coach
 - Common questions for role/company
 - STAR method answer generator
 - Mock interview practice
 
 ### Salary Negotiation
+
 - Salary data insights
 - Negotiation scripts
 - Offer comparison tool
 
 ### Premium Features
+
 - Unlimited AI generations
 - Priority support
 - Advanced analytics
@@ -383,6 +427,7 @@ fl_chart: ^0.68.0  # For charts
 ## 🛠️ Technical Debt & Improvements
 
 ### Code Quality
+
 - [ ] Add comprehensive unit tests
 - [ ] Add integration tests
 - [ ] Add widget tests
@@ -391,18 +436,21 @@ fl_chart: ^0.68.0  # For charts
 - [ ] Error tracking (Sentry/Crashlytics)
 
 ### Performance
+
 - [ ] Image caching and optimization
 - [ ] Lazy loading for large lists
 - [ ] Database query optimization
 - [ ] Reduce app size
 
 ### Security
+
 - [ ] Implement App Check
 - [ ] API key encryption
 - [ ] Secure storage for sensitive data
 - [ ] Regular security audits
 
 ### Accessibility
+
 - [ ] Screen reader support
 - [ ] High contrast mode
 - [ ] Font size adjustments
@@ -413,11 +461,13 @@ fl_chart: ^0.68.0  # For charts
 ## 📅 Timeline Estimate
 
 ### Phase 2 (AI Integration): 4-6 weeks
+
 - Week 1-2: AI service setup, cover letter generator
 - Week 3-4: Resume analysis, JD analyzer
 - Week 5-6: UI polish, testing, bug fixes
 
 ### Phase 3 (AI Agent): 8-12 weeks
+
 - Week 1-3: Job scraping infrastructure
 - Week 4-6: Matching engine and recommendations
 - Week 7-9: Auto-draft and integrations
@@ -428,10 +478,12 @@ fl_chart: ^0.68.0  # For charts
 ## 🔑 API Keys Needed
 
 ### Phase 2:
+
 - OpenAI API key OR Google Gemini API key
 - (Optional) Claude API key
 
 ### Phase 3:
+
 - Indeed API key
 - LinkedIn API access (restricted)
 - RemoteOK - no key needed (RSS)
@@ -443,18 +495,21 @@ fl_chart: ^0.68.0  # For charts
 ## 💰 Cost Estimates
 
 ### Firebase (Free tier sufficient for MVP):
+
 - 50,000 reads/day
 - 20,000 writes/day
 - 1GB storage
 - 10GB bandwidth
 
 ### AI APIs:
+
 - **OpenAI GPT-4**: ~$0.03 per 1K tokens (expensive)
 - **OpenAI GPT-3.5-turbo**: ~$0.002 per 1K tokens
 - **Google Gemini**: Free tier available, then ~$0.001 per 1K chars
 - **Estimated monthly cost**: $10-50 depending on usage
 
 ### Total Monthly Cost (Phase 2): ~$10-50
+
 ### Total Monthly Cost (Phase 3): ~$50-200 (with scraping)
 
 ---

@@ -7,11 +7,7 @@ class JobCard extends StatefulWidget {
   final JobApplicationModel job;
   final VoidCallback onTap;
 
-  const JobCard({
-    super.key,
-    required this.job,
-    required this.onTap,
-  });
+  const JobCard({super.key, required this.job, required this.onTap});
 
   @override
   State<JobCard> createState() => _JobCardState();
@@ -28,9 +24,10 @@ class _JobCardState extends State<JobCard> with SingleTickerProviderStateMixin {
       duration: const Duration(milliseconds: 150),
       vsync: this,
     );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.97).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.97,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -54,7 +51,7 @@ class _JobCardState extends State<JobCard> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return ScaleTransition(
       scale: _scaleAnimation,
       child: GestureDetector(
@@ -92,10 +89,11 @@ class _JobCardState extends State<JobCard> with SingleTickerProviderStateMixin {
                           // Job Title
                           Text(
                             widget.job.jobTitle,
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: -0.3,
-                            ),
+                            style: Theme.of(context).textTheme.titleLarge
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: -0.3,
+                                ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -113,7 +111,7 @@ class _JobCardState extends State<JobCard> with SingleTickerProviderStateMixin {
                   ],
                 ),
                 const SizedBox(height: 16),
-                
+
                 // Status Badge Row
                 Row(
                   children: [
@@ -125,7 +123,7 @@ class _JobCardState extends State<JobCard> with SingleTickerProviderStateMixin {
                   ],
                 ),
                 const SizedBox(height: 16),
-                
+
                 // Info Row
                 Row(
                   children: [
@@ -156,7 +154,7 @@ class _JobCardState extends State<JobCard> with SingleTickerProviderStateMixin {
                   ],
                 ),
                 const SizedBox(height: 8),
-                
+
                 // Source Row
                 Row(
                   children: [
@@ -182,7 +180,7 @@ class _JobCardState extends State<JobCard> with SingleTickerProviderStateMixin {
 
   Widget _buildStageBadge(BuildContext context) {
     final stageColor = AppColors.getStageColor(widget.job.stage);
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
@@ -213,7 +211,7 @@ class _JobCardState extends State<JobCard> with SingleTickerProviderStateMixin {
       ),
     );
   }
-  
+
   Widget _buildDraftBadge(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -241,5 +239,4 @@ class _JobCardState extends State<JobCard> with SingleTickerProviderStateMixin {
       ),
     );
   }
-
 }

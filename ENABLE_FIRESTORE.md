@@ -1,6 +1,7 @@
 # 🔥 Enable Firestore Database - REQUIRED!
 
 ## ⚠️ Current Error
+
 ```
 Cloud Firestore API has not been used in project job-tracker-9389f before or it is disabled.
 ```
@@ -8,14 +9,17 @@ Cloud Firestore API has not been used in project job-tracker-9389f before or it 
 ## ✅ Solution: Enable Firestore (2 minutes)
 
 ### Step 1: Go to Firebase Console
+
 1. Open [Firebase Console](https://console.firebase.google.com/)
 2. Select your project: **job-tracker-9389f**
 
 ### Step 2: Enable Firestore Database
+
 1. In the left sidebar, click **"Firestore Database"**
 2. Click **"Create database"** button
 
 ### Step 3: Choose Security Mode
+
 1. Select **"Start in production mode"** (recommended)
    - We have security rules set up in the code
 2. Or select **"Start in test mode"** (for development only)
@@ -23,6 +27,7 @@ Cloud Firestore API has not been used in project job-tracker-9389f before or it 
    - ⚠️ Remember to update rules later!
 
 ### Step 4: Choose Location
+
 1. Select a location close to you:
    - **us-central1** (Iowa) - Good for North America
    - **us-east1** (South Carolina)
@@ -46,21 +51,21 @@ service cloud.firestore {
     function isOwner(userId) {
       return request.auth != null && request.auth.uid == userId;
     }
-    
+
     // User documents
     match /users/{userId} {
       allow read, write: if isOwner(userId);
-      
+
       // Job applications
       match /jobs/{jobId} {
         allow read, write: if isOwner(userId);
-        
+
         // Cover letters
         match /coverLetters/{letterId} {
           allow read, write: if isOwner(userId);
         }
       }
-      
+
       // Resumes
       match /resumes/{resumeId} {
         allow read, write: if isOwner(userId);
@@ -90,7 +95,7 @@ rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
     match /users/{userId}/{allPaths=**} {
-      allow read, write: if request.auth != null 
+      allow read, write: if request.auth != null
                          && request.auth.uid == userId
                          && request.resource.size < 10 * 1024 * 1024; // 10MB limit
     }
@@ -111,6 +116,7 @@ flutter run
 ```
 
 Or just:
+
 - Press `R` in terminal for hot restart
 - Or restart from your IDE
 
@@ -122,6 +128,7 @@ Or just:
 4. No more Firestore errors ✅
 
 In Firebase Console:
+
 1. Go to **Firestore Database**
 2. You should see a new collection: **users**
 3. Inside, you'll see your user document with your UID
@@ -131,17 +138,21 @@ In Firebase Console:
 ### Still getting errors?
 
 1. **Wait 2-3 minutes** after enabling Firestore
+
    - Changes take time to propagate
 
 2. **Check if Firestore is really enabled:**
+
    - Firebase Console → Firestore Database
    - Should show the database, not a "Create database" button
 
 3. **Verify security rules are published:**
+
    - Firestore → Rules tab
    - Check "Last deployed" timestamp
 
 4. **Clear app data and try again:**
+
    - Uninstall the app
    - Run `flutter clean`
    - Run `flutter run`
@@ -152,6 +163,7 @@ In Firebase Console:
 ## 📊 What Happens Next
 
 Once Firestore is enabled:
+
 - User profile saved automatically ✅
 - Can add job applications ✅
 - Data syncs across devices ✅

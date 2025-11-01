@@ -19,22 +19,26 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
+class _HomeScreenState extends State<HomeScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    
+
     // Load data
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final userId = authProvider.firebaseUser?.uid;
-      
+
       if (userId != null) {
         Provider.of<JobProvider>(context, listen: false).listenToJobs(userId);
-        Provider.of<ResumeProvider>(context, listen: false).listenToResumes(userId);
+        Provider.of<ResumeProvider>(
+          context,
+          listen: false,
+        ).listenToResumes(userId);
       }
     });
   }
@@ -48,7 +52,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Job Tracker'),
@@ -56,9 +60,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           IconButton(
             icon: const Icon(Icons.person),
             onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const ProfileScreen()),
-              );
+              Navigator.of(
+                context,
+              ).push(MaterialPageRoute(builder: (_) => const ProfileScreen()));
             },
           ),
         ],
@@ -73,14 +77,18 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       body: Column(
         children: [
           // Show warning banner if Firestore is not configured
-          if (authProvider.error != null && authProvider.error!.contains('Firestore'))
+          if (authProvider.error != null &&
+              authProvider.error!.contains('Firestore'))
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(12),
               color: Colors.orange.shade100,
               child: Row(
                 children: [
-                  Icon(Icons.warning_amber_rounded, color: Colors.orange.shade900),
+                  Icon(
+                    Icons.warning_amber_rounded,
+                    color: Colors.orange.shade900,
+                  ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -113,21 +121,16 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           Expanded(
             child: TabBarView(
               controller: _tabController,
-              children: [
-                _buildDashboardTab(),
-                _buildJobsListTab(),
-              ],
+              children: [_buildDashboardTab(), _buildJobsListTab()],
             ),
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (_) => const JobFormScreen(),
-            ),
-          );
+          Navigator.of(
+            context,
+          ).push(MaterialPageRoute(builder: (_) => const JobFormScreen()));
         },
         icon: const Icon(Icons.add),
         label: const Text('Add Job'),
@@ -188,35 +191,36 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 ],
               ),
               const SizedBox(height: 24),
-              
+
               // Recent Applications
               const Text(
                 'Recent Applications',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
-              
+
               if (jobProvider.isLoading)
                 const Center(child: CircularProgressIndicator())
               else if (jobProvider.jobs.isEmpty)
                 _buildEmptyState()
               else
-                ...jobProvider.jobs.take(5).map((job) => Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: JobCard(
-                    job: job,
-                    onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => JobDetailScreen(job: job),
+                ...jobProvider.jobs
+                    .take(5)
+                    .map(
+                      (job) => Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: JobCard(
+                          job: job,
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => JobDetailScreen(job: job),
+                              ),
+                            );
+                          },
                         ),
-                      );
-                    },
-                  ),
-                )),
+                      ),
+                    ),
             ],
           ),
         );
@@ -264,12 +268,15 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                           isSelected: jobProvider.filterStage == null,
                           onSelected: (_) => jobProvider.setFilterStage(null),
                         ),
-                        ...ApplicationStage.values.map((stage) => FilterChipWidget(
-                          label: stage.displayName,
-                          isSelected: jobProvider.filterStage == stage,
-                          color: AppColors.getStageColor(stage),
-                          onSelected: (_) => jobProvider.setFilterStage(stage),
-                        )),
+                        ...ApplicationStage.values.map(
+                          (stage) => FilterChipWidget(
+                            label: stage.displayName,
+                            isSelected: jobProvider.filterStage == stage,
+                            color: AppColors.getStageColor(stage),
+                            onSelected: (_) =>
+                                jobProvider.setFilterStage(stage),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -278,7 +285,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                     children: [
                       Expanded(
                         child: DropdownButtonFormField<String>(
-                          value: jobProvider.sortBy,
+                          initialValue: jobProvider.sortBy,
                           decoration: const InputDecoration(
                             labelText: 'Sort By',
                             contentPadding: EdgeInsets.symmetric(
@@ -287,10 +294,22 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                             ),
                           ),
                           items: const [
-                            DropdownMenuItem(value: 'updatedAt', child: Text('Last Updated')),
-                            DropdownMenuItem(value: 'createdAt', child: Text('Date Added')),
-                            DropdownMenuItem(value: 'deadline', child: Text('Deadline')),
-                            DropdownMenuItem(value: 'company', child: Text('Company Name')),
+                            DropdownMenuItem(
+                              value: 'updatedAt',
+                              child: Text('Last Updated'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'createdAt',
+                              child: Text('Date Added'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'deadline',
+                              child: Text('Deadline'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'company',
+                              child: Text('Company Name'),
+                            ),
                           ],
                           onChanged: (value) {
                             if (value != null) {
@@ -310,33 +329,33 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 ],
               ),
             ),
-            
+
             // Jobs List
             Expanded(
               child: jobProvider.isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : jobProvider.jobs.isEmpty
-                      ? _buildEmptyState()
-                      : ListView.builder(
-                          padding: const EdgeInsets.all(16),
-                          itemCount: jobProvider.jobs.length,
-                          itemBuilder: (context, index) {
-                            final job = jobProvider.jobs[index];
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: JobCard(
-                                job: job,
-                                onTap: () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (_) => JobDetailScreen(job: job),
-                                    ),
-                                  );
-                                },
-                              ),
-                            );
-                          },
-                        ),
+                  ? _buildEmptyState()
+                  : ListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: jobProvider.jobs.length,
+                      itemBuilder: (context, index) {
+                        final job = jobProvider.jobs[index];
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: JobCard(
+                            job: job,
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => JobDetailScreen(job: job),
+                                ),
+                              );
+                            },
+                          ),
+                        );
+                      },
+                    ),
             ),
           ],
         );
@@ -349,11 +368,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.work_off_outlined,
-            size: 80,
-            color: Colors.grey[400],
-          ),
+          Icon(Icons.work_off_outlined, size: 80, color: Colors.grey[400]),
           const SizedBox(height: 16),
           Text(
             'No jobs yet',
@@ -366,10 +381,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           const SizedBox(height: 8),
           Text(
             'Add your first job application to get started!',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[500],
-            ),
+            style: TextStyle(fontSize: 14, color: Colors.grey[500]),
             textAlign: TextAlign.center,
           ),
         ],

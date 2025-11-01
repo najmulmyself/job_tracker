@@ -24,7 +24,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
     if (mounted) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      
+
       // Navigate based on auth state
       if (authProvider.isAuthenticated) {
         Navigator.of(context).pushReplacement(
@@ -89,10 +89,7 @@ class _SplashScreenState extends State<SplashScreen> {
               const SizedBox(height: 10),
               const Text(
                 'Track your career journey',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.white70,
-                ),
+                style: TextStyle(fontSize: 16, color: Colors.white70),
               ),
               const SizedBox(height: 50),
               const CircularProgressIndicator(

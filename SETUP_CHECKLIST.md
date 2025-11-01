@@ -5,6 +5,7 @@ Use this checklist to ensure everything is properly configured.
 ## ✅ Pre-Setup Checklist
 
 ### Development Environment
+
 - [ ] Flutter SDK installed (version 3.9.2+)
   - Run: `flutter --version`
   - Should show: Flutter 3.9.2 or higher
@@ -14,12 +15,15 @@ Use this checklist to ensure everything is properly configured.
 - [ ] Git installed
 
 ### Verify Flutter Installation
+
 ```bash
 flutter doctor
 ```
+
 All items should have green checkmarks ✓
 
 ### Device/Emulator Ready
+
 - [ ] Android device connected OR Android emulator running
 - [ ] iOS device connected (Mac only) OR iOS simulator running (Mac only)
 - Run: `flutter devices` to verify
@@ -29,6 +33,7 @@ All items should have green checkmarks ✓
 ## 📦 Project Setup Checklist
 
 ### 1. Clone & Dependencies
+
 - [ ] Project cloned/downloaded
 - [ ] Navigate to project directory
 - [ ] Run: `flutter pub get`
@@ -40,6 +45,7 @@ All items should have green checkmarks ✓
 ## 🔥 Firebase Setup Checklist
 
 ### Create Firebase Project
+
 - [ ] Go to https://console.firebase.google.com/
 - [ ] Click "Create a project" or use existing
 - [ ] Project name: "Job Tracker" (or your choice)
@@ -47,6 +53,7 @@ All items should have green checkmarks ✓
 - [ ] Project created successfully
 
 ### Android App Configuration
+
 - [ ] In Firebase Console, click Android icon (⚙️)
 - [ ] Package name: `com.example.job_tracker`
   - Verify in: `android/app/build.gradle.kts`
@@ -59,6 +66,7 @@ All items should have green checkmarks ✓
 - [ ] Verified file location (should be next to build.gradle.kts)
 
 ### iOS App Configuration (Mac Only)
+
 - [ ] In Firebase Console, click iOS icon (⚙️)
 - [ ] Bundle ID: `com.example.jobTracker`
   - Verify in: `ios/Runner/Info.plist`
@@ -72,6 +80,7 @@ All items should have green checkmarks ✓
 ### Enable Firebase Services
 
 #### Authentication
+
 - [ ] In Firebase Console → Authentication
 - [ ] Click "Get started"
 - [ ] Click "Sign-in method" tab
@@ -81,6 +90,7 @@ All items should have green checkmarks ✓
 - [ ] Save
 
 #### Firestore Database
+
 - [ ] In Firebase Console → Firestore Database
 - [ ] Click "Create database"
 - [ ] Start in: **Production mode**
@@ -89,6 +99,7 @@ All items should have green checkmarks ✓
 - [ ] Database created (shows "Cloud Firestore" with empty collection)
 
 #### Firebase Storage
+
 - [ ] In Firebase Console → Storage
 - [ ] Click "Get started"
 - [ ] Start in: **Production mode**
@@ -97,6 +108,7 @@ All items should have green checkmarks ✓
 - [ ] Storage bucket created (shows empty files list)
 
 #### Cloud Messaging (Optional)
+
 - [ ] In Firebase Console → Cloud Messaging
 - [ ] Note Server key (for future use)
 - [ ] iOS APNs certificate uploaded (if using iOS)
@@ -104,8 +116,10 @@ All items should have green checkmarks ✓
 ### Update Security Rules
 
 #### Firestore Rules
+
 - [ ] In Firestore → Rules tab
 - [ ] Replace with:
+
 ```javascript
 rules_version = '2';
 service cloud.firestore {
@@ -119,11 +133,14 @@ service cloud.firestore {
   }
 }
 ```
+
 - [ ] Click "Publish"
 
 #### Storage Rules
+
 - [ ] In Storage → Rules tab
 - [ ] Replace with:
+
 ```javascript
 rules_version = '2';
 service firebase.storage {
@@ -134,6 +151,7 @@ service firebase.storage {
   }
 }
 ```
+
 - [ ] Click "Publish"
 
 ---
@@ -141,11 +159,13 @@ service firebase.storage {
 ## 🚀 Build & Run Checklist
 
 ### Clean Build
+
 - [ ] Run: `flutter clean`
 - [ ] Run: `flutter pub get`
 - [ ] No errors shown
 
 ### Android Build
+
 - [ ] Device/emulator connected: `flutter devices`
 - [ ] Run: `flutter run`
 - [ ] App builds successfully
@@ -153,6 +173,7 @@ service firebase.storage {
 - [ ] No red errors in console
 
 ### iOS Build (Mac Only)
+
 - [ ] Run: `cd ios && pod install && cd ..`
 - [ ] Pods installed successfully
 - [ ] Simulator/device connected: `flutter devices`
@@ -165,12 +186,14 @@ service firebase.storage {
 ## 🧪 Testing Checklist
 
 ### First Launch
+
 - [ ] App opens without crashing
 - [ ] Splash screen displays
 - [ ] Redirects to login screen
 - [ ] UI looks correct (no layout issues)
 
 ### Authentication
+
 - [ ] "Sign in with Google" button visible
 - [ ] Button responds to tap
 - [ ] Google account picker appears
@@ -180,6 +203,7 @@ service firebase.storage {
 - [ ] User profile icon appears in app bar
 
 ### Home Screen
+
 - [ ] Dashboard tab loads
 - [ ] Stats cards visible (Total, Applied, Interviews, Drafts)
 - [ ] All show "0" initially
@@ -188,6 +212,7 @@ service firebase.storage {
 - [ ] Empty state shows: "No jobs yet"
 
 ### Add Job Functionality
+
 - [ ] Tap floating "+" button
 - [ ] Job form screen opens
 - [ ] All fields visible:
@@ -200,6 +225,7 @@ service firebase.storage {
 - [ ] "Save Draft" button in app bar
 
 ### Save First Job
+
 - [ ] Fill in required fields
 - [ ] Tap "Save Job"
 - [ ] Success message shows
@@ -209,6 +235,7 @@ service firebase.storage {
 - [ ] Job card displays correctly
 
 ### Job Card Features
+
 - [ ] Job title and company visible
 - [ ] Stage badge shows correct color
 - [ ] Tap card to open details
@@ -216,6 +243,7 @@ service firebase.storage {
 - [ ] Back button works
 
 ### Filters & Sorting
+
 - [ ] All Jobs tab → Filter chips work
 - [ ] Can filter by stage
 - [ ] Can sort by different criteria
@@ -223,6 +251,7 @@ service firebase.storage {
 - [ ] Drafts toggle works
 
 ### Profile Screen
+
 - [ ] Tap profile icon (top-right)
 - [ ] Profile screen opens
 - [ ] User info displays (photo, name, email)
@@ -230,11 +259,13 @@ service firebase.storage {
 - [ ] "Sign Out" button visible
 
 ### Sign Out
+
 - [ ] Tap "Sign Out"
 - [ ] Returns to login screen
 - [ ] Can sign back in
 
 ### Offline Mode
+
 - [ ] Turn off internet
 - [ ] App still works
 - [ ] Can add/edit jobs
@@ -246,34 +277,40 @@ service firebase.storage {
 ## 🔧 Troubleshooting Checklist
 
 ### Build Fails
+
 - [ ] Run: `flutter clean`
 - [ ] Run: `flutter pub get`
 - [ ] Delete `build` folder
 - [ ] Try again: `flutter run`
 
 ### Google Sign-In Fails (Android)
+
 - [ ] SHA-1 certificate added to Firebase
 - [ ] Package name matches exactly
 - [ ] Internet connection active
 - [ ] Google Play Services installed on device
 
 ### Google Sign-In Fails (iOS)
+
 - [ ] Bundle ID matches Firebase
 - [ ] `REVERSED_CLIENT_ID` added to Info.plist
 - [ ] URL scheme configured correctly
 
 ### Firestore Permission Denied
+
 - [ ] Security rules published
 - [ ] User signed in successfully
 - [ ] Wait 1-2 minutes after creating database
 
 ### App Crashes
+
 - [ ] Check console for error messages
 - [ ] Verify all Firebase config files in place
 - [ ] Ensure Firebase services enabled
 - [ ] Check device logs
 
 ### iOS Build Issues
+
 - [ ] Run: `cd ios && pod repo update && pod install && cd ..`
 - [ ] Clean Xcode build: Product → Clean Build Folder
 - [ ] Try running from Xcode directly
@@ -283,12 +320,14 @@ service firebase.storage {
 ## 📱 Platform-Specific Checks
 
 ### Android
+
 - [ ] `google-services.json` in correct location
 - [ ] Package name consistent everywhere
 - [ ] Min SDK version: 21 (in build.gradle.kts)
 - [ ] Google Play Services available on device
 
 ### iOS
+
 - [ ] `GoogleService-Info.plist` in correct location
 - [ ] Bundle ID consistent everywhere
 - [ ] Deployment target: iOS 12.0+
@@ -299,6 +338,7 @@ service firebase.storage {
 ## 🎉 Success Criteria
 
 Your app is ready when:
+
 - [ ] ✅ Builds without errors
 - [ ] ✅ Google Sign-In works
 - [ ] ✅ Can add a job
@@ -314,6 +354,7 @@ Your app is ready when:
 ## 📚 Final Steps
 
 ### Git Setup (Optional but Recommended)
+
 - [ ] Initialize git: `git init`
 - [ ] Add `.gitignore` (already included)
 - [ ] First commit: `git add . && git commit -m "Initial commit"`
@@ -321,12 +362,14 @@ Your app is ready when:
 - [ ] **NEVER** commit Firebase config files to public repos!
 
 ### Documentation
+
 - [ ] Read README.md
 - [ ] Review FIREBASE_SETUP.md
 - [ ] Check ROADMAP.md for future features
 - [ ] Bookmark QUICKSTART.md
 
 ### Backups
+
 - [ ] Export Firestore data (Settings → Import/Export)
 - [ ] Note Firebase project ID
 - [ ] Save API keys securely
@@ -339,6 +382,7 @@ Your app is ready when:
 If all checkboxes are marked, congratulations! 🎉
 
 Your Job Tracker app is:
+
 - ✅ Fully configured
 - ✅ Running smoothly
 - ✅ Ready for use
@@ -347,12 +391,14 @@ Your Job Tracker app is:
 ### What's Next?
 
 1. **Start Using the App**
+
    - Add your real job applications
    - Set deadlines
    - Upload resumes
    - Track your progress
 
 2. **Customize**
+
    - Adjust colors in `app_theme.dart`
    - Add more job sources
    - Customize notifications
@@ -367,6 +413,7 @@ Your Job Tracker app is:
 ## 🆘 Still Having Issues?
 
 ### Quick Fixes
+
 1. `flutter doctor` - Check for issues
 2. `flutter clean` - Clean build
 3. Restart IDE
@@ -374,19 +421,18 @@ Your Job Tracker app is:
 5. Check Firebase Console for service status
 
 ### Common Issues
+
 - **Build errors**: Missing dependencies
   - Fix: `flutter pub get`
-  
 - **Sign-in fails**: Firebase config
   - Fix: Verify SHA-1 (Android) or Bundle ID (iOS)
-  
 - **Data not saving**: Firestore rules
   - Fix: Check security rules in Firebase Console
-  
 - **Offline not working**: Settings
   - Fix: Verify persistence enabled in code
 
 ### Resources
+
 - Flutter Docs: https://flutter.dev/docs
 - Firebase Docs: https://firebase.google.com/docs
 - GitHub Issues: Create issue in repo

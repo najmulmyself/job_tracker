@@ -165,16 +165,18 @@ class _JobFormScreenState extends State<JobFormScreen> {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<JobSource>(
-              value: _selectedSource,
+              initialValue: _selectedSource,
               decoration: const InputDecoration(
                 labelText: 'Source',
                 prefixIcon: Icon(Icons.source),
               ),
               items: JobSource.values
-                  .map((source) => DropdownMenuItem(
-                        value: source,
-                        child: Text(source.displayName),
-                      ))
+                  .map(
+                    (source) => DropdownMenuItem(
+                      value: source,
+                      child: Text(source.displayName),
+                    ),
+                  )
                   .toList(),
               onChanged: (value) {
                 if (value != null) {
@@ -194,16 +196,18 @@ class _JobFormScreenState extends State<JobFormScreen> {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<ApplicationStage>(
-              value: _selectedStage,
+              initialValue: _selectedStage,
               decoration: const InputDecoration(
                 labelText: 'Application Stage',
                 prefixIcon: Icon(Icons.timeline),
               ),
               items: ApplicationStage.values
-                  .map((stage) => DropdownMenuItem(
-                        value: stage,
-                        child: Text(stage.displayName),
-                      ))
+                  .map(
+                    (stage) => DropdownMenuItem(
+                      value: stage,
+                      child: Text(stage.displayName),
+                    ),
+                  )
                   .toList(),
               onChanged: (value) {
                 if (value != null) {
@@ -217,10 +221,7 @@ class _JobFormScreenState extends State<JobFormScreen> {
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
-              child: const Text(
-                'Save Job',
-                style: TextStyle(fontSize: 16),
-              ),
+              child: const Text('Save Job', style: TextStyle(fontSize: 16)),
             ),
           ],
         ),

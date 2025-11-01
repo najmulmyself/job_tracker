@@ -20,7 +20,7 @@ class FirestoreService {
   }
 
   // ============ USER OPERATIONS ============
-  
+
   Future<void> createUser(UserModel user) async {
     await _firestore.collection('users').doc(user.uid).set(user.toJson());
   }
@@ -34,9 +34,10 @@ class FirestoreService {
   }
 
   Future<void> updateUser(UserModel user) async {
-    await _firestore.collection('users').doc(user.uid).update(
-      user.copyWith(updatedAt: DateTime.now()).toJson(),
-    );
+    await _firestore
+        .collection('users')
+        .doc(user.uid)
+        .update(user.copyWith(updatedAt: DateTime.now()).toJson());
   }
 
   Future<void> deleteUserData(String uid) async {
@@ -46,7 +47,7 @@ class FirestoreService {
         .doc(uid)
         .collection('jobs')
         .get();
-    
+
     for (var doc in jobsSnapshot.docs) {
       await doc.reference.delete();
     }
@@ -57,7 +58,7 @@ class FirestoreService {
         .doc(uid)
         .collection('resumes')
         .get();
-    
+
     for (var doc in resumesSnapshot.docs) {
       await doc.reference.delete();
     }
@@ -67,7 +68,7 @@ class FirestoreService {
   }
 
   // ============ JOB APPLICATION OPERATIONS ============
-  
+
   Future<void> createJobApplication(JobApplicationModel job) async {
     await _firestore
         .collection('users')
@@ -77,14 +78,17 @@ class FirestoreService {
         .set(job.toJson());
   }
 
-  Future<JobApplicationModel?> getJobApplication(String userId, String jobId) async {
+  Future<JobApplicationModel?> getJobApplication(
+    String userId,
+    String jobId,
+  ) async {
     final doc = await _firestore
         .collection('users')
         .doc(userId)
         .collection('jobs')
         .doc(jobId)
         .get();
-    
+
     if (doc.exists) {
       return JobApplicationModel.fromJson(doc.data()!);
     }
@@ -98,9 +102,11 @@ class FirestoreService {
         .collection('jobs')
         .orderBy('updatedAt', descending: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => JobApplicationModel.fromJson(doc.data()))
-            .toList());
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => JobApplicationModel.fromJson(doc.data()))
+              .toList(),
+        );
   }
 
   Future<List<JobApplicationModel>> getJobApplications(
@@ -108,10 +114,7 @@ class FirestoreService {
     ApplicationStage? stage,
     bool? isDraft,
   }) async {
-    Query query = _firestore
-        .collection('users')
-        .doc(userId)
-        .collection('jobs');
+    Query query = _firestore.collection('users').doc(userId).collection('jobs');
 
     if (stage != null) {
       query = query.where('stage', isEqualTo: stage.toString().split('.').last);
@@ -123,7 +126,10 @@ class FirestoreService {
 
     final snapshot = await query.orderBy('updatedAt', descending: true).get();
     return snapshot.docs
-        .map((doc) => JobApplicationModel.fromJson(doc.data() as Map<String, dynamic>))
+        .map(
+          (doc) =>
+              JobApplicationModel.fromJson(doc.data() as Map<String, dynamic>),
+        )
         .toList();
   }
 
@@ -145,7 +151,7 @@ class FirestoreService {
         .doc(jobId)
         .collection('coverLetters')
         .get();
-    
+
     for (var doc in coverLettersSnapshot.docs) {
       await doc.reference.delete();
     }
@@ -160,7 +166,7 @@ class FirestoreService {
   }
 
   // ============ RESUME OPERATIONS ============
-  
+
   Future<void> createResume(ResumeModel resume) async {
     await _firestore
         .collection('users')
@@ -177,7 +183,7 @@ class FirestoreService {
         .collection('resumes')
         .orderBy('uploadedAt', descending: true)
         .get();
-    
+
     return snapshot.docs
         .map((doc) => ResumeModel.fromJson(doc.data()))
         .toList();
@@ -190,9 +196,11 @@ class FirestoreService {
         .collection('resumes')
         .orderBy('uploadedAt', descending: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => ResumeModel.fromJson(doc.data()))
-            .toList());
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => ResumeModel.fromJson(doc.data()))
+              .toList(),
+        );
   }
 
   Future<void> updateResume(ResumeModel resume) async {
@@ -217,16 +225,16 @@ class FirestoreService {
   Future<void> setDefaultResume(String userId, String resumeId) async {
     // Get all resumes
     final resumes = await getResumes(userId);
-    
+
     // Update all resumes to not be default
     for (var resume in resumes) {
       await updateResume(resume.copyWith(isDefault: false));
     }
-    
+
     // Set the selected resume as default
     final selectedResume = resumes.firstWhere((r) => r.id == resumeId);
     await updateResume(selectedResume.copyWith(isDefault: true));
-    
+
     // Update user's default resume ID
     await _firestore.collection('users').doc(userId).update({
       'defaultResumeId': resumeId,
@@ -235,7 +243,7 @@ class FirestoreService {
   }
 
   // ============ COVER LETTER OPERATIONS ============
-  
+
   Future<void> createCoverLetter(CoverLetterModel coverLetter) async {
     await _firestore
         .collection('users')
@@ -259,7 +267,7 @@ class FirestoreService {
         .collection('coverLetters')
         .orderBy('createdAt', descending: true)
         .get();
-    
+
     return snapshot.docs
         .map((doc) => CoverLetterModel.fromJson(doc.data()))
         .toList();
@@ -277,9 +285,11 @@ class FirestoreService {
         .collection('coverLetters')
         .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => CoverLetterModel.fromJson(doc.data()))
-            .toList());
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => CoverLetterModel.fromJson(doc.data()))
+              .toList(),
+        );
   }
 
   Future<void> updateCoverLetter(CoverLetterModel coverLetter) async {
