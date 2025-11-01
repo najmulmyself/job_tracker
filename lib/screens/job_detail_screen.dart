@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../models/job_application_model.dart';
 import '../providers/job_provider.dart';
+import '../services/notification_service.dart';
 import '../utils/app_theme.dart';
 import 'job_form_screen.dart';
 
@@ -22,12 +23,17 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
   @override
   void initState() {
     super.initState();
-    reminderEnabled = false; // Default value
+    reminderEnabled = widget.job.interviewReminderEnabled;
   }
 
   String _formatDate(DateTime? date) {
     if (date == null) return 'Not set';
     return DateFormat('MMM dd, yyyy').format(date);
+  }
+
+  String _formatTime(DateTime? time) {
+    if (time == null) return '';
+    return DateFormat('h:mm a').format(time);
   }
 
   String _formatSalary() {
@@ -52,16 +58,59 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
   }
 
   void _toggleReminder(bool value) async {
+    // Check if interview is scheduled
+    if (widget.job.interviewScheduledDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please set an interview date first'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
     setState(() {
       reminderEnabled = value;
     });
 
-    // Update in provider - for now just update the state
-    // You can add reminderEnabled field to the model later
     final jobProvider = Provider.of<JobProvider>(context, listen: false);
-    final updatedJob = widget.job.copyWith(updatedAt: DateTime.now());
+    final updatedJob = widget.job.copyWith(
+      interviewReminderEnabled: value,
+      updatedAt: DateTime.now(),
+    );
 
     await jobProvider.updateJob(updatedJob);
+
+    // Schedule or cancel notifications
+    final notificationService = NotificationService();
+    if (value) {
+      await notificationService.scheduleInterviewReminders(
+        jobId: widget.job.id,
+        companyName: widget.job.companyName,
+        jobTitle: widget.job.jobTitle,
+        interviewDateTime: widget.job.interviewScheduledDate!,
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Interview reminders scheduled! 🔔'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } else {
+      await notificationService.cancelInterviewReminders(widget.job.id);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Interview reminders cancelled'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    }
   }
 
   void _showDeleteDialog() {
@@ -265,6 +314,101 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
             ),
 
             const SizedBox(height: 16),
+
+            // Interview Call Section
+            if (widget.job.stage == ApplicationStage.interviewCalled ||
+                widget.job.stage == ApplicationStage.interviewed)
+              _buildSection(
+                context: context,
+                title: 'Interview Information',
+                isDark: isDark,
+                children: [
+                  if (widget.job.interviewCallDate != null)
+                    _buildDetailItem(
+                      icon: Icons.phone_callback,
+                      label: 'Interview Call Received',
+                      isDark: isDark,
+                      trailing: Text(
+                        _formatDate(widget.job.interviewCallDate),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  if (widget.job.interviewScheduledDate != null) ...[
+                    _buildDetailItem(
+                      icon: Icons.event_available,
+                      label: 'Interview Scheduled',
+                      isDark: isDark,
+                      trailing: Text(
+                        '${_formatDate(widget.job.interviewScheduledDate)} ${_formatTime(widget.job.interviewScheduledDate)}',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    if (widget.job.interviewType != null)
+                      _buildDetailItem(
+                        icon: Icons.video_call,
+                        label: 'Interview Type',
+                        isDark: isDark,
+                        trailing: Text(
+                          widget.job.interviewType!,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    _buildDetailItem(
+                      icon: Icons.notifications_active,
+                      label: 'Interview Reminders',
+                      isDark: isDark,
+                      trailing: Switch(
+                        value: reminderEnabled,
+                        onChanged: _toggleReminder,
+                        activeThumbColor: AppColors.primaryBlue,
+                      ),
+                    ),
+                  ],
+                  if (widget.job.interviewCallNotes != null &&
+                      widget.job.interviewCallNotes!.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 12,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Interview Notes:',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: isDark ? Colors.white70 : Colors.black87,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            widget.job.interviewCallNotes!,
+                            style: TextStyle(
+                              fontSize: 15,
+                              height: 1.5,
+                              color: isDark ? Colors.white60 : Colors.black54,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+
+            if (widget.job.stage == ApplicationStage.interviewCalled ||
+                widget.job.stage == ApplicationStage.interviewed)
+              const SizedBox(height: 16),
 
             // Notes Section
             if (widget.job.notes.isNotEmpty)

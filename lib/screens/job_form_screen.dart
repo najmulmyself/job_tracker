@@ -24,6 +24,7 @@ class _JobFormScreenState extends State<JobFormScreen> {
   final _expectedSalaryController = TextEditingController();
   final _jobDescriptionController = TextEditingController();
   final _notesController = TextEditingController();
+  final _interviewNotesController = TextEditingController();
 
   JobSource _selectedSource = JobSource.linkedin;
   ApplicationStage _selectedStage = ApplicationStage.applied;
@@ -33,6 +34,12 @@ class _JobFormScreenState extends State<JobFormScreen> {
 
   double _minSalary = 60.0;
   double _maxSalary = 90.0;
+
+  // Interview call tracking
+  DateTime? _interviewCallDate;
+  DateTime? _interviewScheduledDate;
+  TimeOfDay? _interviewTime;
+  String? _interviewType;
 
   @override
   void initState() {
@@ -65,6 +72,16 @@ class _JobFormScreenState extends State<JobFormScreen> {
             double.tryParse(parts[1].replaceAll(RegExp(r'[^\d.]'), '')) ?? 90.0;
       }
     }
+
+    // Load interview data
+    _interviewCallDate = job.interviewCallDate;
+    _interviewScheduledDate = job.interviewScheduledDate;
+    _interviewType = job.interviewType;
+    _interviewNotesController.text = job.interviewCallNotes ?? '';
+
+    if (job.interviewScheduledDate != null) {
+      _interviewTime = TimeOfDay.fromDateTime(job.interviewScheduledDate!);
+    }
   }
 
   @override
@@ -76,6 +93,7 @@ class _JobFormScreenState extends State<JobFormScreen> {
     _expectedSalaryController.dispose();
     _jobDescriptionController.dispose();
     _notesController.dispose();
+    _interviewNotesController.dispose();
     super.dispose();
   }
 
@@ -84,11 +102,37 @@ class _JobFormScreenState extends State<JobFormScreen> {
       return;
     }
 
+    // Validate interview fields if stage is "Interview Called"
+    if (!asDraft && _selectedStage == ApplicationStage.interviewCalled) {
+      if (_interviewScheduledDate == null || _interviewTime == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please set interview date and time'),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 3),
+          ),
+        );
+        return;
+      }
+    }
+
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final jobProvider = Provider.of<JobProvider>(context, listen: false);
     final userId = authProvider.firebaseUser?.uid;
 
     if (userId == null) return;
+
+    // Combine interview date and time
+    DateTime? finalInterviewDateTime;
+    if (_interviewScheduledDate != null && _interviewTime != null) {
+      finalInterviewDateTime = DateTime(
+        _interviewScheduledDate!.year,
+        _interviewScheduledDate!.month,
+        _interviewScheduledDate!.day,
+        _interviewTime!.hour,
+        _interviewTime!.minute,
+      );
+    }
 
     final job = JobApplicationModel(
       id: widget.job?.id ?? const Uuid().v4(),
@@ -109,6 +153,13 @@ class _JobFormScreenState extends State<JobFormScreen> {
       isDraft: asDraft,
       createdAt: widget.job?.createdAt ?? DateTime.now(),
       updatedAt: DateTime.now(),
+      interviewCallDate: _interviewCallDate,
+      interviewCallNotes: _interviewNotesController.text.trim().isNotEmpty
+          ? _interviewNotesController.text.trim()
+          : null,
+      interviewScheduledDate: finalInterviewDateTime,
+      interviewType: _interviewType,
+      interviewReminderEnabled: widget.job?.interviewReminderEnabled ?? false,
     );
 
     try {
@@ -320,6 +371,239 @@ class _JobFormScreenState extends State<JobFormScreen> {
               },
             ),
             const SizedBox(height: 20),
+
+            // Interview Section (only show if stage is interviewCalled)
+            if (_selectedStage == ApplicationStage.interviewCalled) ...[
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? Colors.cyan.withOpacity(0.1)
+                      : Colors.cyan.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.cyan.withOpacity(0.3)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.phone_in_talk, color: Colors.cyan),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Interview Call Information',
+                                style: Theme.of(context).textTheme.titleMedium
+                                    ?.copyWith(
+                                      color: Colors.cyan,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                              ),
+                              Text(
+                                '* Interview date & time required',
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(color: Colors.red, fontSize: 12),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Interview Call Date
+                    Text(
+                      'Interview Call Received',
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                    const SizedBox(height: 8),
+                    InkWell(
+                      onTap: () async {
+                        final date = await showDatePicker(
+                          context: context,
+                          initialDate: _interviewCallDate ?? DateTime.now(),
+                          firstDate: DateTime(2020),
+                          lastDate: DateTime.now(),
+                        );
+                        if (date != null) {
+                          setState(() => _interviewCallDate = date);
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: isDark
+                                ? Colors.white.withOpacity(0.2)
+                                : Colors.black.withOpacity(0.2),
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                _interviewCallDate != null
+                                    ? '${_interviewCallDate!.day}/${_interviewCallDate!.month}/${_interviewCallDate!.year}'
+                                    : 'Select date',
+                                style: Theme.of(context).textTheme.bodyLarge,
+                              ),
+                            ),
+                            const Icon(Icons.calendar_today_outlined, size: 20),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Interview Scheduled Date
+                    Text(
+                      'Interview Scheduled Date',
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: InkWell(
+                            onTap: () async {
+                              final date = await showDatePicker(
+                                context: context,
+                                initialDate:
+                                    _interviewScheduledDate ?? DateTime.now(),
+                                firstDate: DateTime.now(),
+                                lastDate: DateTime(2030),
+                              );
+                              if (date != null) {
+                                setState(() => _interviewScheduledDate = date);
+                              }
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: isDark
+                                      ? Colors.white.withOpacity(0.2)
+                                      : Colors.black.withOpacity(0.2),
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      _interviewScheduledDate != null
+                                          ? '${_interviewScheduledDate!.day}/${_interviewScheduledDate!.month}/${_interviewScheduledDate!.year}'
+                                          : 'Select date',
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.bodyLarge,
+                                    ),
+                                  ),
+                                  const Icon(
+                                    Icons.calendar_today_outlined,
+                                    size: 20,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: InkWell(
+                            onTap: () async {
+                              final time = await showTimePicker(
+                                context: context,
+                                initialTime: _interviewTime ?? TimeOfDay.now(),
+                              );
+                              if (time != null) {
+                                setState(() => _interviewTime = time);
+                              }
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: isDark
+                                      ? Colors.white.withOpacity(0.2)
+                                      : Colors.black.withOpacity(0.2),
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      _interviewTime != null
+                                          ? _interviewTime!.format(context)
+                                          : 'Select time',
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.bodyLarge,
+                                    ),
+                                  ),
+                                  const Icon(Icons.access_time, size: 20),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Interview Type
+                    Text(
+                      'Interview Type',
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                    const SizedBox(height: 8),
+                    DropdownButtonFormField<String>(
+                      initialValue: _interviewType,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        hintText: 'Select interview type',
+                      ),
+                      items: const [
+                        DropdownMenuItem(value: 'Phone', child: Text('Phone')),
+                        DropdownMenuItem(value: 'Video', child: Text('Video')),
+                        DropdownMenuItem(
+                          value: 'In-Person',
+                          child: Text('In-Person'),
+                        ),
+                      ],
+                      onChanged: (value) {
+                        setState(() => _interviewType = value);
+                      },
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Interview Notes
+                    Text(
+                      'Interview Notes',
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _interviewNotesController,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                      maxLines: 3,
+                      decoration: const InputDecoration(
+                        hintText: 'Notes from the interview call...',
+                        border: OutlineInputBorder(),
+                        alignLabelWithHint: true,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+            ],
 
             // Date Pickers Row
             Row(

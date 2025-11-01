@@ -47,8 +47,10 @@ class AppColors {
         return statusInterested;
       case ApplicationStage.applied:
         return statusApplied;
-      case ApplicationStage.interview:
-        return statusInterview;
+      case ApplicationStage.interviewCalled:
+        return const Color(0xFF00BCD4); // Cyan - Called for interview
+      case ApplicationStage.interviewed:
+        return statusInterview; // Green - Already interviewed
       case ApplicationStage.offer:
         return statusOffer;
       case ApplicationStage.rejected:

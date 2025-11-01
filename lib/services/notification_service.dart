@@ -113,6 +113,67 @@ class NotificationService {
     );
   }
 
+  // Schedule interview reminders
+  Future<void> scheduleInterviewReminders({
+    required String jobId,
+    required String companyName,
+    required String jobTitle,
+    required DateTime interviewDateTime,
+  }) async {
+    if (!_initialized) await initialize();
+
+    // Cancel any existing notifications for this job
+    await cancelInterviewReminders(jobId);
+
+    final now = DateTime.now();
+
+    // Don't schedule if interview is in the past
+    if (interviewDateTime.isBefore(now)) return;
+
+    // Schedule notification on interview day (at 9 AM)
+    final onInterviewDay = DateTime(
+      interviewDateTime.year,
+      interviewDateTime.month,
+      interviewDateTime.day,
+      9, // 9 AM on interview day
+      0,
+    );
+
+    if (onInterviewDay.isAfter(now)) {
+      await _scheduleNotification(
+        id: '${jobId}_day'.hashCode,
+        title: 'Interview Today! 🎯',
+        body: 'You have an interview with $companyName for $jobTitle',
+        scheduledDate: onInterviewDay,
+        payload: 'interview_$jobId',
+      );
+    }
+
+    // Schedule notification 30 minutes before interview
+    final thirtyMinsBefore = interviewDateTime.subtract(
+      const Duration(minutes: 30),
+    );
+
+    if (thirtyMinsBefore.isAfter(now)) {
+      await _scheduleNotification(
+        id: '${jobId}_30min'.hashCode,
+        title: 'Interview in 30 Minutes! ⏰',
+        body: 'Get ready for your interview with $companyName',
+        scheduledDate: thirtyMinsBefore,
+        payload: 'interview_$jobId',
+      );
+    }
+  }
+
+  // Cancel interview reminders for a specific job
+  Future<void> cancelInterviewReminders(String jobId) async {
+    if (!_initialized) await initialize();
+
+    // Cancel both notifications for this job
+    await _notifications.cancel('${jobId}_day'.hashCode);
+    await _notifications.cancel('${jobId}_30min'.hashCode);
+  }
+
   // Generic schedule notification
   Future<void> _scheduleNotification({
     required int id,

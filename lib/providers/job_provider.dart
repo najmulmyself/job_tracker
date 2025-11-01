@@ -26,8 +26,13 @@ class JobProvider with ChangeNotifier {
   int get draftCount => _jobs.where((job) => job.isDraft).length;
   int get appliedCount =>
       _jobs.where((job) => job.stage == ApplicationStage.applied).length;
-  int get interviewCount =>
-      _jobs.where((job) => job.stage == ApplicationStage.interview).length;
+  int get interviewCount => _jobs
+      .where(
+        (job) =>
+            job.stage == ApplicationStage.interviewCalled ||
+            job.stage == ApplicationStage.interviewed,
+      )
+      .length;
   int get offerCount =>
       _jobs.where((job) => job.stage == ApplicationStage.offer).length;
   int get rejectedCount =>

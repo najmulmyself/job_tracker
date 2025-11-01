@@ -1,4 +1,11 @@
-enum ApplicationStage { interested, applied, interview, offer, rejected }
+enum ApplicationStage {
+  interested,
+  applied,
+  interviewCalled,
+  interviewed,
+  offer,
+  rejected,
+}
 
 enum JobSource {
   linkedin,
@@ -29,6 +36,13 @@ class JobApplicationModel {
   final DateTime createdAt;
   final DateTime updatedAt;
 
+  // Interview call tracking
+  final DateTime? interviewCallDate;
+  final String? interviewCallNotes;
+  final DateTime? interviewScheduledDate;
+  final String? interviewType; // phone, video, in-person
+  final bool interviewReminderEnabled;
+
   JobApplicationModel({
     required this.id,
     required this.userId,
@@ -46,7 +60,25 @@ class JobApplicationModel {
     this.isDraft = false,
     required this.createdAt,
     required this.updatedAt,
+    this.interviewCallDate,
+    this.interviewCallNotes,
+    this.interviewScheduledDate,
+    this.interviewType,
+    this.interviewReminderEnabled = false,
   });
+
+  // Helper method to parse stage with backward compatibility
+  static ApplicationStage _parseStage(String stageStr) {
+    // Handle old "interview" stage by converting to "interviewCalled"
+    if (stageStr == 'interview') {
+      return ApplicationStage.interviewCalled;
+    }
+
+    return ApplicationStage.values.firstWhere(
+      (e) => e.toString() == 'ApplicationStage.$stageStr',
+      orElse: () => ApplicationStage.interested,
+    );
+  }
 
   factory JobApplicationModel.fromJson(Map<String, dynamic> json) {
     return JobApplicationModel(
@@ -61,10 +93,7 @@ class JobApplicationModel {
       salaryRange: json['salaryRange'] as String?,
       expectedSalary: json['expectedSalary'] as String?,
       jobDescription: json['jobDescription'] as String,
-      stage: ApplicationStage.values.firstWhere(
-        (e) => e.toString() == 'ApplicationStage.${json['stage']}',
-        orElse: () => ApplicationStage.interested,
-      ),
+      stage: _parseStage(json['stage'] as String),
       applicationDate: json['applicationDate'] != null
           ? DateTime.parse(json['applicationDate'] as String)
           : null,
@@ -76,6 +105,16 @@ class JobApplicationModel {
       isDraft: json['isDraft'] as bool? ?? false,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
+      interviewCallDate: json['interviewCallDate'] != null
+          ? DateTime.parse(json['interviewCallDate'] as String)
+          : null,
+      interviewCallNotes: json['interviewCallNotes'] as String?,
+      interviewScheduledDate: json['interviewScheduledDate'] != null
+          ? DateTime.parse(json['interviewScheduledDate'] as String)
+          : null,
+      interviewType: json['interviewType'] as String?,
+      interviewReminderEnabled:
+          json['interviewReminderEnabled'] as bool? ?? false,
     );
   }
 
@@ -97,6 +136,11 @@ class JobApplicationModel {
       'isDraft': isDraft,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
+      'interviewCallDate': interviewCallDate?.toIso8601String(),
+      'interviewCallNotes': interviewCallNotes,
+      'interviewScheduledDate': interviewScheduledDate?.toIso8601String(),
+      'interviewType': interviewType,
+      'interviewReminderEnabled': interviewReminderEnabled,
     };
   }
 
@@ -117,6 +161,11 @@ class JobApplicationModel {
     bool? isDraft,
     DateTime? createdAt,
     DateTime? updatedAt,
+    DateTime? interviewCallDate,
+    String? interviewCallNotes,
+    DateTime? interviewScheduledDate,
+    String? interviewType,
+    bool? interviewReminderEnabled,
   }) {
     return JobApplicationModel(
       id: id ?? this.id,
@@ -135,6 +184,13 @@ class JobApplicationModel {
       isDraft: isDraft ?? this.isDraft,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      interviewCallDate: interviewCallDate ?? this.interviewCallDate,
+      interviewCallNotes: interviewCallNotes ?? this.interviewCallNotes,
+      interviewScheduledDate:
+          interviewScheduledDate ?? this.interviewScheduledDate,
+      interviewType: interviewType ?? this.interviewType,
+      interviewReminderEnabled:
+          interviewReminderEnabled ?? this.interviewReminderEnabled,
     );
   }
 }
@@ -147,8 +203,10 @@ extension ApplicationStageExtension on ApplicationStage {
         return 'Interested';
       case ApplicationStage.applied:
         return 'Applied';
-      case ApplicationStage.interview:
-        return 'Interview';
+      case ApplicationStage.interviewCalled:
+        return 'Interview Called';
+      case ApplicationStage.interviewed:
+        return 'Interviewed';
       case ApplicationStage.offer:
         return 'Offer';
       case ApplicationStage.rejected:
