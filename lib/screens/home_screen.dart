@@ -133,7 +133,7 @@ class _HomeScreenState extends State<HomeScreen>
           ).push(MaterialPageRoute(builder: (_) => const JobFormScreen()));
         },
         icon: const Icon(Icons.add),
-        label: const Text('Add Job'),
+        label: const Text('New Application'),
       ),
     );
   }

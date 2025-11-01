@@ -112,6 +112,8 @@ android/local.properties
 # ============================================
 *.md.backup
 *.md.old
+lib/utils/app_theme.dart.backup
+lib/widgets/job_card.dart.old
 
 # ============================================
 # Testing & Debug
