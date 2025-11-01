@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import 'home_screen.dart';
@@ -25,7 +26,7 @@ class _LoginScreenState extends State<LoginScreen>
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       if (authProvider.isAuthenticated) {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const HomeScreen()),
+          CupertinoPageRoute(builder: (_) => const HomeScreen()),
         );
       }
     });
@@ -62,7 +63,7 @@ class _LoginScreenState extends State<LoginScreen>
     if (success && mounted) {
       Navigator.of(
         context,
-      ).pushReplacement(MaterialPageRoute(builder: (_) => const HomeScreen()));
+      ).pushReplacement(CupertinoPageRoute(builder: (_) => const HomeScreen()));
     } else if (authProvider.error != null && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

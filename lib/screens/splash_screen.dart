@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import 'login_screen.dart';
@@ -28,11 +29,11 @@ class _SplashScreenState extends State<SplashScreen> {
       // Navigate based on auth state
       if (authProvider.isAuthenticated) {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const HomeScreen()),
+          CupertinoPageRoute(builder: (_) => const HomeScreen()),
         );
       } else {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const LoginScreen()),
+          CupertinoPageRoute(builder: (_) => const LoginScreen()),
         );
       }
     }

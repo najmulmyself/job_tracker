@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/job_provider.dart';
@@ -62,7 +63,7 @@ class _HomeScreenState extends State<HomeScreen>
             onPressed: () {
               Navigator.of(
                 context,
-              ).push(MaterialPageRoute(builder: (_) => const ProfileScreen()));
+              ).push(CupertinoPageRoute(builder: (_) => const ProfileScreen()));
             },
           ),
         ],
@@ -130,7 +131,7 @@ class _HomeScreenState extends State<HomeScreen>
         onPressed: () {
           Navigator.of(
             context,
-          ).push(MaterialPageRoute(builder: (_) => const JobFormScreen()));
+          ).push(CupertinoPageRoute(builder: (_) => const JobFormScreen()));
         },
         icon: const Icon(Icons.add),
         label: const Text('New Application'),
@@ -213,7 +214,7 @@ class _HomeScreenState extends State<HomeScreen>
                           job: job,
                           onTap: () {
                             Navigator.of(context).push(
-                              MaterialPageRoute(
+                              CupertinoPageRoute(
                                 builder: (_) => JobDetailScreen(job: job),
                               ),
                             );
@@ -347,7 +348,7 @@ class _HomeScreenState extends State<HomeScreen>
                             job: job,
                             onTap: () {
                               Navigator.of(context).push(
-                                MaterialPageRoute(
+                                CupertinoPageRoute(
                                   builder: (_) => JobDetailScreen(job: job),
                                 ),
                               );

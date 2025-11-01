@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/resume_provider.dart';
@@ -351,7 +352,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 await authProvider.signOut();
                                 if (context.mounted) {
                                   Navigator.of(context).pushAndRemoveUntil(
-                                    MaterialPageRoute(
+                                    CupertinoPageRoute(
                                       builder: (_) => const LoginScreen(),
                                     ),
                                     (route) => false,
