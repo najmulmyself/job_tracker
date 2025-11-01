@@ -8,22 +8,88 @@ import '../widgets/job_card.dart';
 import '../widgets/filter_chip_widget.dart';
 import 'job_detail_screen.dart';
 
-class JobsListScreen extends StatelessWidget {
+class JobsListScreen extends StatefulWidget {
   const JobsListScreen({super.key});
 
   @override
+  State<JobsListScreen> createState() => _JobsListScreenState();
+}
+
+class _JobsListScreenState extends State<JobsListScreen> {
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  List<JobApplicationModel> _filterJobsBySearch(
+    List<JobApplicationModel> jobs,
+  ) {
+    if (_searchQuery.isEmpty) return jobs;
+
+    return jobs.where((job) {
+      return job.companyName.toLowerCase().contains(_searchQuery.toLowerCase());
+    }).toList();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Consumer<JobProvider>(
       builder: (context, jobProvider, _) {
+        final filteredJobs = _filterJobsBySearch(jobProvider.jobs);
+
         return Column(
           children: [
-            // Filters
+            // Search and Filters
             Container(
               padding: const EdgeInsets.all(16),
               color: Theme.of(context).colorScheme.surface,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Search Field
+                  TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: 'Search by company name...',
+                      prefixIcon: Icon(
+                        Icons.search,
+                        color: isDark ? Colors.white54 : Colors.black54,
+                      ),
+                      suffixIcon: _searchQuery.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear),
+                              onPressed: () {
+                                setState(() {
+                                  _searchController.clear();
+                                  _searchQuery = '';
+                                });
+                              },
+                            )
+                          : null,
+                      filled: true,
+                      fillColor: isDark ? AppColors.darkCard : Colors.grey[100],
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        _searchQuery = value;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 16),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -118,13 +184,13 @@ class JobsListScreen extends StatelessWidget {
             Expanded(
               child: jobProvider.isLoading
                   ? const Center(child: CircularProgressIndicator())
-                  : jobProvider.jobs.isEmpty
-                  ? _buildEmptyState()
+                  : filteredJobs.isEmpty
+                  ? _buildEmptyState(isSearching: _searchQuery.isNotEmpty)
                   : ListView.builder(
                       padding: const EdgeInsets.all(16),
-                      itemCount: jobProvider.jobs.length,
+                      itemCount: filteredJobs.length,
                       itemBuilder: (context, index) {
-                        final job = jobProvider.jobs[index];
+                        final job = filteredJobs[index];
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 12),
                           child: JobCard(
@@ -147,15 +213,19 @@ class JobsListScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState({bool isSearching = false}) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.work_off_outlined, size: 80, color: Colors.grey[400]),
+          Icon(
+            isSearching ? Icons.search_off : Icons.work_off_outlined,
+            size: 80,
+            color: Colors.grey[400],
+          ),
           const SizedBox(height: 16),
           Text(
-            'No jobs yet',
+            isSearching ? 'No results found' : 'No jobs yet',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w600,
@@ -164,7 +234,9 @@ class JobsListScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Add your first job application to get started!',
+            isSearching
+                ? 'Try searching with a different company name'
+                : 'Add your first job application to get started!',
             style: TextStyle(fontSize: 14, color: Colors.grey[500]),
             textAlign: TextAlign.center,
           ),

@@ -186,9 +186,9 @@ class _ApplicationFunnel extends StatelessWidget {
     required this.isDark,
   });
 
-  double _getOfferRate() {
+  double _getInterviewRate() {
     if (total == 0) return 0;
-    return (offer / total * 100);
+    return (interview / total * 100);
   }
 
   @override
@@ -221,7 +221,7 @@ class _ApplicationFunnel extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Success Rate',
+                    'Interview Rate',
                     style: TextStyle(
                       fontSize: 14,
                       color: isDark ? Colors.white60 : Colors.black54,
@@ -265,14 +265,14 @@ class _ApplicationFunnel extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            '${_getOfferRate().toStringAsFixed(1)}%',
+                            '${_getInterviewRate().toStringAsFixed(1)}%',
                             style: const TextStyle(
                               fontSize: 28,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           Text(
-                            'Offer Rate',
+                            'Interview Rate',
                             style: TextStyle(
                               fontSize: 12,
                               color: isDark ? Colors.white60 : Colors.black54,
@@ -374,65 +374,58 @@ class _DonutChartPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (total == 0) return;
+    if (total == 0) {
+      // Draw a gray circle if no data
+      final paint = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 20.0
+        ..color = Colors.grey.withOpacity(0.3);
+
+      canvas.drawCircle(
+        Offset(size.width / 2, size.height / 2),
+        (size.width / 2) - 10,
+        paint,
+      );
+      return;
+    }
 
     final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.width / 2;
+    final radius = (size.width / 2) - 10;
     final strokeWidth = 20.0;
 
     final paint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round;
+      ..strokeCap = StrokeCap.butt;
 
-    double startAngle = -90 * (3.14159 / 180);
+    const double pi = 3.14159265359;
+    double startAngle = -pi / 2; // Start at top (12 o'clock)
 
-    // Draw rejected (gray)
-    final rejectedSweep = (rejected / total) * 2 * 3.14159;
-    paint.color = AppColors.statusRejected;
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius - strokeWidth / 2),
-      startAngle,
-      rejectedSweep,
-      false,
-      paint,
-    );
-    startAngle += rejectedSweep;
+    // Draw each segment with a tiny gap for visual separation
+    final segments = [
+      {'count': applied, 'color': AppColors.statusApplied},
+      {'count': interview, 'color': AppColors.statusInterview},
+      {'count': offer, 'color': AppColors.primaryBlue},
+      {'count': rejected, 'color': AppColors.statusRejected},
+    ];
 
-    // Draw interview (green)
-    final interviewSweep = (interview / total) * 2 * 3.14159;
-    paint.color = AppColors.statusInterview;
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius - strokeWidth / 2),
-      startAngle,
-      interviewSweep,
-      false,
-      paint,
-    );
-    startAngle += interviewSweep;
+    for (var segment in segments) {
+      final count = segment['count'] as int;
+      if (count == 0) continue;
 
-    // Draw offer (blue)
-    final offerSweep = (offer / total) * 2 * 3.14159;
-    paint.color = AppColors.primaryBlue;
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius - strokeWidth / 2),
-      startAngle,
-      offerSweep,
-      false,
-      paint,
-    );
-    startAngle += offerSweep;
+      final sweepAngle = (count / total) * 2 * pi;
+      paint.color = segment['color'] as Color;
 
-    // Draw applied (orange)
-    final appliedSweep = (applied / total) * 2 * 3.14159;
-    paint.color = AppColors.statusApplied;
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius - strokeWidth / 2),
-      startAngle,
-      appliedSweep,
-      false,
-      paint,
-    );
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: radius),
+        startAngle,
+        sweepAngle,
+        false,
+        paint,
+      );
+
+      startAngle += sweepAngle;
+    }
   }
 
   @override
