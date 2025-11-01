@@ -39,26 +39,37 @@ class AuthService {
 
       // Create or update user document in Firestore
       if (userCredential.user != null) {
-        final user = userCredential.user!;
-        final userModel = UserModel(
-          uid: user.uid,
-          email: user.email ?? '',
-          displayName: user.displayName ?? 'User',
-          photoUrl: user.photoURL,
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-        );
+        try {
+          final user = userCredential.user!;
+          final userModel = UserModel(
+            uid: user.uid,
+            email: user.email ?? '',
+            displayName: user.displayName ?? 'User',
+            photoUrl: user.photoURL,
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          );
 
-        // Check if user exists, if not create new user document
-        final existingUser = await _firestoreService.getUser(user.uid);
-        if (existingUser == null) {
-          await _firestoreService.createUser(userModel);
+          // Check if user exists, if not create new user document
+          final existingUser = await _firestoreService.getUser(user.uid);
+          if (existingUser == null) {
+            await _firestoreService.createUser(userModel);
+            print('✅ User created in Firestore successfully');
+          } else {
+            print('✅ User already exists in Firestore');
+          }
+        } catch (firestoreError) {
+          // Firestore error - authentication still succeeded
+          print('⚠️ Warning: Could not save user to Firestore: $firestoreError');
+          print('ℹ️ Authentication successful, but Firestore may not be enabled.');
+          print('ℹ️ Please follow instructions in ENABLE_FIRESTORE.md');
+          // Don't rethrow - authentication was successful
         }
       }
 
       return userCredential;
     } catch (e) {
-      print('Error signing in with Google: $e');
+      print('❌ Error signing in with Google: $e');
       rethrow;
     }
   }

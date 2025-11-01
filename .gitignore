@@ -43,3 +43,91 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# ============================================
+# 🔒 SENSITIVE FILES - NEVER COMMIT THESE!
+# ============================================
+
+# Firebase Configuration Files (CONTAINS API KEYS!)
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+lib/firebase_options.dart
+
+# Environment Variables & API Keys
+.env
+.env.*
+*.env
+**/secrets.dart
+**/api_keys.dart
+**/config/secrets.json
+
+# Keystore Files (Android Signing Keys)
+*.jks
+*.keystore
+key.properties
+android/key.properties
+android/app/upload-keystore.jks
+android/app/release-keystore.jks
+
+# iOS Signing & Provisioning
+ios/Runner.xcworkspace/xcuserdata/
+ios/Pods/
+*.mobileprovision
+*.p12
+*.cer
+ios/Runner/GoogleService-Info.plist
+ios/Flutter/flutter_export_environment.sh
+
+# macOS Signing
+macos/Runner.xcworkspace/xcuserdata/
+macos/Pods/
+macos/Flutter/ephemeral/
+
+# Windows & Linux Build Artifacts
+windows/flutter/ephemeral/
+linux/flutter/ephemeral/
+
+# Service Account Keys (Google Cloud, Firebase Admin)
+**/service-account*.json
+**/firebase-adminsdk*.json
+**/gcloud-service-key.json
+
+# Database Backups
+*.db
+*.sqlite
+*.sqlite3
+
+# Local Configuration
+local.properties
+android/local.properties
+
+# Backup Files
+*.backup
+*.bak
+*.old
+*~
+
+# ============================================
+# Documentation Backups (keep main docs)
+# ============================================
+*.md.backup
+*.md.old
+
+# ============================================
+# Testing & Debug
+# ============================================
+/test/fixtures/
+/test/mocks/
+coverage/
+.test_coverage/
+
+# ============================================
+# CI/CD Secrets (if using)
+# ============================================
+.github/secrets/
+.gitlab-ci-secrets/
+fastlane/README.md
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
