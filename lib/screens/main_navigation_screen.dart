@@ -5,10 +5,12 @@ import '../providers/auth_provider.dart';
 import '../providers/job_provider.dart';
 import '../providers/resume_provider.dart';
 import '../utils/app_theme.dart';
+import '../widgets/animated_bottom_nav_bar.dart';
 import 'dashboard_screen.dart';
 import 'jobs_list_screen.dart';
 import 'profile_screen.dart';
 import 'job_form_screen.dart';
+import 'coming_soon_screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
@@ -42,13 +44,17 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   final List<Widget> _screens = const [
     DashboardScreen(),
     JobsListScreen(),
-    Center(child: Text('Calendar')), // Placeholder
+    ComingSoonScreen(
+      feature: 'Calendar',
+      icon: Icons.calendar_month,
+      description:
+          'Track your interview dates, application deadlines, and follow-up reminders all in one place!',
+    ),
     ProfileScreen(),
   ];
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final authProvider = Provider.of<AuthProvider>(context);
 
     return Scaffold(
@@ -110,7 +116,29 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                 ],
               ),
             ),
-          Expanded(child: _screens[_currentIndex]),
+          Expanded(
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              switchInCurve: Curves.easeInOut,
+              switchOutCurve: Curves.easeInOut,
+              transitionBuilder: (child, animation) {
+                return FadeTransition(
+                  opacity: animation,
+                  child: SlideTransition(
+                    position: Tween<Offset>(
+                      begin: const Offset(0.02, 0),
+                      end: Offset.zero,
+                    ).animate(animation),
+                    child: child,
+                  ),
+                );
+              },
+              child: KeyedSubtree(
+                key: ValueKey<int>(_currentIndex),
+                child: _screens[_currentIndex],
+              ),
+            ),
+          ),
         ],
       ),
       floatingActionButton: _currentIndex == 0 || _currentIndex == 1
@@ -124,52 +152,35 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
               child: const Icon(Icons.add, color: Colors.white),
             )
           : null,
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          border: Border(
-            top: BorderSide(
-              color: isDark
-                  ? Colors.white.withOpacity(0.1)
-                  : Colors.black.withOpacity(0.1),
-              width: 0.5,
-            ),
+      bottomNavigationBar: AnimatedBottomNavBar(
+        currentIndex: _currentIndex,
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        items: const [
+          NavBarItem(
+            icon: Icons.dashboard_outlined,
+            activeIcon: Icons.dashboard,
+            label: 'Dashboard',
           ),
-        ),
-        child: BottomNavigationBar(
-          currentIndex: _currentIndex,
-          onTap: (index) {
-            setState(() {
-              _currentIndex = index;
-            });
-          },
-          type: BottomNavigationBarType.fixed,
-          selectedItemColor: AppColors.primaryBlue,
-          unselectedItemColor: isDark ? Colors.white54 : Colors.black54,
-          selectedFontSize: 12,
-          unselectedFontSize: 12,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.dashboard_outlined),
-              activeIcon: Icon(Icons.dashboard),
-              label: 'Dashboard',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.work_outline),
-              activeIcon: Icon(Icons.work),
-              label: 'Jobs',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.calendar_today_outlined),
-              activeIcon: Icon(Icons.calendar_today),
-              label: 'Calendar',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.settings_outlined),
-              activeIcon: Icon(Icons.settings),
-              label: 'Settings',
-            ),
-          ],
-        ),
+          NavBarItem(
+            icon: Icons.work_outline,
+            activeIcon: Icons.work,
+            label: 'Jobs',
+          ),
+          NavBarItem(
+            icon: Icons.calendar_today_outlined,
+            activeIcon: Icons.calendar_today,
+            label: 'Calendar',
+          ),
+          NavBarItem(
+            icon: Icons.settings_outlined,
+            activeIcon: Icons.settings,
+            label: 'Settings',
+          ),
+        ],
       ),
     );
   }
