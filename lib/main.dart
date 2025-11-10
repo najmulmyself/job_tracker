@@ -14,7 +14,17 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize Firebase
-  await Firebase.initializeApp();
+  // Check if Firebase is already initialized to avoid duplicate initialization
+  try {
+    await Firebase.initializeApp();
+  } catch (e) {
+    // If Firebase is already initialized, just use the existing instance
+    if (e.toString().contains('duplicate-app')) {
+      debugPrint('Firebase already initialized, using existing instance');
+    } else {
+      rethrow;
+    }
+  }
 
   // Enable Firestore offline persistence
   final firestoreService = FirestoreService();

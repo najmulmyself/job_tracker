@@ -50,8 +50,14 @@ app.*.map.json
 
 # Firebase Configuration Files (CONTAINS API KEYS!)
 android/app/google-services.json
+android/app/src/dev/google-services.json
+android/app/src/prod/google-services.json
 ios/Runner/GoogleService-Info.plist
+ios/Runner/GoogleService-Info-dev.plist
+ios/Runner/GoogleService-Info-prod.plist
 lib/firebase_options.dart
+lib/firebase_options_dev.dart
+lib/firebase_options_prod.dart
 
 # Environment Variables & API Keys
 .env
