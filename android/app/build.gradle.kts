@@ -32,19 +32,19 @@ android {
         versionName = flutter.versionName
     }
 
-    flavorDimensions += "environment"
-    productFlavors {
-        create("dev") {
-            dimension = "environment"
-            applicationIdSuffix = ".dev"
-            versionNameSuffix = "-dev"
-            resValue("string", "app_name", "Job Tracker DEV")
-        }
-        create("prod") {
-            dimension = "environment"
-            resValue("string", "app_name", "Job Tracker")
-        }
-    }
+    // flavorDimensions += "environment"
+    // productFlavors {
+    //     create("dev") {
+    //         dimension = "environment"
+    //         applicationIdSuffix = ".dev"
+    //         versionNameSuffix = "-dev"
+    //         resValue("string", "app_name", "[D] Job Tracker")
+    //     }
+    //     create("prod") {
+    //         dimension = "environment"
+    //         resValue("string", "app_name", "Job Tracker")
+    //     }
+    // }
 
     buildTypes {
         release {
