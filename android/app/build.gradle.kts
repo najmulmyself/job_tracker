@@ -22,8 +22,8 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.job_tracker"
+        // Base Application ID - will be overridden by flavors
+        applicationId = "com.jobtracker"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion  // Required for Firebase and flutter_local_notifications
@@ -32,19 +32,20 @@ android {
         versionName = flutter.versionName
     }
 
-    // flavorDimensions += "environment"
-    // productFlavors {
-    //     create("dev") {
-    //         dimension = "environment"
-    //         applicationIdSuffix = ".dev"
-    //         versionNameSuffix = "-dev"
-    //         resValue("string", "app_name", "[D] Job Tracker")
-    //     }
-    //     create("prod") {
-    //         dimension = "environment"
-    //         resValue("string", "app_name", "Job Tracker")
-    //     }
-    // }
+    flavorDimensions += "environment"
+    productFlavors {
+        create("dev") {
+            dimension = "environment"
+            applicationId = "com.jobtracker.dev"
+            versionNameSuffix = "-dev"
+            resValue("string", "app_name", "Job Tracker DEV")
+        }
+        create("prod") {
+            dimension = "environment"
+            applicationId = "com.jobtracker.app"
+            resValue("string", "app_name", "Job Tracker")
+        }
+    }
 
     buildTypes {
         release {
