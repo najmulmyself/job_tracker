@@ -7,7 +7,6 @@ plugins {
 }
 
 android {
-    namespace = "com.example.job_tracker"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -39,11 +38,24 @@ android {
             applicationId = "com.jobtracker.dev"
             versionNameSuffix = "-dev"
             resValue("string", "app_name", "Job Tracker DEV")
+            namespace = "com.jobtracker.dev"
         }
         create("prod") {
             dimension = "environment"
             applicationId = "com.jobtracker.app"
             resValue("string", "app_name", "Job Tracker")
+            namespace = "com.jobtracker.app"
+        }
+    }
+
+    sourceSets {
+        getByName("dev") {
+            java.srcDir("src/dev/kotlin")
+            res.srcDir("src/dev/res")
+        }
+        getByName("prod") {
+            java.srcDir("src/prod/kotlin")
+            res.srcDir("src/prod/res")
         }
     }
 
@@ -64,4 +76,7 @@ dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
     implementation(platform("com.google.firebase:firebase-bom:34.7.0"))
     implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.android.gms:play-services-auth:21.0.0")
+
 }

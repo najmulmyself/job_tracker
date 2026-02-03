@@ -1,4 +1,4 @@
-package com.example.job_tracker
+package com.jobtracker.dev
 
 import io.flutter.embedding.android.FlutterActivity
 

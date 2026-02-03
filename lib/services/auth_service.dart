@@ -2,20 +2,24 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '../models/user_model.dart';
 import 'firestore_service.dart';
+import '../config/app_config.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn(
-    // Web OAuth Client ID from Firebase Console
-    // This is REQUIRED for Firebase Authentication with Google Sign-In
-    // Without this, you'll get ApiException: 10 (DEVELOPER_ERROR)
-    // Get this from: Firebase Console → Project Settings → General → Web API Key
-    // Or from google-services.json → client → oauth_client → client_type: 3
-    serverClientId:
-        '887714890457-inv7sihflhdhabbtu94tg1qsrb2h1opt.apps.googleusercontent.com',
-    scopes: ['email'],
-  );
+  late final GoogleSignIn _googleSignIn;
   final FirestoreService _firestoreService = FirestoreService();
+
+  AuthService() {
+    _googleSignIn = GoogleSignIn(
+      // Web OAuth Client ID from Firebase Console
+      // This is REQUIRED for Firebase Authentication with Google Sign-In
+      // Without this, you'll get ApiException: 10 (DEVELOPER_ERROR)
+      // Get this from: Firebase Console → Project Settings → General → Web API Key
+      // Or from google-services.json → client → oauth_client → client_type: 3
+      serverClientId: AppConfig.instance.googleWebClientId,
+      scopes: ['email'],
+    );
+  }
 
   // Get current user
   User? get currentUser => _auth.currentUser;
