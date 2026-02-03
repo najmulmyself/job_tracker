@@ -37,7 +37,8 @@ class AppConfig {
     apiBaseUrl: 'https://dev-api.example.com',
     enableLogging: true,
     // Web Client ID from dev google-services.json (client_type: 3)
-    googleWebClientId: '799198238282-21qhhv7d834k4ej2u9dkisqgd5v33n6r.apps.googleusercontent.com',
+    googleWebClientId:
+        '799198238282-21qhhv7d834k4ej2u9dkisqgd5v33n6r.apps.googleusercontent.com',
   );
 
   // Production configuration
@@ -47,7 +48,8 @@ class AppConfig {
     apiBaseUrl: 'https://api.example.com',
     enableLogging: false,
     // Web Client ID from prod google-services.json (client_type: 3)
-    googleWebClientId: '43490462622-ve0n788ga09jifki3qv61imbsmf907pa.apps.googleusercontent.com',
+    googleWebClientId:
+        '43490462622-ve0n788ga09jifki3qv61imbsmf907pa.apps.googleusercontent.com',
   );
 
   bool get isDev => flavor == AppFlavor.dev;

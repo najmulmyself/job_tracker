@@ -22,21 +22,25 @@ A complete guide to setting up Flutter flavors (dev/prod) with Firebase. This gu
 ## 1. What Are Flavors & Why Use Them?
 
 ### The Problem
+
 Without flavors, you have ONE app that connects to ONE backend. This means:
+
 - Testing new features affects real users
 - You can't have separate databases for testing
 - Accidental data corruption in production
 - No way to test push notifications without spamming real users
 
 ### The Solution: Flavors
+
 Flavors let you build **multiple versions** of your app from the same codebase:
 
-| Flavor | Package Name | Use Case |
-|--------|--------------|----------|
-| `dev` | `com.yourapp.dev` | Development & testing |
+| Flavor | Package Name      | Use Case                  |
+| ------ | ----------------- | ------------------------- |
+| `dev`  | `com.yourapp.dev` | Development & testing     |
 | `prod` | `com.yourapp.app` | Production for real users |
 
 Each flavor can have:
+
 - Different Firebase project
 - Different app icon & name
 - Different API endpoints
@@ -75,6 +79,7 @@ your_app/
 ### 3.1 Create Entry Points
 
 **`lib/main_dev.dart`**
+
 ```dart
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -84,20 +89,21 @@ import 'app.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Initialize with DEV config
   AppConfig.initialize(AppConfig.dev);
-  
+
   // Initialize Firebase with DEV options
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  
+
   runApp(const MyApp());
 }
 ```
 
 **`lib/main_prod.dart`**
+
 ```dart
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -107,14 +113,14 @@ import 'app.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Initialize with PROD config
   AppConfig.initialize(AppConfig.prod);
-  
+
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  
+
   runApp(const MyApp());
 }
 ```
@@ -122,6 +128,7 @@ void main() async {
 ### 3.2 Create App Configuration
 
 **`lib/config/app_config.dart`**
+
 ```dart
 enum AppFlavor { dev, prod }
 
@@ -207,7 +214,7 @@ android {
 
     // 👇 FLAVOR CONFIGURATION
     flavorDimensions += "environment"
-    
+
     productFlavors {
         create("dev") {
             dimension = "environment"
@@ -234,10 +241,10 @@ android {
 
 ### 4.2 Why Different `applicationId` and `namespace`?
 
-| Property | Purpose |
-|----------|---------|
+| Property        | Purpose                                                                    |
+| --------------- | -------------------------------------------------------------------------- |
 | `applicationId` | Unique identifier on Play Store & device. Different IDs = apps can coexist |
-| `namespace` | Java/Kotlin package for generated code (R class, BuildConfig) |
+| `namespace`     | Java/Kotlin package for generated code (R class, BuildConfig)              |
 
 **Important:** Both flavors can be installed simultaneously on the same device because they have different `applicationId`.
 
@@ -255,6 +262,7 @@ Each directory will contain the flavor-specific `google-services.json`.
 **Why?** The `namespace` changes per flavor, but you need ONE `MainActivity` that works for both.
 
 **`android/app/src/main/kotlin/com/yourapp/MainActivity.kt`**
+
 ```kotlin
 package com.yourapp  // Use base package, not flavor-specific
 
@@ -266,6 +274,7 @@ class MainActivity : FlutterActivity()
 ### 4.5 Update AndroidManifest.xml
 
 **`android/app/src/main/AndroidManifest.xml`**
+
 ```xml
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
@@ -290,6 +299,7 @@ class MainActivity : FlutterActivity()
 ### 5.1 Create Build Configurations
 
 Open Xcode:
+
 ```bash
 open ios/Runner.xcworkspace
 ```
@@ -299,11 +309,11 @@ open ios/Runner.xcworkspace
 3. Go to **Info** tab
 4. Under **Configurations**, click **+** to duplicate:
 
-| Original | Create These |
-|----------|--------------|
-| Debug | Debug-dev, Debug-prod |
-| Release | Release-dev, Release-prod |
-| Profile | Profile-dev, Profile-prod |
+| Original | Create These              |
+| -------- | ------------------------- |
+| Debug    | Debug-dev, Debug-prod     |
+| Release  | Release-dev, Release-prod |
+| Profile  | Profile-dev, Profile-prod |
 
 ### 5.2 Create Schemes
 
@@ -314,10 +324,12 @@ open ios/Runner.xcworkspace
 For each scheme, set the build configuration:
 
 **dev scheme:**
+
 - Run → Build Configuration: `Debug-dev`
 - Archive → Build Configuration: `Release-dev`
 
 **prod scheme:**
+
 - Run → Build Configuration: `Debug-prod`
 - Archive → Build Configuration: `Release-prod`
 
@@ -329,13 +341,13 @@ For each scheme, set the build configuration:
 4. Set per configuration:
 
 | Configuration | Bundle Identifier |
-|--------------|-------------------|
-| Debug-dev | com.yourapp.dev |
-| Release-dev | com.yourapp.dev |
-| Profile-dev | com.yourapp.dev |
-| Debug-prod | com.yourapp.app |
-| Release-prod | com.yourapp.app |
-| Profile-prod | com.yourapp.app |
+| ------------- | ----------------- |
+| Debug-dev     | com.yourapp.dev   |
+| Release-dev   | com.yourapp.dev   |
+| Profile-dev   | com.yourapp.dev   |
+| Debug-prod    | com.yourapp.app   |
+| Release-prod  | com.yourapp.app   |
+| Profile-prod  | com.yourapp.app   |
 
 ### 5.4 Create GoogleService-Info.plist Directories
 
@@ -380,6 +392,7 @@ Go to [Firebase Console](https://console.firebase.google.com):
 2. **Project 2:** `yourapp-prod` (for production)
 
 **Why separate projects?**
+
 - Isolated databases (dev mistakes don't affect prod)
 - Separate analytics
 - Different API quotas
@@ -401,17 +414,20 @@ For **EACH** Firebase project:
 ### 6.3 Add SHA-1 Fingerprint (Required for Google Sign-In)
 
 **Get your debug SHA-1:**
+
 ```bash
 cd android && ./gradlew signingReport
 ```
 
 Look for output like:
+
 ```
 Variant: devDebug
 SHA1: 6B:D3:60:F6:6F:7E:28:AC:A3:E8:5D:76:EE:15:57:81:32:2F:93:54
 ```
 
 **Add to Firebase:**
+
 1. Go to Firebase Console → Project Settings
 2. Select your Android app
 3. Click **Add fingerprint**
@@ -461,6 +477,7 @@ flutterfire configure \
 ### 7.1 Enable Google Sign-In in Firebase
 
 For **EACH** Firebase project:
+
 1. Go to **Authentication** → **Sign-in method**
 2. Enable **Google**
 3. Add your support email
@@ -504,7 +521,7 @@ class AuthService {
     if (googleUser == null) return null;
 
     final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-    
+
     final credential = GoogleAuthProvider.credential(
       accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,
@@ -517,10 +534,10 @@ class AuthService {
 
 ### 7.4 Why Web Client ID?
 
-| Client Type | Purpose |
-|-------------|---------|
-| `client_type: 1` (Android) | Identifies your Android app to Google |
-| `client_type: 3` (Web) | Used by Firebase to verify tokens server-side |
+| Client Type                | Purpose                                       |
+| -------------------------- | --------------------------------------------- |
+| `client_type: 1` (Android) | Identifies your Android app to Google         |
+| `client_type: 3` (Web)     | Used by Firebase to verify tokens server-side |
 
 Firebase Auth uses the **Web Client ID** to validate the Google ID token on their servers. Using the wrong ID causes `ApiException: 10`.
 
@@ -561,6 +578,7 @@ flutter build ipa --flavor prod -t lib/main_prod.dart
 ## 9. VS Code Launch Configuration
 
 **`.vscode/launch.json`**
+
 ```json
 {
   "version": "0.2.0",
@@ -608,6 +626,7 @@ flutter build ipa --flavor prod -t lib/main_prod.dart
 **Cause:** Google Sign-In configuration mismatch
 
 **Solutions:**
+
 1. ✅ Add SHA-1 fingerprint to Firebase Console
 2. ✅ Re-download `google-services.json` after adding SHA-1
 3. ✅ Use Web Client ID (`client_type: 3`), not Android Client ID
@@ -619,6 +638,7 @@ flutter build ipa --flavor prod -t lib/main_prod.dart
 **Cause:** `MainActivity` package doesn't match the namespace
 
 **Solution:** Use fully qualified class name in `AndroidManifest.xml`:
+
 ```xml
 <!-- ❌ Wrong -->
 <activity android:name=".MainActivity" ...>
@@ -632,6 +652,7 @@ flutter build ipa --flavor prod -t lib/main_prod.dart
 **Cause:** iOS schemes for flavors not created
 
 **Solution:** Create schemes in Xcode:
+
 1. Product → Scheme → New Scheme
 2. Name it exactly `dev` and `prod`
 3. Configure build configurations for each scheme
@@ -641,6 +662,7 @@ flutter build ipa --flavor prod -t lib/main_prod.dart
 **Cause:** Package name mismatch between app and Firebase
 
 **Check:**
+
 1. `applicationId` in `build.gradle.kts` matches Firebase Android app package name
 2. You have `google-services.json` in the correct flavor directory (`src/dev/` or `src/prod/`)
 
@@ -649,6 +671,7 @@ flutter build ipa --flavor prod -t lib/main_prod.dart
 **Cause:** Build script not copying the correct plist
 
 **Solution:**
+
 1. Ensure plist files exist in `ios/Runner/dev/` and `ios/Runner/prod/`
 2. Add the copy script in Xcode Build Phases
 3. Make sure script runs BEFORE "Compile Sources"
@@ -660,6 +683,7 @@ flutter build ipa --flavor prod -t lib/main_prod.dart
 Before deploying, verify:
 
 ### Android
+
 - [ ] `build.gradle.kts` has both flavors defined
 - [ ] `google-services.json` in `src/dev/` and `src/prod/`
 - [ ] SHA-1 fingerprint added to both Firebase projects
@@ -667,6 +691,7 @@ Before deploying, verify:
 - [ ] `AndroidManifest.xml` uses fully qualified MainActivity name
 
 ### iOS
+
 - [ ] Build configurations created (Debug-dev, Release-dev, etc.)
 - [ ] Schemes created (dev, prod)
 - [ ] Bundle identifiers set per configuration
@@ -674,6 +699,7 @@ Before deploying, verify:
 - [ ] Build script copies correct plist
 
 ### Firebase
+
 - [ ] Two separate Firebase projects
 - [ ] Android apps added with correct package names
 - [ ] iOS apps added with correct bundle IDs
@@ -682,6 +708,7 @@ Before deploying, verify:
 - [ ] `google-services.json` downloaded AFTER adding SHA-1
 
 ### Flutter
+
 - [ ] `main_dev.dart` and `main_prod.dart` created
 - [ ] `AppConfig` has correct Web Client IDs
 - [ ] `firebase_options_dev.dart` and `firebase_options.dart` generated
@@ -692,6 +719,7 @@ Before deploying, verify:
 ## 🎉 You're Done!
 
 You now have a fully configured Flutter app with:
+
 - ✅ Separate dev and prod environments
 - ✅ Independent Firebase projects
 - ✅ Google Sign-In working for both flavors
