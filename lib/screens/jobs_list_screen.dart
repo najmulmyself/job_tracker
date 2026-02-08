@@ -423,7 +423,7 @@ class _JobsListScreenState extends State<JobsListScreen> {
               onChanged: (_) {
                 jobProvider.toggleDraftsOnly();
               },
-              activeThumbColor: AppColors.primaryGreen,
+              activeThumbColor: Theme.of(context).colorScheme.primary,
             ),
             const SizedBox(height: 20),
           ],
@@ -444,7 +444,7 @@ class _JobsListScreenState extends State<JobsListScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.primaryGreen
+              ? Theme.of(context).colorScheme.primary
               : (isDark ? AppColors.darkBackground : Colors.grey[100]),
           borderRadius: BorderRadius.circular(20),
         ),
@@ -452,7 +452,7 @@ class _JobsListScreenState extends State<JobsListScreen> {
           label,
           style: TextStyle(
             color: isSelected
-                ? AppColors.primaryDark
+                ? Theme.of(context).colorScheme.onPrimary
                 : (isDark ? Colors.white70 : Colors.black87),
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
           ),
@@ -776,7 +776,7 @@ class _JobCardNew extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.primaryGreen,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                     ),
                   )

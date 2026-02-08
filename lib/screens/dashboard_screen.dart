@@ -55,7 +55,9 @@ class DashboardScreen extends StatelessWidget {
                                   title: 'TOTAL APPLIED',
                                   value: jobProvider.totalJobs.toString(),
                                   subtitle: '+12%',
-                                  subtitleColor: AppColors.primaryGreen,
+                                  subtitleColor: Theme.of(
+                                    context,
+                                  ).colorScheme.primary,
                                   isDark: isDark,
                                 ),
                               ),
@@ -79,7 +81,9 @@ class DashboardScreen extends StatelessWidget {
                                   title: 'OFFERS REC.',
                                   value: jobProvider.offerCount.toString(),
                                   subtitle: 'Active',
-                                  subtitleColor: AppColors.primaryGreen,
+                                  subtitleColor: Theme.of(
+                                    context,
+                                  ).colorScheme.primary,
                                   isDark: isDark,
                                 ),
                               ),
@@ -220,11 +224,13 @@ class _DashboardAppBarContent extends StatelessWidget {
                         width: 44,
                         height: 44,
                         decoration: BoxDecoration(
-                          color: AppColors.primaryGreen,
+                          color: Theme.of(context).colorScheme.primary,
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: AppColors.primaryGreen.withOpacity(0.3),
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.primary.withOpacity(0.3),
                               blurRadius: 8,
                               offset: const Offset(0, 2),
                             ),
@@ -255,11 +261,7 @@ class _DashboardAppBarContent extends StatelessWidget {
 
   Widget _buildDefaultAvatar() {
     return const Center(
-      child: Icon(
-        Icons.person_outline_rounded,
-        color: AppColors.primaryDark,
-        size: 24,
-      ),
+      child: Icon(Icons.person_outline_rounded, color: Colors.white, size: 24),
     );
   }
 }
@@ -307,7 +309,7 @@ class _StatsCard extends StatelessWidget {
               child: Container(
                 width: 4,
                 decoration: BoxDecoration(
-                  color: AppColors.primaryGreen,
+                  color: Theme.of(context).colorScheme.primary,
                   borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(16),
                     bottomLeft: Radius.circular(16),

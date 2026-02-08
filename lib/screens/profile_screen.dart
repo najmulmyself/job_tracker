@@ -107,7 +107,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 vertical: 10,
                               ),
                               decoration: BoxDecoration(
-                                color: AppColors.primaryGreen,
+                                color: Theme.of(context).colorScheme.primary,
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: Text(
@@ -115,7 +115,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
-                                  color: AppColors.primaryDark,
+                                  color: Colors.white,
                                 ),
                               ),
                             ),
@@ -134,7 +134,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             border: Border.all(
-                              color: AppColors.primaryGreen,
+                              color: Theme.of(context).colorScheme.primary,
                               width: 3,
                             ),
                           ),
@@ -158,14 +158,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             width: 34,
                             height: 34,
                             decoration: BoxDecoration(
-                              color: AppColors.primaryGreen,
+                              color: Theme.of(context).colorScheme.primary,
                               shape: BoxShape.circle,
                               border: Border.all(color: bgColor, width: 3),
                             ),
                             child: Icon(
                               Icons.edit,
                               size: 14,
-                              color: AppColors.primaryDark,
+                              color: Colors.white,
                             ),
                           ),
                         ),
@@ -265,7 +265,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     vertical: 8,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: AppColors.primaryGreen,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
                                     borderRadius: BorderRadius.circular(18),
                                   ),
                                   child: Row(
@@ -274,7 +276,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       Icon(
                                         Icons.add,
                                         size: 16,
-                                        color: AppColors.primaryDark,
+                                        color: Colors.white,
                                       ),
                                       const SizedBox(width: 4),
                                       Text(
@@ -282,7 +284,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         style: TextStyle(
                                           fontSize: 13,
                                           fontWeight: FontWeight.w600,
-                                          color: AppColors.primaryDark,
+                                          color: Colors.white,
                                         ),
                                       ),
                                     ],
@@ -302,6 +304,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     date: 'July 15, 2024',
                                     isDefault: true,
                                     isDark: isDark,
+                                    primaryColor: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
                                   ),
                                   const SizedBox(height: 12),
                                   _buildResumeCard(
@@ -309,6 +314,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     date: 'June 02, 2024',
                                     isDefault: false,
                                     isDark: isDark,
+                                    primaryColor: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
                                   ),
                                 ],
                               );
@@ -467,7 +475,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.primaryGreen
+              ? Theme.of(context).colorScheme.primary
               : (isDark ? AppColors.darkBackground : const Color(0xFFF2F2F7)),
           borderRadius: BorderRadius.circular(10),
         ),
@@ -477,7 +485,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               icon,
               size: 20,
               color: isSelected
-                  ? AppColors.primaryDark
+                  ? Theme.of(context).colorScheme.onPrimary
                   : (isDark ? Colors.white60 : Colors.black54),
             ),
             const SizedBox(height: 6),
@@ -487,7 +495,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 fontSize: 12,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                 color: isSelected
-                    ? AppColors.primaryDark
+                    ? Theme.of(context).colorScheme.onPrimary
                     : (isDark ? Colors.white70 : Colors.black87),
               ),
             ),
@@ -502,6 +510,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     required String date,
     required bool isDefault,
     required bool isDark,
+    required Color primaryColor,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -527,7 +536,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: Icon(
                     Icons.description_outlined,
                     size: 20,
-                    color: AppColors.primaryGreen,
+                    color: primaryColor,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -589,7 +598,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     value: isDefault,
                     onChanged: (value) {},
                     activeThumbColor: Colors.white,
-                    activeTrackColor: AppColors.primaryGreen,
+                    activeTrackColor: primaryColor,
                     inactiveThumbColor: Colors.white,
                     inactiveTrackColor: isDark
                         ? Colors.white24

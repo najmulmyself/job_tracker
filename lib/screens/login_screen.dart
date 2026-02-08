@@ -144,11 +144,13 @@ class _LoginScreenState extends State<LoginScreen>
                           width: 100,
                           height: 100,
                           decoration: BoxDecoration(
-                            color: AppColors.primaryGreen,
+                            color: Theme.of(context).colorScheme.primary,
                             borderRadius: BorderRadius.circular(24),
                             boxShadow: [
                               BoxShadow(
-                                color: AppColors.primaryGreen.withOpacity(0.3),
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.primary.withOpacity(0.3),
                                 blurRadius: 20,
                                 offset: const Offset(0, 10),
                               ),
@@ -157,7 +159,7 @@ class _LoginScreenState extends State<LoginScreen>
                           child: const Icon(
                             Icons.work_outline_rounded,
                             size: 50,
-                            color: AppColors.primaryDark,
+                            color: Colors.white,
                           ),
                         ),
                       ),
@@ -182,9 +184,9 @@ class _LoginScreenState extends State<LoginScreen>
                                   vertical: 2,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: AppColors.primaryGreen.withOpacity(
-                                    0.4,
-                                  ),
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.primary.withOpacity(0.4),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Text(
@@ -218,9 +220,9 @@ class _LoginScreenState extends State<LoginScreen>
                       Consumer<AuthProvider>(
                         builder: (context, authProvider, _) {
                           return authProvider.isLoading
-                              ? const CircularProgressIndicator(
+                              ? CircularProgressIndicator(
                                   valueColor: AlwaysStoppedAnimation<Color>(
-                                    AppColors.primaryGreen,
+                                    Theme.of(context).colorScheme.primary,
                                   ),
                                 )
                               : SizedBox(
@@ -229,10 +231,14 @@ class _LoginScreenState extends State<LoginScreen>
                                     onPressed: _handleGoogleSignIn,
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: isDark
-                                          ? AppColors.primaryGreen
+                                          ? Theme.of(
+                                              context,
+                                            ).colorScheme.primary
                                           : AppColors.primaryDark,
                                       foregroundColor: isDark
-                                          ? AppColors.primaryDark
+                                          ? Theme.of(
+                                              context,
+                                            ).colorScheme.onPrimary
                                           : Colors.white,
                                       padding: const EdgeInsets.symmetric(
                                         vertical: 18,

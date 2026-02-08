@@ -36,11 +36,16 @@ void main() async {
   await notificationService.initialize();
   await notificationService.requestPermissions();
 
-  runApp(const MyApp());
+  // Pre-load theme settings before app starts
+  final themeProvider = await ThemeProvider.create();
+
+  runApp(MyApp(themeProvider: themeProvider));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final ThemeProvider themeProvider;
+
+  const MyApp({super.key, required this.themeProvider});
 
   @override
   Widget build(BuildContext context) {
@@ -49,29 +54,39 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => JobProvider()),
         ChangeNotifierProvider(create: (_) => ResumeProvider()),
-        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider.value(value: themeProvider),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, _) {
           return MaterialApp(
             title: 'Job Tracker',
             debugShowCheckedModeBanner: false,
-            theme: AppTheme.lightTheme.copyWith(
-              pageTransitionsTheme: const PageTransitionsTheme(
-                builders: {
-                  TargetPlatform.android: CupertinoPageTransitionsBuilder(),
-                  TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
-                },
-              ),
-            ),
-            darkTheme: AppTheme.darkTheme.copyWith(
-              pageTransitionsTheme: const PageTransitionsTheme(
-                builders: {
-                  TargetPlatform.android: CupertinoPageTransitionsBuilder(),
-                  TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
-                },
-              ),
-            ),
+            theme:
+                AppTheme.getLightTheme(
+                  primaryColor: themeProvider.primaryColor,
+                  primaryDarkColor: themeProvider.primaryDarkColor,
+                  onPrimaryColor: themeProvider.onPrimaryColor,
+                ).copyWith(
+                  pageTransitionsTheme: const PageTransitionsTheme(
+                    builders: {
+                      TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+                      TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+                    },
+                  ),
+                ),
+            darkTheme:
+                AppTheme.getDarkTheme(
+                  primaryColor: themeProvider.primaryColor,
+                  primaryDarkColor: themeProvider.primaryDarkColor,
+                  onPrimaryColor: themeProvider.onPrimaryColor,
+                ).copyWith(
+                  pageTransitionsTheme: const PageTransitionsTheme(
+                    builders: {
+                      TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+                      TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+                    },
+                  ),
+                ),
             themeMode: themeProvider.themeMode,
             home: const SplashScreen(),
           );

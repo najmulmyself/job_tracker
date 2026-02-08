@@ -16,6 +16,7 @@ class AnimatedBottomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bottomPadding = MediaQuery.of(context).padding.bottom;
+    final primaryColor = Theme.of(context).colorScheme.primary;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -29,11 +30,11 @@ class AnimatedBottomNavBar extends StatelessWidget {
           ),
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
           decoration: BoxDecoration(
-            color: AppColors.primaryGreen,
+            color: primaryColor,
             borderRadius: BorderRadius.circular(32),
             boxShadow: [
               BoxShadow(
-                color: AppColors.primaryGreen.withOpacity(0.4),
+                color: primaryColor.withOpacity(0.4),
                 blurRadius: 20,
                 offset: const Offset(0, 8),
               ),
