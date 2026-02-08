@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import '../providers/theme_provider.dart';
+import '../utils/app_theme.dart';
 import 'main_navigation_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -42,7 +44,7 @@ class _LoginScreenState extends State<LoginScreen>
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn));
 
     _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.5),
+      begin: const Offset(0, 0.3),
       end: Offset.zero,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
@@ -77,93 +79,140 @@ class _LoginScreenState extends State<LoginScreen>
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final isDark = themeProvider.isDarkMode;
+    final backgroundColor = isDark
+        ? AppColors.darkBackground
+        : AppColors.lightBackground;
+    final textPrimary = isDark
+        ? AppColors.darkTextPrimary
+        : AppColors.lightTextPrimary;
+    final textSecondary = isDark
+        ? AppColors.darkTextSecondary
+        : AppColors.lightTextSecondary;
+    final textTertiary = isDark
+        ? AppColors.darkTextTertiary
+        : AppColors.lightTextTertiary;
+
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Theme.of(context).colorScheme.primary,
-              Theme.of(context).colorScheme.secondary,
-            ],
-          ),
-        ),
-        child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
+      backgroundColor: backgroundColor,
+      body: SafeArea(
+        child: Stack(
+          children: [
+            // Theme toggle button at top right
+            Positioned(
+              top: 8,
+              right: 8,
+              child: IconButton(
+                onPressed: () => themeProvider.toggleTheme(),
+                icon: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  transitionBuilder: (child, animation) {
+                    return RotationTransition(
+                      turns: animation,
+                      child: FadeTransition(opacity: animation, child: child),
+                    );
+                  },
+                  child: Icon(
+                    isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
+                    key: ValueKey(isDark),
+                    color: textSecondary,
+                    size: 28,
+                  ),
+                ),
+                tooltip: isDark
+                    ? 'Switch to light mode'
+                    : 'Switch to dark mode',
+              ),
+            ),
+            // Main content
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
               child: FadeTransition(
                 opacity: _fadeAnimation,
                 child: SlideTransition(
                   position: _slideAnimation,
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      const Spacer(flex: 2),
+
+                      // App Logo
                       // App Logo
                       Hero(
                         tag: 'app_logo',
                         child: Container(
-                          width: 120,
-                          height: 120,
+                          width: 100,
+                          height: 100,
                           decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(30),
+                            color: AppColors.primaryGreen,
+                            borderRadius: BorderRadius.circular(24),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.2),
+                                color: AppColors.primaryGreen.withOpacity(0.3),
                                 blurRadius: 20,
                                 offset: const Offset(0, 10),
                               ),
                             ],
                           ),
-                          child: Icon(
-                            Icons.work_outline,
-                            size: 60,
-                            color: Theme.of(context).colorScheme.primary,
+                          child: const Icon(
+                            Icons.work_outline_rounded,
+                            size: 50,
+                            color: AppColors.primaryDark,
                           ),
                         ),
                       ),
-                      const SizedBox(height: 40),
+                      const SizedBox(height: 32),
 
-                      // App Title
-                      const Text(
-                        'Job Tracker',
-                        style: TextStyle(
-                          fontSize: 36,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                      // App Title with highlight
+                      RichText(
+                        textAlign: TextAlign.center,
+                        text: TextSpan(
+                          style: TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                            color: textPrimary,
+                            height: 1.3,
+                          ),
+                          children: [
+                            const TextSpan(text: 'Track your\n'),
+                            WidgetSpan(
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primaryGreen.withOpacity(
+                                    0.4,
+                                  ),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  'career journey',
+                                  style: TextStyle(
+                                    fontSize: 32,
+                                    fontWeight: FontWeight.bold,
+                                    color: textPrimary,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 10),
-                      const Text(
-                        'Your personal career assistant',
-                        style: TextStyle(fontSize: 16, color: Colors.white70),
+                      const SizedBox(height: 16),
+
+                      Text(
+                        'Manage your job applications,\ninterviews, and follow-ups in one\nclean workspace.',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: textSecondary,
+                          height: 1.5,
+                        ),
                         textAlign: TextAlign.center,
                       ),
-                      const SizedBox(height: 60),
 
-                      // Features List
-                      _buildFeatureItem(
-                        Icons.track_changes,
-                        'Track all your job applications',
-                      ),
-                      const SizedBox(height: 16),
-                      _buildFeatureItem(
-                        Icons.notifications_active,
-                        'Get deadline reminders',
-                      ),
-                      const SizedBox(height: 16),
-                      _buildFeatureItem(
-                        Icons.cloud_sync,
-                        'Sync across all devices',
-                      ),
-                      const SizedBox(height: 16),
-                      _buildFeatureItem(
-                        Icons.analytics,
-                        'Analyze your progress',
-                      ),
-                      const SizedBox(height: 60),
+                      const Spacer(flex: 2),
 
                       // Google Sign In Button
                       Consumer<AuthProvider>(
@@ -171,85 +220,125 @@ class _LoginScreenState extends State<LoginScreen>
                           return authProvider.isLoading
                               ? const CircularProgressIndicator(
                                   valueColor: AlwaysStoppedAnimation<Color>(
-                                    Colors.white,
+                                    AppColors.primaryGreen,
                                   ),
                                 )
-                              : ElevatedButton.icon(
-                                  onPressed: _handleGoogleSignIn,
-                                  icon: Image.asset(
-                                    'assets/google_logo.png',
-                                    height: 24,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      return const Icon(
-                                        Icons.login,
-                                        color: Colors.white,
-                                      );
-                                    },
-                                  ),
-                                  label: const Text(
-                                    'Sign in with Google',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
+                              : SizedBox(
+                                  width: double.infinity,
+                                  child: ElevatedButton(
+                                    onPressed: _handleGoogleSignIn,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: isDark
+                                          ? AppColors.primaryGreen
+                                          : AppColors.primaryDark,
+                                      foregroundColor: isDark
+                                          ? AppColors.primaryDark
+                                          : Colors.white,
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 18,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                      elevation: 0,
                                     ),
-                                  ),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.white,
-                                    foregroundColor: Colors.black87,
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 32,
-                                      vertical: 16,
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.all(4),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius: BorderRadius.circular(
+                                              4,
+                                            ),
+                                          ),
+                                          child: Image.asset(
+                                            'assets/google_logo.png',
+                                            height: 18,
+                                            errorBuilder:
+                                                (context, error, stackTrace) {
+                                                  return const Icon(
+                                                    Icons.g_mobiledata,
+                                                    color: Colors.red,
+                                                    size: 18,
+                                                  );
+                                                },
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Text(
+                                          'Continue with Google',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600,
+                                            color: isDark
+                                                ? AppColors.primaryDark
+                                                : Colors.white,
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(30),
-                                    ),
-                                    elevation: 8,
                                   ),
                                 );
                         },
                       ),
-                      const SizedBox(height: 40),
+                      const SizedBox(height: 16),
+
+                      // Other sign in options
+                      TextButton(
+                        onPressed: () {
+                          // TODO: Implement other sign in options
+                        },
+                        child: Text(
+                          'Other sign in options',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: textSecondary,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+
+                      const Spacer(flex: 1),
 
                       // Terms and Privacy
-                      const Text(
-                        'By signing in, you agree to our Terms of Service\nand Privacy Policy',
-                        style: TextStyle(fontSize: 12, color: Colors.white60),
-                        textAlign: TextAlign.center,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          TextButton(
+                            onPressed: () {},
+                            child: Text(
+                              'Terms of Service',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: textSecondary,
+                              ),
+                            ),
+                          ),
+                          Text('•', style: TextStyle(color: textTertiary)),
+                          TextButton(
+                            onPressed: () {},
+                            child: Text(
+                              'Privacy Policy',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: textSecondary,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
+                      const SizedBox(height: 16),
                     ],
                   ),
                 ),
               ),
             ),
-          ),
+          ],
         ),
       ),
-    );
-  }
-
-  Widget _buildFeatureItem(IconData icon, String text) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(icon, color: Colors.white, size: 24),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Text(
-            text,
-            style: const TextStyle(
-              fontSize: 16,
-              color: Colors.white,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

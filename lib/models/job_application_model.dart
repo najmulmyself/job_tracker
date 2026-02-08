@@ -7,6 +7,8 @@ enum ApplicationStage {
   rejected,
 }
 
+enum SalaryCurrency { usd, bdt, eur, inr, gbp, other }
+
 enum JobSource {
   linkedin,
   indeed,
@@ -25,6 +27,7 @@ class JobApplicationModel {
   final String jobTitle;
   final JobSource source;
   final String? salaryRange;
+  final SalaryCurrency salaryCurrency;
   final String? expectedSalary;
   final String jobDescription;
   final ApplicationStage stage;
@@ -50,6 +53,7 @@ class JobApplicationModel {
     required this.jobTitle,
     required this.source,
     this.salaryRange,
+    this.salaryCurrency = SalaryCurrency.usd,
     this.expectedSalary,
     required this.jobDescription,
     required this.stage,
@@ -91,6 +95,10 @@ class JobApplicationModel {
         orElse: () => JobSource.other,
       ),
       salaryRange: json['salaryRange'] as String?,
+      salaryCurrency: SalaryCurrency.values.firstWhere(
+        (e) => e.toString() == 'SalaryCurrency.${json['salaryCurrency']}',
+        orElse: () => SalaryCurrency.usd,
+      ),
       expectedSalary: json['expectedSalary'] as String?,
       jobDescription: json['jobDescription'] as String,
       stage: _parseStage(json['stage'] as String),
@@ -126,6 +134,7 @@ class JobApplicationModel {
       'jobTitle': jobTitle,
       'source': source.toString().split('.').last,
       'salaryRange': salaryRange,
+      'salaryCurrency': salaryCurrency.toString().split('.').last,
       'expectedSalary': expectedSalary,
       'jobDescription': jobDescription,
       'stage': stage.toString().split('.').last,
@@ -151,6 +160,7 @@ class JobApplicationModel {
     String? jobTitle,
     JobSource? source,
     String? salaryRange,
+    SalaryCurrency? salaryCurrency,
     String? expectedSalary,
     String? jobDescription,
     ApplicationStage? stage,
@@ -174,6 +184,7 @@ class JobApplicationModel {
       jobTitle: jobTitle ?? this.jobTitle,
       source: source ?? this.source,
       salaryRange: salaryRange ?? this.salaryRange,
+      salaryCurrency: salaryCurrency ?? this.salaryCurrency,
       expectedSalary: expectedSalary ?? this.expectedSalary,
       jobDescription: jobDescription ?? this.jobDescription,
       stage: stage ?? this.stage,
@@ -233,6 +244,42 @@ extension JobSourceExtension on JobSource {
       case JobSource.remoteOk:
         return 'RemoteOK';
       case JobSource.other:
+        return 'Other';
+    }
+  }
+}
+
+extension SalaryCurrencyExtension on SalaryCurrency {
+  String get symbol {
+    switch (this) {
+      case SalaryCurrency.usd:
+        return '\$';
+      case SalaryCurrency.bdt:
+        return '৳';
+      case SalaryCurrency.eur:
+        return '€';
+      case SalaryCurrency.inr:
+        return '₹';
+      case SalaryCurrency.gbp:
+        return '£';
+      case SalaryCurrency.other:
+        return '';
+    }
+  }
+
+  String get displayName {
+    switch (this) {
+      case SalaryCurrency.usd:
+        return 'USD';
+      case SalaryCurrency.bdt:
+        return 'BDT';
+      case SalaryCurrency.eur:
+        return 'EUR';
+      case SalaryCurrency.inr:
+        return 'INR';
+      case SalaryCurrency.gbp:
+        return 'GBP';
+      case SalaryCurrency.other:
         return 'Other';
     }
   }

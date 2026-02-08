@@ -7,6 +7,7 @@ import 'firebase_options_dev.dart' as firebase_dev;
 import 'providers/auth_provider.dart';
 import 'providers/job_provider.dart';
 import 'providers/resume_provider.dart';
+import 'providers/theme_provider.dart';
 import 'services/firestore_service.dart';
 import 'services/notification_service.dart';
 import 'screens/splash_screen.dart';
@@ -56,28 +57,33 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => JobProvider()),
         ChangeNotifierProvider(create: (_) => ResumeProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
       ],
-      child: MaterialApp(
-        title: AppConfig.instance.appName,
-        debugShowCheckedModeBanner: AppConfig.instance.isDev,
-        theme: AppTheme.lightTheme.copyWith(
-          pageTransitionsTheme: const PageTransitionsTheme(
-            builders: {
-              TargetPlatform.android: CupertinoPageTransitionsBuilder(),
-              TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
-            },
-          ),
-        ),
-        darkTheme: AppTheme.darkTheme.copyWith(
-          pageTransitionsTheme: const PageTransitionsTheme(
-            builders: {
-              TargetPlatform.android: CupertinoPageTransitionsBuilder(),
-              TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
-            },
-          ),
-        ),
-        themeMode: ThemeMode.system,
-        home: const SplashScreen(),
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, _) {
+          return MaterialApp(
+            title: AppConfig.instance.appName,
+            debugShowCheckedModeBanner: AppConfig.instance.isDev,
+            theme: AppTheme.lightTheme.copyWith(
+              pageTransitionsTheme: const PageTransitionsTheme(
+                builders: {
+                  TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+                  TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+                },
+              ),
+            ),
+            darkTheme: AppTheme.darkTheme.copyWith(
+              pageTransitionsTheme: const PageTransitionsTheme(
+                builders: {
+                  TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+                  TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+                },
+              ),
+            ),
+            themeMode: themeProvider.themeMode,
+            home: const SplashScreen(),
+          );
+        },
       ),
     );
   }

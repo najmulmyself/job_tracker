@@ -2,42 +2,49 @@ import 'package:flutter/material.dart';
 import '../models/job_application_model.dart';
 
 class AppColors {
-  // Brand Colors
-  static const Color primaryBlue = Color(0xFF2196F3);
-  static const Color accentBlue = Color(0xFF1E88E5);
+  // Brand Colors - Deep Forest Green + Orange Accent theme
+  static const Color primaryGreen = Color(0xFF1B4332);  // Deep forest green
+  static const Color primaryGreenDark = Color(0xFF163B2B);  // Darker shade
+  static const Color primaryDark = Color(0xFF0D2818);  // Darkest green for contrast
+  static const Color accentOrange = Color(0xFFF5A623);  // Orange accent
+  static const Color accentOrangeDark = Color(0xFFE09000);  // Darker orange
 
-  // Dark Theme Colors
-  static const Color darkBackground = Color(0xFF1A1F2E);
-  static const Color darkSurface = Color(0xFF252B3D);
-  static const Color darkCard = Color(0xFF2A3142);
+  // Legacy aliases for compatibility
+  static const Color primaryBlue = primaryGreen;
+  static const Color accentBlue = accentOrange;
 
-  // Light Theme Colors
-  static const Color lightBackground = Color(0xFFF5F7FA);
+  // Light Theme Colors (Default)
+  static const Color lightBackground = Color(0xFFF8F9FA);  // Soft off-white
   static const Color lightSurface = Color(0xFFFFFFFF);
   static const Color lightCard = Color(0xFFFFFFFF);
 
-  // Status Colors (matching reference images)
-  static const Color statusInterview = Color(0xFF4CAF50); // Green
-  static const Color statusApplied = Color(0xFFFF9800); // Orange
-  static const Color statusRejected = Color(0xFFF44336); // Red
-  static const Color statusOffer = Color(0xFF9C27B0); // Purple
-  static const Color statusInterested = Color(0xFF2196F3); // Blue
+  // Dark Theme Colors - Pure dark (no blue tint)
+  static const Color darkBackground = Color(0xFF0D0D0D);  // Near black
+  static const Color darkSurface = Color(0xFF171717);     // Slightly lighter
+  static const Color darkCard = Color(0xFF1C1C1C);        // Card background
 
-  // Text Colors - Dark Theme
-  static const Color darkTextPrimary = Color(0xFFFFFFFF);
-  static const Color darkTextSecondary = Color(0xFFB0B8C8);
-  static const Color darkTextTertiary = Color(0xFF6B7280);
+  // Status Colors (matching reference images)
+  static const Color statusInterview = Color(0xFFB8DB80); // Green - Interview
+  static const Color statusApplied = Color(0xFFFFB946); // Yellow/Orange - Applied
+  static const Color statusRejected = Color(0xFFFF6B6B); // Red - Rejected
+  static const Color statusOffer = Color(0xFF9C27B0); // Purple - Offer
+  static const Color statusInterested = Color(0xFF64B5F6); // Blue - Interested
 
   // Text Colors - Light Theme
   static const Color lightTextPrimary = Color(0xFF1A1F2E);
   static const Color lightTextSecondary = Color(0xFF6B7280);
   static const Color lightTextTertiary = Color(0xFF9CA3AF);
 
+  // Text Colors - Dark Theme
+  static const Color darkTextPrimary = Color(0xFFFFFFFF);
+  static const Color darkTextSecondary = Color(0xFFB0B8C8);
+  static const Color darkTextTertiary = Color(0xFF6B7280);
+
   // Legacy support
-  static const Color primary = primaryBlue;
-  static const Color secondary = accentBlue;
+  static const Color primary = primaryGreen;
+  static const Color secondary = primaryGreenDark;
   static const Color error = statusRejected;
-  static const Color onPrimary = Colors.white;
+  static const Color onPrimary = primaryDark;  // Dark text on green background
   static const Color onSecondary = Colors.white;
 
   // Get color by stage
@@ -69,11 +76,11 @@ class AppTheme {
     useMaterial3: true,
     brightness: Brightness.light,
     colorScheme: ColorScheme.light(
-      primary: AppColors.primaryBlue,
-      secondary: AppColors.accentBlue,
+      primary: AppColors.primaryGreen,
+      secondary: AppColors.primaryGreenDark,
       surface: AppColors.lightSurface,
       error: AppColors.statusRejected,
-      onPrimary: Colors.white,
+      onPrimary: AppColors.primaryDark,  // Dark text on green
       onSecondary: Colors.white,
       onSurface: AppColors.lightTextPrimary,
     ),
@@ -81,15 +88,15 @@ class AppTheme {
 
     appBarTheme: AppBarTheme(
       elevation: 0,
-      centerTitle: false,
+      centerTitle: true,
       backgroundColor: AppColors.lightSurface,
       foregroundColor: AppColors.lightTextPrimary,
       surfaceTintColor: Colors.transparent,
       titleTextStyle: const TextStyle(
         color: AppColors.lightTextPrimary,
-        fontSize: 24,
-        fontWeight: FontWeight.bold,
-        letterSpacing: -0.5,
+        fontSize: 18,
+        fontWeight: FontWeight.w600,
+        letterSpacing: -0.3,
       ),
       iconTheme: const IconThemeData(color: AppColors.lightTextPrimary),
     ),
@@ -116,18 +123,18 @@ class AppTheme {
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(
-          color: AppColors.lightTextTertiary.withOpacity(0.2),
+          color: AppColors.lightTextTertiary.withOpacity(0.3),
         ),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(
-          color: AppColors.lightTextTertiary.withOpacity(0.2),
+          color: AppColors.lightTextTertiary.withOpacity(0.3),
         ),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.primaryBlue, width: 2),
+        borderSide: const BorderSide(color: AppColors.primaryGreen, width: 2),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
@@ -185,16 +192,16 @@ class AppTheme {
 
     chipTheme: ChipThemeData(
       backgroundColor: AppColors.lightCard,
-      selectedColor: AppColors.primaryBlue,
+      selectedColor: AppColors.primaryGreen,
       labelStyle: const TextStyle(color: AppColors.lightTextPrimary),
-      secondaryLabelStyle: const TextStyle(color: Colors.white),
+      secondaryLabelStyle: const TextStyle(color: AppColors.primaryDark),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         elevation: 0,
-        backgroundColor: AppColors.primaryBlue,
+        backgroundColor: AppColors.primaryDark,  // Dark button
         foregroundColor: Colors.white,
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -204,7 +211,7 @@ class AppTheme {
 
     floatingActionButtonTheme: FloatingActionButtonThemeData(
       elevation: 4,
-      backgroundColor: AppColors.primaryBlue,
+      backgroundColor: AppColors.accentOrange,
       foregroundColor: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
     ),
@@ -214,11 +221,11 @@ class AppTheme {
     useMaterial3: true,
     brightness: Brightness.dark,
     colorScheme: ColorScheme.dark(
-      primary: AppColors.primaryBlue,
-      secondary: AppColors.accentBlue,
+      primary: AppColors.primaryGreen,
+      secondary: AppColors.primaryGreenDark,
       surface: AppColors.darkSurface,
       error: AppColors.statusRejected,
-      onPrimary: Colors.white,
+      onPrimary: AppColors.primaryDark,
       onSecondary: Colors.white,
       onSurface: AppColors.darkTextPrimary,
     ),
@@ -226,15 +233,15 @@ class AppTheme {
 
     appBarTheme: AppBarTheme(
       elevation: 0,
-      centerTitle: false,
+      centerTitle: true,
       backgroundColor: AppColors.darkBackground,
       foregroundColor: AppColors.darkTextPrimary,
       surfaceTintColor: Colors.transparent,
       titleTextStyle: const TextStyle(
         color: AppColors.darkTextPrimary,
-        fontSize: 24,
-        fontWeight: FontWeight.bold,
-        letterSpacing: -0.5,
+        fontSize: 18,
+        fontWeight: FontWeight.w600,
+        letterSpacing: -0.3,
       ),
       iconTheme: const IconThemeData(color: AppColors.darkTextPrimary),
     ),
@@ -267,7 +274,7 @@ class AppTheme {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.primaryBlue, width: 2),
+        borderSide: const BorderSide(color: AppColors.primaryGreen, width: 2),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
@@ -325,9 +332,9 @@ class AppTheme {
 
     chipTheme: ChipThemeData(
       backgroundColor: AppColors.darkSurface,
-      selectedColor: AppColors.primaryBlue,
+      selectedColor: AppColors.primaryGreen,
       labelStyle: const TextStyle(color: AppColors.darkTextPrimary),
-      secondaryLabelStyle: const TextStyle(color: Colors.white),
+      secondaryLabelStyle: const TextStyle(color: AppColors.primaryDark),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
     ),
@@ -335,8 +342,8 @@ class AppTheme {
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         elevation: 0,
-        backgroundColor: AppColors.primaryBlue,
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.primaryGreen,
+        foregroundColor: AppColors.primaryDark,
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
@@ -345,7 +352,7 @@ class AppTheme {
 
     floatingActionButtonTheme: FloatingActionButtonThemeData(
       elevation: 4,
-      backgroundColor: AppColors.primaryBlue,
+      backgroundColor: AppColors.accentOrange,
       foregroundColor: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
     ),

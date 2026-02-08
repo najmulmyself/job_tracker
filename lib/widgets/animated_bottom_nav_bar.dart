@@ -15,22 +15,30 @@ class AnimatedBottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.darkSurface : Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 20,
-            offset: const Offset(0, -3),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          margin: EdgeInsets.fromLTRB(
+            20,
+            0,
+            20,
+            bottomPadding > 0 ? bottomPadding : 12,
           ),
-        ],
-      ),
-      child: SafeArea(
-        child: SizedBox(
-          height: 60,
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+          decoration: BoxDecoration(
+            color: AppColors.primaryGreen,
+            borderRadius: BorderRadius.circular(32),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primaryGreen.withOpacity(0.4),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: items.asMap().entries.map((entry) {
@@ -38,93 +46,64 @@ class AnimatedBottomNavBar extends StatelessWidget {
               final item = entry.value;
               final isSelected = currentIndex == index;
 
-              return Expanded(
-                child: GestureDetector(
-                  onTap: () => onTap(index),
-                  behavior: HitTestBehavior.opaque,
-                  child: Container(
-                    color: Colors.transparent,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        TweenAnimationBuilder<double>(
-                          tween: Tween(begin: 0.0, end: isSelected ? 1.0 : 0.0),
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeOutCubic,
-                          builder: (context, value, child) {
-                            return Transform.scale(
-                              scale: 1.0 + (value * 0.15),
-                              child: Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: AppColors.primaryBlue.withOpacity(
-                                    value * 0.15,
-                                  ),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Icon(
-                                  isSelected ? item.activeIcon : item.icon,
-                                  size: 24,
-                                  color: Color.lerp(
-                                    isDark ? Colors.white54 : Colors.black54,
-                                    AppColors.primaryBlue,
-                                    value,
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                        const SizedBox(height: 2),
-                        TweenAnimationBuilder<double>(
-                          tween: Tween(begin: 0.0, end: isSelected ? 1.0 : 0.0),
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeOutCubic,
-                          builder: (context, value, child) {
-                            return AnimatedDefaultTextStyle(
+              return GestureDetector(
+                onTap: () => onTap(index),
+                behavior: HitTestBehavior.opaque,
+                child: TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0.0, end: isSelected ? 1.0 : 0.0),
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeOutCubic,
+                  builder: (context, value, child) {
+                    return Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 16 + (value * 8),
+                        vertical: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? AppColors.accentOrange
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            isSelected ? item.activeIcon : item.icon,
+                            size: 22,
+                            color: isSelected
+                                ? Colors.white
+                                : Colors.white.withOpacity(0.6),
+                          ),
+                          ClipRect(
+                            child: AnimatedAlign(
                               duration: const Duration(milliseconds: 300),
-                              style: TextStyle(
-                                fontSize: 10 + (value * 1),
-                                fontWeight: isSelected
-                                    ? FontWeight.w600
-                                    : FontWeight.normal,
-                                color: Color.lerp(
-                                  isDark ? Colors.white54 : Colors.black54,
-                                  AppColors.primaryBlue,
-                                  value,
+                              curve: Curves.easeOutCubic,
+                              alignment: Alignment.centerLeft,
+                              widthFactor: value,
+                              child: Padding(
+                                padding: const EdgeInsets.only(left: 8),
+                                child: Text(
+                                  item.label,
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                  ),
                                 ),
                               ),
-                              child: Text(item.label),
-                            );
-                          },
-                        ),
-                        // Animated indicator dot
-                        TweenAnimationBuilder<double>(
-                          tween: Tween(begin: 0.0, end: isSelected ? 1.0 : 0.0),
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeOutCubic,
-                          builder: (context, value, child) {
-                            return Container(
-                              margin: const EdgeInsets.only(top: 2),
-                              height: 2.5,
-                              width: 20 * value,
-                              decoration: BoxDecoration(
-                                color: AppColors.primaryBlue,
-                                borderRadius: BorderRadius.circular(2),
-                              ),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                 ),
               );
             }).toList(),
           ),
         ),
-      ),
+      ],
     );
   }
 }

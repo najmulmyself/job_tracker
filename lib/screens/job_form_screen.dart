@@ -28,6 +28,7 @@ class _JobFormScreenState extends State<JobFormScreen> {
 
   JobSource _selectedSource = JobSource.linkedin;
   ApplicationStage _selectedStage = ApplicationStage.applied;
+  SalaryCurrency _selectedCurrency = SalaryCurrency.usd;
   DateTime? _applicationDate;
   DateTime? _deadline;
   String? _selectedResumeId;
@@ -57,6 +58,7 @@ class _JobFormScreenState extends State<JobFormScreen> {
     _expectedSalaryController.text = job.expectedSalary ?? '';
     _jobDescriptionController.text = job.jobDescription;
     _selectedStage = job.stage;
+    _selectedCurrency = job.salaryCurrency;
     _applicationDate = job.applicationDate;
     _deadline = job.deadline;
     _selectedResumeId = job.resumeId;
@@ -140,7 +142,9 @@ class _JobFormScreenState extends State<JobFormScreen> {
       companyName: _companyController.text.trim(),
       jobTitle: _jobTitleController.text.trim(),
       source: _selectedSource,
-      salaryRange: '\$${_minSalary.toInt()}K - \$${_maxSalary.toInt()}K',
+      salaryRange:
+          '${_selectedCurrency.symbol}${_minSalary.toInt()}K - ${_selectedCurrency.symbol}${_maxSalary.toInt()}K',
+      salaryCurrency: _selectedCurrency,
       expectedSalary: _expectedSalaryController.text.trim().isNotEmpty
           ? _expectedSalaryController.text.trim()
           : null,
@@ -273,6 +277,26 @@ class _JobFormScreenState extends State<JobFormScreen> {
             ),
             const SizedBox(height: 20),
 
+            // Salary Currency
+            Text(
+              'Salary Currency',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                _buildCurrencyChip('BDT', SalaryCurrency.bdt, isDark),
+                _buildCurrencyChip('USD', SalaryCurrency.usd, isDark),
+                _buildCurrencyChip('EUR', SalaryCurrency.eur, isDark),
+                _buildCurrencyChip('INR', SalaryCurrency.inr, isDark),
+                _buildCurrencyChip('GBP', SalaryCurrency.gbp, isDark),
+                _buildCurrencyChip('Other', SalaryCurrency.other, isDark),
+              ],
+            ),
+            const SizedBox(height: 20),
+
             // Salary Range (Slider)
             Text(
               'Salary Range (Advertised)',
@@ -285,8 +309,8 @@ class _JobFormScreenState extends State<JobFormScreen> {
               max: 200,
               divisions: 40,
               labels: RangeLabels(
-                '\$${_minSalary.toInt()}K',
-                '\$${_maxSalary.toInt()}K',
+                '${_selectedCurrency.symbol}${_minSalary.toInt()}K',
+                '${_selectedCurrency.symbol}${_maxSalary.toInt()}K',
               ),
               onChanged: (RangeValues values) {
                 setState(() {
@@ -299,11 +323,11 @@ class _JobFormScreenState extends State<JobFormScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  '\$${_minSalary.toInt()}K',
+                  '${_selectedCurrency.symbol}${_minSalary.toInt()}K',
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 Text(
-                  '\$${_maxSalary.toInt()}K',
+                  '${_selectedCurrency.symbol}${_maxSalary.toInt()}K',
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
               ],
@@ -773,6 +797,47 @@ class _JobFormScreenState extends State<JobFormScreen> {
             ),
             const SizedBox(height: 16),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCurrencyChip(
+    String label,
+    SalaryCurrency currency,
+    bool isDark,
+  ) {
+    final isSelected = _selectedCurrency == currency;
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedCurrency = currency;
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? Theme.of(context).colorScheme.primary
+              : (isDark ? Colors.grey[800] : Colors.grey[100]),
+          borderRadius: BorderRadius.circular(20),
+          border: isSelected
+              ? null
+              : Border.all(
+                  color: isDark ? Colors.white24 : Colors.black12,
+                  width: 1,
+                ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected
+                ? Colors.white
+                : (isDark ? Colors.white70 : Colors.black87),
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+            fontSize: 14,
+          ),
         ),
       ),
     );

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import '../providers/job_provider.dart';
+import '../providers/auth_provider.dart';
 import '../models/job_application_model.dart';
 import '../utils/app_theme.dart';
+import 'profile_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -17,99 +20,245 @@ class DashboardScreen extends StatelessWidget {
           : AppColors.lightBackground,
       body: Consumer<JobProvider>(
         builder: (context, jobProvider, _) {
-          return SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Stats Grid
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      Row(
+          return CustomScrollView(
+            slivers: [
+              // Sticky App Bar using SliverAppBar
+              SliverAppBar(
+                pinned: true,
+                floating: false,
+                expandedHeight: 70,
+                collapsedHeight: 70,
+                toolbarHeight: 70,
+                backgroundColor: isDark
+                    ? AppColors.darkBackground
+                    : AppColors.lightBackground,
+                elevation: 0,
+                scrolledUnderElevation: 0,
+                automaticallyImplyLeading: false,
+                flexibleSpace: _DashboardAppBarContent(isDark: isDark),
+              ),
+
+              // Content
+              SliverToBoxAdapter(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Stats Grid
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
                         children: [
-                          Expanded(
-                            child: _StatsCard(
-                              title: 'Total Apps',
-                              value: jobProvider.totalJobs.toString(),
-                              isDark: isDark,
-                            ),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _StatsCard(
+                                  title: 'TOTAL APPLIED',
+                                  value: jobProvider.totalJobs.toString(),
+                                  subtitle: '+12%',
+                                  subtitleColor: AppColors.primaryGreen,
+                                  isDark: isDark,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: _StatsCard(
+                                  title: 'INTERVIEWS',
+                                  value: jobProvider.interviewCount.toString(),
+                                  subtitle: _getInterviewRate(jobProvider),
+                                  hasAccentBar: true,
+                                  isDark: isDark,
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _StatsCard(
-                              title: 'Active',
-                              value: jobProvider.appliedCount.toString(),
-                              isDark: isDark,
-                            ),
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _StatsCard(
+                                  title: 'OFFERS REC.',
+                                  value: jobProvider.offerCount.toString(),
+                                  subtitle: 'Active',
+                                  subtitleColor: AppColors.primaryGreen,
+                                  isDark: isDark,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: _StatsCard(
+                                  title: 'AVG. RESPONSE',
+                                  value: '6.2',
+                                  subtitle: 'Days',
+                                  isDark: isDark,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _StatsCard(
-                              title: 'Interviews',
-                              value: jobProvider.interviewCount.toString(),
-                              isDark: isDark,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _StatsCard(
-                              title: 'Offers',
-                              value: jobProvider.offerCount.toString(),
-                              valueColor: AppColors.primaryBlue,
-                              isDark: isDark,
-                            ),
-                          ),
-                        ],
+                    ),
+
+                    // Application Funnel
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: _ApplicationFunnel(
+                        total: jobProvider.totalJobs,
+                        applied: jobProvider.appliedCount,
+                        interview: jobProvider.interviewCount,
+                        offer: jobProvider.offerCount,
+                        rejected: jobProvider.rejectedCount,
+                        isDark: isDark,
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // Monthly Activity
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: _MonthlyActivity(
+                        jobs: jobProvider.jobs,
+                        isDark: isDark,
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // Application Trend
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: _ApplicationTrend(
+                        jobs: jobProvider.jobs,
+                        isDark: isDark,
+                      ),
+                    ),
+
+                    const SizedBox(height: 100), // Space for FAB
+                  ],
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  String _getInterviewRate(JobProvider provider) {
+    if (provider.totalJobs == 0) return '0%';
+    final rate = (provider.interviewCount / provider.totalJobs * 100);
+    return '${rate.toStringAsFixed(1)}%';
+  }
+}
+
+class _DashboardAppBarContent extends StatelessWidget {
+  final bool isDark;
+
+  const _DashboardAppBarContent({required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      bottom: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Dashboard',
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : AppColors.primaryDark,
+              ),
+            ),
+            Row(
+              children: [
+                // Notification Bell
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: isDark ? AppColors.darkCard : Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(isDark ? 0.2 : 0.08),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
                       ),
                     ],
                   ),
-                ),
-
-                // Application Funnel
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: _ApplicationFunnel(
-                    total: jobProvider.totalJobs,
-                    applied: jobProvider.appliedCount,
-                    interview: jobProvider.interviewCount,
-                    offer: jobProvider.offerCount,
-                    rejected: jobProvider.rejectedCount,
-                    isDark: isDark,
+                  child: IconButton(
+                    icon: Icon(
+                      Icons.notifications_outlined,
+                      color: isDark ? Colors.white : AppColors.primaryDark,
+                      size: 22,
+                    ),
+                    onPressed: () {
+                      // TODO: Navigate to notifications
+                    },
                   ),
                 ),
+                const SizedBox(width: 12),
+                // Profile Avatar
+                Consumer<AuthProvider>(
+                  builder: (context, authProvider, _) {
+                    final user = authProvider.firebaseUser;
+                    final photoUrl = user?.photoURL;
 
-                const SizedBox(height: 16),
-
-                // Monthly Activity
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: _MonthlyActivity(
-                    jobs: jobProvider.jobs,
-                    isDark: isDark,
-                  ),
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).push(
+                          CupertinoPageRoute(
+                            builder: (_) => const ProfileScreen(),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryGreen,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.primaryGreen.withOpacity(0.3),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: photoUrl != null && photoUrl.isNotEmpty
+                            ? ClipOval(
+                                child: Image.network(
+                                  photoUrl,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return _buildDefaultAvatar();
+                                  },
+                                ),
+                              )
+                            : _buildDefaultAvatar(),
+                      ),
+                    );
+                  },
                 ),
-
-                const SizedBox(height: 16),
-
-                // Application Trend
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: _ApplicationTrend(
-                    jobs: jobProvider.jobs,
-                    isDark: isDark,
-                  ),
-                ),
-
-                const SizedBox(height: 100), // Space for FAB
               ],
             ),
-          );
-        },
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDefaultAvatar() {
+    return const Center(
+      child: Icon(
+        Icons.person_outline_rounded,
+        color: AppColors.primaryDark,
+        size: 24,
       ),
     );
   }
@@ -118,13 +267,17 @@ class DashboardScreen extends StatelessWidget {
 class _StatsCard extends StatelessWidget {
   final String title;
   final String value;
-  final Color? valueColor;
+  final String? subtitle;
+  final Color? subtitleColor;
+  final bool hasAccentBar;
   final bool isDark;
 
   const _StatsCard({
     required this.title,
     required this.value,
-    this.valueColor,
+    this.subtitle,
+    this.subtitleColor,
+    this.hasAccentBar = false,
     required this.isDark,
   });
 
@@ -143,25 +296,69 @@ class _StatsCard extends StatelessWidget {
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Stack(
         children: [
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 14,
-              color: isDark ? Colors.white60 : Colors.black54,
-              fontWeight: FontWeight.w500,
+          // Accent bar on left side
+          if (hasAccentBar)
+            Positioned(
+              left: -20,
+              top: 0,
+              bottom: 0,
+              child: Container(
+                width: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.primaryGreen,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(16),
+                    bottomLeft: Radius.circular(16),
+                  ),
+                ),
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 36,
-              fontWeight: FontWeight.bold,
-              color: valueColor ?? (isDark ? Colors.white : Colors.black87),
-            ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: isDark ? Colors.white60 : Colors.black54,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.5,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    value,
+                    style: TextStyle(
+                      fontSize: 40,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.white : AppColors.primaryDark,
+                      height: 1,
+                    ),
+                  ),
+                  if (subtitle != null) ...[
+                    const SizedBox(width: 8),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 6),
+                      child: Text(
+                        subtitle!,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color:
+                              subtitleColor ??
+                              (isDark ? Colors.white60 : Colors.black54),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ],
           ),
         ],
       ),

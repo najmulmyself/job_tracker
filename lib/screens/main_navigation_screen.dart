@@ -8,7 +8,7 @@ import '../utils/app_theme.dart';
 import '../widgets/animated_bottom_nav_bar.dart';
 import 'dashboard_screen.dart';
 import 'jobs_list_screen.dart';
-import 'profile_screen.dart';
+import 'settings_screen.dart';
 import 'job_form_screen.dart';
 import 'coming_soon_screen.dart';
 
@@ -42,15 +42,15 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   }
 
   final List<Widget> _screens = const [
-    DashboardScreen(),
     JobsListScreen(),
+    DashboardScreen(),
     ComingSoonScreen(
       feature: 'Calendar',
       icon: Icons.calendar_month,
       description:
           'Track your interview dates, application deadlines, and follow-up reminders all in one place!',
     ),
-    ProfileScreen(),
+    SettingsScreen(),
   ];
 
   @override
@@ -58,20 +58,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     final authProvider = Provider.of<AuthProvider>(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_getTitle()),
-        actions: [
-          if (_currentIndex == 0)
-            IconButton(
-              icon: const Icon(Icons.person_outline),
-              onPressed: () {
-                Navigator.of(context).push(
-                  CupertinoPageRoute(builder: (_) => const ProfileScreen()),
-                );
-              },
-            ),
-        ],
-      ),
       body: Column(
         children: [
           // Show warning banner if Firestore is not configured
@@ -148,7 +134,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                   CupertinoPageRoute(builder: (_) => const JobFormScreen()),
                 );
               },
-              backgroundColor: AppColors.primaryBlue,
+              backgroundColor: AppColors.accentOrange,
               child: const Icon(Icons.add, color: Colors.white),
             )
           : null,
@@ -161,14 +147,14 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         },
         items: const [
           NavBarItem(
-            icon: Icons.dashboard_outlined,
-            activeIcon: Icons.dashboard,
-            label: 'Dashboard',
-          ),
-          NavBarItem(
             icon: Icons.work_outline,
             activeIcon: Icons.work,
             label: 'Jobs',
+          ),
+          NavBarItem(
+            icon: Icons.dashboard_outlined,
+            activeIcon: Icons.dashboard,
+            label: 'Dashboard',
           ),
           NavBarItem(
             icon: Icons.calendar_today_outlined,
@@ -183,20 +169,5 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         ],
       ),
     );
-  }
-
-  String _getTitle() {
-    switch (_currentIndex) {
-      case 0:
-        return 'Dashboard';
-      case 1:
-        return 'Jobs';
-      case 2:
-        return 'Calendar';
-      case 3:
-        return 'Settings';
-      default:
-        return 'Job Tracker';
-    }
   }
 }
