@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/theme_provider.dart';
 import '../utils/app_theme.dart';
 
 class AnimatedBottomNavBar extends StatelessWidget {
@@ -16,7 +18,8 @@ class AnimatedBottomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bottomPadding = MediaQuery.of(context).padding.bottom;
-    final primaryColor = Theme.of(context).colorScheme.primary;
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final primaryColor = themeProvider.primaryColor;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -30,7 +33,7 @@ class AnimatedBottomNavBar extends StatelessWidget {
           ),
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
           decoration: BoxDecoration(
-            color: primaryColor,
+            gradient: themeProvider.horizontalGradient,
             borderRadius: BorderRadius.circular(32),
             boxShadow: [
               BoxShadow(

@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import '../providers/job_provider.dart';
 import '../providers/auth_provider.dart';
+import '../providers/theme_provider.dart';
 import '../models/job_application_model.dart';
 import '../utils/app_theme.dart';
 import 'profile_screen.dart';
@@ -211,6 +212,7 @@ class _DashboardAppBarContent extends StatelessWidget {
                   builder: (context, authProvider, _) {
                     final user = authProvider.firebaseUser;
                     final photoUrl = user?.photoURL;
+                    final themeProvider = Provider.of<ThemeProvider>(context);
 
                     return GestureDetector(
                       onTap: () {
@@ -224,13 +226,13 @@ class _DashboardAppBarContent extends StatelessWidget {
                         width: 44,
                         height: 44,
                         decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.primary,
+                          gradient: themeProvider.primaryGradient,
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.primary.withOpacity(0.3),
+                              color: themeProvider.primaryColor.withOpacity(
+                                0.3,
+                              ),
                               blurRadius: 8,
                               offset: const Offset(0, 2),
                             ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import '../providers/theme_provider.dart';
 import 'login_screen.dart';
 import 'main_navigation_screen.dart';
 
@@ -41,18 +42,11 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Theme.of(context).colorScheme.primary,
-              Theme.of(context).colorScheme.secondary,
-            ],
-          ),
-        ),
+        decoration: BoxDecoration(gradient: themeProvider.primaryGradient),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -75,7 +69,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 child: Icon(
                   Icons.work_outline,
                   size: 60,
-                  color: Theme.of(context).colorScheme.primary,
+                  color: themeProvider.primaryColor,
                 ),
               ),
               const SizedBox(height: 30),

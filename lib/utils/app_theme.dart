@@ -8,7 +8,8 @@ class AppColors {
   static const Color primaryDark = Color(
     0xFF0D2818,
   ); // Darkest green for contrast
-  static const Color accentOrange = Color(0xFFF5A623); // Orange accent
+  static const Color accentOrange = Colors.black;
+  //  Color.fromARGB(255, 232, 152, 23); // Orange accent
   static const Color accentOrangeDark = Color(0xFFE09000); // Darker orange
 
   // Legacy aliases for compatibility

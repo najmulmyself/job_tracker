@@ -29,6 +29,24 @@ extension AppColorPaletteExtension on AppColorPalette {
     }
   }
 
+  // Lighter variant for gradient start
+  Color get lightVariant {
+    switch (this) {
+      case AppColorPalette.lime:
+        return const Color(0xFFBDE89A);
+      case AppColorPalette.purple:
+        return const Color(0xFFB98BF7);
+      case AppColorPalette.skyBlue:
+        return const Color(0xFF9DCEF5);
+      case AppColorPalette.blue:
+        return const Color(0xFF5A8FF7);
+      case AppColorPalette.orange:
+        return const Color(0xFFFF6B3D);
+      case AppColorPalette.forest:
+        return const Color(0xFF2D5A47);
+    }
+  }
+
   Color get darkVariant {
     switch (this) {
       case AppColorPalette.lime:
@@ -44,6 +62,24 @@ extension AppColorPaletteExtension on AppColorPalette {
       case AppColorPalette.forest:
         return const Color(0xFF163B2B);
     }
+  }
+
+  // Gradient from light to dark variant
+  LinearGradient get primaryGradient {
+    return LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [lightVariant, primaryColor],
+    );
+  }
+
+  // Horizontal gradient variant
+  LinearGradient get horizontalGradient {
+    return LinearGradient(
+      begin: Alignment.centerLeft,
+      end: Alignment.centerRight,
+      colors: [lightVariant, primaryColor],
+    );
   }
 
   // Whether text on this color should be white or dark
@@ -91,8 +127,13 @@ class ThemeProvider extends ChangeNotifier {
   bool get isInitialized => _isInitialized;
 
   Color get primaryColor => _colorPalette.primaryColor;
+  Color get primaryLightColor => _colorPalette.lightVariant;
   Color get primaryDarkColor => _colorPalette.darkVariant;
   Color get onPrimaryColor => _colorPalette.onPrimaryColor;
+
+  // Gradient getters
+  LinearGradient get primaryGradient => _colorPalette.primaryGradient;
+  LinearGradient get horizontalGradient => _colorPalette.horizontalGradient;
 
   bool get isDarkMode => _themeMode == ThemeMode.dark;
 

@@ -68,7 +68,7 @@ class MyApp extends StatelessWidget {
         builder: (context, themeProvider, _) {
           return MaterialApp(
             title: AppConfig.instance.appName,
-            debugShowCheckedModeBanner: AppConfig.instance.isDev,
+            debugShowCheckedModeBanner: false,
             theme:
                 AppTheme.getLightTheme(
                   primaryColor: themeProvider.primaryColor,

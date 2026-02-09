@@ -42,8 +42,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   }
 
   final List<Widget> _screens = const [
-    JobsListScreen(),
     DashboardScreen(),
+    JobsListScreen(),
     ComingSoonScreen(
       feature: 'Calendar',
       icon: Icons.calendar_month,
@@ -147,14 +147,14 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         },
         items: const [
           NavBarItem(
-            icon: Icons.work_outline,
-            activeIcon: Icons.work,
-            label: 'Jobs',
-          ),
-          NavBarItem(
             icon: Icons.dashboard_outlined,
             activeIcon: Icons.dashboard,
             label: 'Dashboard',
+          ),
+          NavBarItem(
+            icon: Icons.work_outline,
+            activeIcon: Icons.work,
+            label: 'Jobs',
           ),
           NavBarItem(
             icon: Icons.calendar_today_outlined,

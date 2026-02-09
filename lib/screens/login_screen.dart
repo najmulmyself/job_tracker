@@ -144,22 +144,22 @@ class _LoginScreenState extends State<LoginScreen>
                           width: 100,
                           height: 100,
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.primary,
+                            gradient: themeProvider.primaryGradient,
                             borderRadius: BorderRadius.circular(24),
                             boxShadow: [
                               BoxShadow(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.primary.withOpacity(0.3),
+                                color: themeProvider.primaryColor.withOpacity(
+                                  0.3,
+                                ),
                                 blurRadius: 20,
                                 offset: const Offset(0, 10),
                               ),
                             ],
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.work_outline_rounded,
                             size: 50,
-                            color: Colors.white,
+                            color: themeProvider.onPrimaryColor,
                           ),
                         ),
                       ),
@@ -222,69 +222,80 @@ class _LoginScreenState extends State<LoginScreen>
                           return authProvider.isLoading
                               ? CircularProgressIndicator(
                                   valueColor: AlwaysStoppedAnimation<Color>(
-                                    Theme.of(context).colorScheme.primary,
+                                    themeProvider.primaryColor,
                                   ),
                                 )
                               : SizedBox(
                                   width: double.infinity,
-                                  child: ElevatedButton(
-                                    onPressed: _handleGoogleSignIn,
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: isDark
-                                          ? Theme.of(
-                                              context,
-                                            ).colorScheme.primary
-                                          : AppColors.primaryDark,
-                                      foregroundColor: isDark
-                                          ? Theme.of(
-                                              context,
-                                            ).colorScheme.onPrimary
-                                          : Colors.white,
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 18,
-                                      ),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(16),
-                                      ),
-                                      elevation: 0,
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Container(
-                                          padding: const EdgeInsets.all(4),
-                                          decoration: BoxDecoration(
-                                            color: Colors.white,
-                                            borderRadius: BorderRadius.circular(
-                                              4,
+                                  child: Material(
+                                    color: Colors.transparent,
+                                    child: InkWell(
+                                      onTap: _handleGoogleSignIn,
+                                      borderRadius: BorderRadius.circular(16),
+                                      child: Ink(
+                                        decoration: BoxDecoration(
+                                          gradient:
+                                              themeProvider.horizontalGradient,
+                                          borderRadius: BorderRadius.circular(
+                                            16,
+                                          ),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: themeProvider.primaryColor
+                                                  .withOpacity(0.3),
+                                              blurRadius: 12,
+                                              offset: const Offset(0, 4),
                                             ),
+                                          ],
+                                        ),
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                            vertical: 18,
                                           ),
-                                          child: Image.asset(
-                                            'assets/google_logo.png',
-                                            height: 18,
-                                            errorBuilder:
-                                                (context, error, stackTrace) {
-                                                  return const Icon(
-                                                    Icons.g_mobiledata,
-                                                    color: Colors.red,
-                                                    size: 18,
-                                                  );
-                                                },
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Container(
+                                                padding: const EdgeInsets.all(
+                                                  4,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.white,
+                                                  borderRadius:
+                                                      BorderRadius.circular(4),
+                                                ),
+                                                child: Image.asset(
+                                                  'assets/google_logo.png',
+                                                  height: 18,
+                                                  errorBuilder:
+                                                      (
+                                                        context,
+                                                        error,
+                                                        stackTrace,
+                                                      ) {
+                                                        return const Icon(
+                                                          Icons.g_mobiledata,
+                                                          color: Colors.red,
+                                                          size: 18,
+                                                        );
+                                                      },
+                                                ),
+                                              ),
+                                              const SizedBox(width: 12),
+                                              Text(
+                                                'Continue with Google',
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: themeProvider
+                                                      .onPrimaryColor,
+                                                ),
+                                              ),
+                                            ],
                                           ),
                                         ),
-                                        const SizedBox(width: 12),
-                                        Text(
-                                          'Continue with Google',
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w600,
-                                            color: isDark
-                                                ? AppColors.primaryDark
-                                                : Colors.white,
-                                          ),
-                                        ),
-                                      ],
+                                      ),
                                     ),
                                   ),
                                 );

@@ -57,6 +57,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bgColor = isDark ? AppColors.darkBackground : const Color(0xFFF2F2F7);
+    final themeProvider = Provider.of<ThemeProvider>(context);
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -107,15 +108,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 vertical: 10,
                               ),
                               decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.primary,
+                                gradient: themeProvider.horizontalGradient,
                                 borderRadius: BorderRadius.circular(20),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: themeProvider.primaryColor
+                                        .withOpacity(0.3),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
                               ),
                               child: Text(
                                 'Save',
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
-                                  color: Colors.white,
+                                  color: themeProvider.onPrimaryColor,
                                 ),
                               ),
                             ),
@@ -133,22 +142,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           height: 110,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Theme.of(context).colorScheme.primary,
-                              width: 3,
-                            ),
+                            gradient: themeProvider.primaryGradient,
                           ),
-                          child: ClipOval(
-                            child:
-                                user?.photoURL != null &&
-                                    user!.photoURL!.isNotEmpty
-                                ? Image.network(
-                                    user.photoURL!,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (_, __, ___) =>
-                                        _buildDefaultAvatar(isDark),
-                                  )
-                                : _buildDefaultAvatar(isDark),
+                          padding: const EdgeInsets.all(3),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: bgColor,
+                            ),
+                            padding: const EdgeInsets.all(2),
+                            child: ClipOval(
+                              child:
+                                  user?.photoURL != null &&
+                                      user!.photoURL!.isNotEmpty
+                                  ? Image.network(
+                                      user.photoURL!,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) =>
+                                          _buildDefaultAvatar(isDark),
+                                    )
+                                  : _buildDefaultAvatar(isDark),
+                            ),
                           ),
                         ),
                         Positioned(
@@ -158,7 +172,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             width: 34,
                             height: 34,
                             decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.primary,
+                              gradient: themeProvider.primaryGradient,
                               shape: BoxShape.circle,
                               border: Border.all(color: bgColor, width: 3),
                             ),

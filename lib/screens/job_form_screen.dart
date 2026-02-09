@@ -72,6 +72,8 @@ class _JobFormScreenState extends State<JobFormScreen> {
             double.tryParse(parts[0].replaceAll(RegExp(r'[^\d.]'), '')) ?? 60.0;
         _maxSalary =
             double.tryParse(parts[1].replaceAll(RegExp(r'[^\d.]'), '')) ?? 90.0;
+        _salaryMinController.text = _minSalary.toInt().toString();
+        _salaryMaxController.text = _maxSalary.toInt().toString();
       }
     }
 
@@ -303,6 +305,78 @@ class _JobFormScreenState extends State<JobFormScreen> {
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 16),
+
+            // Manual input fields for salary range
+            Row(
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    controller: _salaryMinController,
+                    keyboardType: TextInputType.number,
+                    style: Theme.of(context).textTheme.bodyLarge,
+                    decoration: InputDecoration(
+                      labelText: 'Min (K)',
+                      prefixText: _selectedCurrency.symbol,
+                      border: const OutlineInputBorder(),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 14,
+                      ),
+                    ),
+                    onChanged: (value) {
+                      final parsed = double.tryParse(value);
+                      if (parsed != null && parsed >= 0 && parsed <= 200) {
+                        setState(() {
+                          _minSalary = parsed;
+                          if (_minSalary > _maxSalary) {
+                            _maxSalary = _minSalary;
+                            _salaryMaxController.text = _maxSalary
+                                .toInt()
+                                .toString();
+                          }
+                        });
+                      }
+                    },
+                  ),
+                ),
+                const SizedBox(width: 16),
+                const Text('—', style: TextStyle(fontSize: 20)),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: TextFormField(
+                    controller: _salaryMaxController,
+                    keyboardType: TextInputType.number,
+                    style: Theme.of(context).textTheme.bodyLarge,
+                    decoration: InputDecoration(
+                      labelText: 'Max (K)',
+                      prefixText: _selectedCurrency.symbol,
+                      border: const OutlineInputBorder(),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 14,
+                      ),
+                    ),
+                    onChanged: (value) {
+                      final parsed = double.tryParse(value);
+                      if (parsed != null && parsed >= 0 && parsed <= 200) {
+                        setState(() {
+                          _maxSalary = parsed;
+                          if (_maxSalary < _minSalary) {
+                            _minSalary = _maxSalary;
+                            _salaryMinController.text = _minSalary
+                                .toInt()
+                                .toString();
+                          }
+                        });
+                      }
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            // Slider for quick adjustment
             RangeSlider(
               values: RangeValues(_minSalary, _maxSalary),
               min: 0,
@@ -316,21 +390,10 @@ class _JobFormScreenState extends State<JobFormScreen> {
                 setState(() {
                   _minSalary = values.start;
                   _maxSalary = values.end;
+                  _salaryMinController.text = _minSalary.toInt().toString();
+                  _salaryMaxController.text = _maxSalary.toInt().toString();
                 });
               },
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '${_selectedCurrency.symbol}${_minSalary.toInt()}K',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                Text(
-                  '${_selectedCurrency.symbol}${_maxSalary.toInt()}K',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-              ],
             ),
             const SizedBox(height: 20),
 

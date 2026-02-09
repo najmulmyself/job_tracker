@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:job_tracker/config/app_config.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/theme_provider.dart';
@@ -91,7 +92,8 @@ class SettingsScreen extends StatelessWidget {
                         context: context,
                         icon: Icons.info_outline,
                         title: 'About App',
-                        subtitle: 'Version 1.0.0',
+                        subtitle:
+                            'Version 1.0.0 ${AppConfig.instance.isDev ? "(DEV)" : ""}',
                         isDark: isDark,
                         onTap: () {
                           _showAboutDialog(context);
@@ -293,7 +295,7 @@ class SettingsScreen extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: themeProvider.primaryColor,
+                      gradient: themeProvider.primaryGradient,
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Icon(
@@ -387,13 +389,16 @@ class SettingsScreen extends StatelessWidget {
     required bool isDark,
     required VoidCallback onTap,
   }) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
+          gradient: isSelected ? themeProvider.primaryGradient : null,
           color: isSelected
-              ? Theme.of(context).colorScheme.primary
+              ? null
               : (isDark ? AppColors.darkBackground : Colors.grey[100]),
           borderRadius: BorderRadius.circular(12),
           border: isSelected
@@ -408,7 +413,7 @@ class SettingsScreen extends StatelessWidget {
             Icon(
               icon,
               color: isSelected
-                  ? Theme.of(context).colorScheme.onPrimary
+                  ? themeProvider.onPrimaryColor
                   : (isDark ? Colors.white60 : Colors.black54),
               size: 22,
             ),
@@ -419,7 +424,7 @@ class SettingsScreen extends StatelessWidget {
                 fontSize: 13,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                 color: isSelected
-                    ? Theme.of(context).colorScheme.onPrimary
+                    ? themeProvider.onPrimaryColor
                     : (isDark ? Colors.white70 : Colors.black87),
               ),
             ),
