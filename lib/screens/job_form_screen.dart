@@ -66,12 +66,19 @@ class _JobFormScreenState extends State<JobFormScreen> {
 
     // Parse salary range if exists
     if (job.salaryRange != null) {
-      final parts = job.salaryRange!.split('-');
-      if (parts.length == 2) {
-        _minSalary =
-            double.tryParse(parts[0].replaceAll(RegExp(r'[^\d.]'), '')) ?? 60.0;
-        _maxSalary =
-            double.tryParse(parts[1].replaceAll(RegExp(r'[^\d.]'), '')) ?? 90.0;
+      // Extract all numbers from the salary range string
+      final numbers = RegExp(r'\d+\.?\d*').allMatches(job.salaryRange!);
+      final parsed = numbers
+          .map((m) => double.tryParse(m.group(0)!) ?? 0)
+          .toList();
+      if (parsed.length >= 2) {
+        _minSalary = parsed[0];
+        _maxSalary = parsed[1];
+        _salaryMinController.text = _minSalary.toInt().toString();
+        _salaryMaxController.text = _maxSalary.toInt().toString();
+      } else if (parsed.length == 1) {
+        _minSalary = parsed[0];
+        _maxSalary = parsed[0];
         _salaryMinController.text = _minSalary.toInt().toString();
         _salaryMaxController.text = _maxSalary.toInt().toString();
       }
@@ -106,8 +113,10 @@ class _JobFormScreenState extends State<JobFormScreen> {
       return;
     }
 
-    // Validate interview fields if stage is "Interview Called"
-    if (!asDraft && _selectedStage == ApplicationStage.interviewCalled) {
+    // Validate interview fields if stage is "Interview Called" or "Interviewed"
+    if (!asDraft &&
+        (_selectedStage == ApplicationStage.interviewCalled ||
+            _selectedStage == ApplicationStage.interviewed)) {
       if (_interviewScheduledDate == null || _interviewTime == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -459,8 +468,9 @@ class _JobFormScreenState extends State<JobFormScreen> {
             ),
             const SizedBox(height: 20),
 
-            // Interview Section (only show if stage is interviewCalled)
-            if (_selectedStage == ApplicationStage.interviewCalled) ...[
+            // Interview Section (show if stage is interviewCalled or interviewed)
+            if (_selectedStage == ApplicationStage.interviewCalled ||
+                _selectedStage == ApplicationStage.interviewed) ...[
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(

@@ -61,7 +61,13 @@ class SettingsScreen extends StatelessWidget {
                         subtitle: 'Manage push notifications',
                         isDark: isDark,
                         onTap: () {
-                          // TODO: Navigate to notifications settings
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Notification settings coming soon',
+                              ),
+                            ),
+                          );
                         },
                       ),
                       _buildDivider(isDark),
@@ -72,7 +78,11 @@ class SettingsScreen extends StatelessWidget {
                         subtitle: 'English',
                         isDark: isDark,
                         onTap: () {
-                          // TODO: Navigate to language settings
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Language settings coming soon'),
+                            ),
+                          );
                         },
                       ),
                     ],
@@ -104,7 +114,11 @@ class SettingsScreen extends StatelessWidget {
                         title: 'Privacy Policy',
                         isDark: isDark,
                         onTap: () {
-                          // TODO: Open privacy policy
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Privacy policy coming soon'),
+                            ),
+                          );
                         },
                       ),
                       _buildDivider(isDark),
@@ -114,7 +128,11 @@ class SettingsScreen extends StatelessWidget {
                         title: 'Terms of Service',
                         isDark: isDark,
                         onTap: () {
-                          // TODO: Open terms of service
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Terms of service coming soon'),
+                            ),
+                          );
                         },
                       ),
                     ],

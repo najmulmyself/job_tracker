@@ -42,13 +42,12 @@ class _JobsListScreenState extends State<JobsListScreen> {
     if (_selectedFilter != 'All') {
       filtered = filtered.where((job) {
         switch (_selectedFilter) {
-          case 'Interview':
-            return job.stage == ApplicationStage.interviewCalled ||
-                job.stage == ApplicationStage.interviewed;
           case 'Applied':
             return job.stage == ApplicationStage.applied;
-          case 'Waitlist':
-            return job.stage == ApplicationStage.interested;
+          case 'Called':
+            return job.stage == ApplicationStage.interviewCalled;
+          case 'Interviewed':
+            return job.stage == ApplicationStage.interviewed;
           case 'Offer':
             return job.stage == ApplicationStage.offer;
           case 'Rejected':
@@ -77,187 +76,210 @@ class _JobsListScreenState extends State<JobsListScreen> {
               .where((job) => job.stage != ApplicationStage.rejected)
               .length;
 
-          return CustomScrollView(
-            slivers: [
-              // App Bar
-              SliverAppBar(
-                pinned: true,
-                floating: false,
-                expandedHeight: _isSearching ? 130 : 130,
-                collapsedHeight: _isSearching ? 130 : 130,
-                toolbarHeight: _isSearching ? 130 : 130,
-                backgroundColor: isDark
-                    ? AppColors.darkBackground
-                    : AppColors.lightBackground,
-                elevation: 0,
-                scrolledUnderElevation: 0,
-                automaticallyImplyLeading: false,
-                flexibleSpace: SafeArea(
-                  bottom: false,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Header Row
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Applications',
-                                  style: TextStyle(
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.bold,
-                                    color: isDark
-                                        ? Colors.white
-                                        : AppColors.primaryDark,
+          return GestureDetector(
+            onTap: () {
+              if (_isSearching) {
+                setState(() {
+                  _isSearching = false;
+                  _searchController.clear();
+                  _searchQuery = '';
+                });
+                FocusScope.of(context).unfocus();
+              }
+            },
+            child: CustomScrollView(
+              slivers: [
+                // App Bar
+                SliverAppBar(
+                  pinned: true,
+                  floating: false,
+                  expandedHeight: _isSearching ? 150 : 130,
+                  collapsedHeight: _isSearching ? 150 : 130,
+                  toolbarHeight: _isSearching ? 150 : 130,
+                  backgroundColor: isDark
+                      ? AppColors.darkBackground
+                      : AppColors.lightBackground,
+                  elevation: 0,
+                  scrolledUnderElevation: 0,
+                  automaticallyImplyLeading: false,
+                  flexibleSpace: SafeArea(
+                    bottom: false,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Header Row
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Applications',
+                                    style: TextStyle(
+                                      fontSize: 28,
+                                      fontWeight: FontWeight.bold,
+                                      color: isDark
+                                          ? Colors.white
+                                          : AppColors.primaryDark,
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  '$activeJobsCount active jobs',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: isDark
-                                        ? Colors.white60
-                                        : Colors.black54,
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    '$activeJobsCount active jobs',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: isDark
+                                          ? Colors.white60
+                                          : Colors.black54,
+                                    ),
                                   ),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                _buildIconButton(
-                                  icon: Icons.search,
-                                  isDark: isDark,
-                                  onTap: () {
-                                    setState(() {
-                                      _isSearching = !_isSearching;
-                                      if (!_isSearching) {
-                                        _searchController.clear();
-                                        _searchQuery = '';
-                                      }
-                                    });
-                                  },
-                                ),
-                                const SizedBox(width: 12),
-                                _buildIconButton(
-                                  icon: Icons.tune,
-                                  isDark: isDark,
-                                  onTap: () {
-                                    _showFilterBottomSheet(
-                                      context,
-                                      jobProvider,
-                                    );
-                                  },
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-
-                        // Search Field (when searching)
-                        if (_isSearching) ...[
-                          const SizedBox(height: 12),
-                          TextField(
-                            controller: _searchController,
-                            autofocus: true,
-                            decoration: InputDecoration(
-                              hintText: 'Search jobs...',
-                              prefixIcon: Icon(
-                                Icons.search,
-                                color: isDark ? Colors.white54 : Colors.black54,
+                                ],
                               ),
-                              suffixIcon: _searchQuery.isNotEmpty
-                                  ? IconButton(
-                                      icon: const Icon(Icons.clear),
-                                      onPressed: () {
-                                        setState(() {
+                              Row(
+                                children: [
+                                  _buildIconButton(
+                                    icon: Icons.search,
+                                    isDark: isDark,
+                                    isActive: _isSearching,
+                                    onTap: () {
+                                      setState(() {
+                                        _isSearching = !_isSearching;
+                                        if (!_isSearching) {
                                           _searchController.clear();
                                           _searchQuery = '';
-                                        });
-                                      },
-                                    )
-                                  : null,
-                              filled: true,
-                              fillColor: isDark
-                                  ? AppColors.darkCard
-                                  : Colors.white,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide.none,
+                                        }
+                                      });
+                                    },
+                                  ),
+                                  const SizedBox(width: 12),
+                                  _buildIconButton(
+                                    icon: Icons.tune,
+                                    isDark: isDark,
+                                    isActive:
+                                        jobProvider.showDraftsOnly ||
+                                        jobProvider.sortBy != 'updatedAt',
+                                    onTap: () {
+                                      _showFilterBottomSheet(
+                                        context,
+                                        jobProvider,
+                                      );
+                                    },
+                                  ),
+                                ],
                               ),
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 12,
-                              ),
-                            ),
-                            onChanged: (value) {
-                              setState(() {
-                                _searchQuery = value;
-                              });
-                            },
+                            ],
                           ),
-                        ],
 
-                        // Filter Chips
-                        if (!_isSearching) ...[
-                          const SizedBox(height: 16),
-                          SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Row(
-                              children: [
-                                _buildFilterChip('All', isDark),
-                                _buildFilterChip('Interview', isDark),
-                                _buildFilterChip('Applied', isDark),
-                                _buildFilterChip('Waitlist', isDark),
-                              ],
+                          // Search Field (when searching)
+                          if (_isSearching) ...[
+                            const SizedBox(height: 12),
+                            TextField(
+                              controller: _searchController,
+                              autofocus: true,
+                              decoration: InputDecoration(
+                                hintText: 'Search jobs...',
+                                prefixIcon: Icon(
+                                  Icons.search,
+                                  color: isDark
+                                      ? Colors.white54
+                                      : Colors.black54,
+                                ),
+                                suffixIcon: _searchQuery.isNotEmpty
+                                    ? IconButton(
+                                        icon: const Icon(Icons.clear),
+                                        onPressed: () {
+                                          setState(() {
+                                            _searchController.clear();
+                                            _searchQuery = '';
+                                          });
+                                        },
+                                      )
+                                    : null,
+                                filled: true,
+                                fillColor: isDark
+                                    ? AppColors.darkCard
+                                    : Colors.white,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide.none,
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 12,
+                                ),
+                              ),
+                              onChanged: (value) {
+                                setState(() {
+                                  _searchQuery = value;
+                                });
+                              },
                             ),
-                          ),
+                          ],
+
+                          // Filter Chips
+                          if (!_isSearching) ...[
+                            const SizedBox(height: 16),
+                            SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: [
+                                  _buildFilterChip('All', isDark),
+                                  _buildFilterChip('Applied', isDark),
+                                  _buildFilterChip('Called', isDark),
+                                  _buildFilterChip('Interviewed', isDark),
+                                  _buildFilterChip('Offer', isDark),
+                                  _buildFilterChip('Rejected', isDark),
+                                ],
+                              ),
+                            ),
+                          ],
                         ],
-                      ],
+                      ),
                     ),
                   ),
                 ),
-              ),
 
-              // Jobs List
-              jobProvider.isLoading
-                  ? const SliverFillRemaining(
-                      child: Center(child: CircularProgressIndicator()),
-                    )
-                  : filteredJobs.isEmpty
-                  ? SliverFillRemaining(
-                      child: _buildEmptyState(
-                        isSearching: _searchQuery.isNotEmpty,
+                // Jobs List
+                jobProvider.isLoading
+                    ? const SliverFillRemaining(
+                        child: Center(child: CircularProgressIndicator()),
+                      )
+                    : filteredJobs.isEmpty
+                    ? SliverFillRemaining(
+                        child: _buildEmptyState(
+                          isSearching: _searchQuery.isNotEmpty,
+                        ),
+                      )
+                    : SliverPadding(
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+                        sliver: SliverList(
+                          delegate: SliverChildBuilderDelegate((
+                            context,
+                            index,
+                          ) {
+                            final job = filteredJobs[index];
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: _JobCardNew(
+                                job: job,
+                                isDark: isDark,
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    CupertinoPageRoute(
+                                      builder: (_) => JobDetailScreen(job: job),
+                                    ),
+                                  );
+                                },
+                              ),
+                            );
+                          }, childCount: filteredJobs.length),
+                        ),
                       ),
-                    )
-                  : SliverPadding(
-                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
-                      sliver: SliverList(
-                        delegate: SliverChildBuilderDelegate((context, index) {
-                          final job = filteredJobs[index];
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: _JobCardNew(
-                              job: job,
-                              isDark: isDark,
-                              onTap: () {
-                                Navigator.of(context).push(
-                                  CupertinoPageRoute(
-                                    builder: (_) => JobDetailScreen(job: job),
-                                  ),
-                                );
-                              },
-                            ),
-                          );
-                        }, childCount: filteredJobs.length),
-                      ),
-                    ),
-            ],
+              ],
+            ),
           );
         },
       ),
@@ -268,6 +290,7 @@ class _JobsListScreenState extends State<JobsListScreen> {
     required IconData icon,
     required bool isDark,
     required VoidCallback onTap,
+    bool isActive = false,
   }) {
     return GestureDetector(
       onTap: onTap,
@@ -275,7 +298,9 @@ class _JobsListScreenState extends State<JobsListScreen> {
         width: 44,
         height: 44,
         decoration: BoxDecoration(
-          color: isDark ? AppColors.darkCard : Colors.white,
+          color: isActive
+              ? Theme.of(context).colorScheme.primary
+              : (isDark ? AppColors.darkCard : Colors.white),
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
@@ -287,7 +312,9 @@ class _JobsListScreenState extends State<JobsListScreen> {
         ),
         child: Icon(
           icon,
-          color: isDark ? Colors.white : AppColors.primaryDark,
+          color: isActive
+              ? Colors.white
+              : (isDark ? Colors.white : AppColors.primaryDark),
           size: 22,
         ),
       ),
@@ -304,6 +331,11 @@ class _JobsListScreenState extends State<JobsListScreen> {
           setState(() {
             _selectedFilter = label;
           });
+          // Turn off drafts-only when switching filter tabs
+          final jobProvider = Provider.of<JobProvider>(context, listen: false);
+          if (jobProvider.showDraftsOnly) {
+            jobProvider.toggleDraftsOnly();
+          }
         },
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -343,90 +375,97 @@ class _JobsListScreenState extends State<JobsListScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: isDark ? Colors.white24 : Colors.black12,
-                  borderRadius: BorderRadius.circular(2),
+      builder: (sheetContext) => StatefulBuilder(
+        builder: (sheetContext, setSheetState) => Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: isDark ? Colors.white24 : Colors.black12,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              'Filter & Sort',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: isDark ? Colors.white : AppColors.primaryDark,
-              ),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              'Sort By',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: isDark ? Colors.white70 : Colors.black54,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                _buildSortOption(
-                  'Last Updated',
-                  jobProvider.sortBy == 'updatedAt',
-                  () {
-                    jobProvider.setSortBy('updatedAt');
-                    Navigator.pop(context);
-                  },
-                  isDark,
-                ),
-                _buildSortOption(
-                  'Date Added',
-                  jobProvider.sortBy == 'createdAt',
-                  () {
-                    jobProvider.setSortBy('createdAt');
-                    Navigator.pop(context);
-                  },
-                  isDark,
-                ),
-                _buildSortOption(
-                  'Company',
-                  jobProvider.sortBy == 'company',
-                  () {
-                    jobProvider.setSortBy('company');
-                    Navigator.pop(context);
-                  },
-                  isDark,
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            SwitchListTile(
-              title: Text(
-                'Show Drafts Only',
+              const SizedBox(height: 20),
+              Text(
+                'Filter & Sort',
                 style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
                   color: isDark ? Colors.white : AppColors.primaryDark,
                 ),
               ),
-              value: jobProvider.showDraftsOnly,
-              onChanged: (_) {
-                jobProvider.toggleDraftsOnly();
-              },
-              activeThumbColor: Theme.of(context).colorScheme.primary,
-            ),
-            const SizedBox(height: 20),
-          ],
+              const SizedBox(height: 20),
+              Text(
+                'Sort By',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? Colors.white70 : Colors.black54,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  _buildSortOption(
+                    'Last Updated',
+                    jobProvider.sortBy == 'updatedAt',
+                    () {
+                      jobProvider.setSortBy('updatedAt');
+                      Navigator.pop(sheetContext);
+                    },
+                    isDark,
+                  ),
+                  _buildSortOption(
+                    'Date Added',
+                    jobProvider.sortBy == 'createdAt',
+                    () {
+                      jobProvider.setSortBy('createdAt');
+                      Navigator.pop(sheetContext);
+                    },
+                    isDark,
+                  ),
+                  _buildSortOption(
+                    'Company',
+                    jobProvider.sortBy == 'company',
+                    () {
+                      jobProvider.setSortBy('company');
+                      Navigator.pop(sheetContext);
+                    },
+                    isDark,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              SwitchListTile(
+                title: Text(
+                  'Show Drafts Only',
+                  style: TextStyle(
+                    color: isDark ? Colors.white : AppColors.primaryDark,
+                  ),
+                ),
+                value: jobProvider.showDraftsOnly,
+                onChanged: (_) {
+                  jobProvider.toggleDraftsOnly();
+                  setSheetState(() {});
+                  // Also reset the tab filter to 'All' when toggling drafts
+                  setState(() {
+                    _selectedFilter = 'All';
+                  });
+                },
+                activeThumbColor: Theme.of(context).colorScheme.primary,
+              ),
+              const SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
     );
@@ -546,12 +585,13 @@ class _JobCardNew extends StatelessWidget {
   String _getStatusLabel() {
     switch (job.stage) {
       case ApplicationStage.interested:
-        return 'WAITLIST';
+        return 'DRAFT';
       case ApplicationStage.applied:
         return 'APPLIED';
       case ApplicationStage.interviewCalled:
+        return 'CALLED';
       case ApplicationStage.interviewed:
-        return 'INTERVIEW';
+        return 'INTERVIEWED';
       case ApplicationStage.offer:
         return 'OFFER';
       case ApplicationStage.rejected:

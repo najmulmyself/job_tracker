@@ -20,10 +20,18 @@ class ResumeProvider with ChangeNotifier {
       _resumes.where((r) => r.isDefault).firstOrNull;
 
   void listenToResumes(String userId) {
-    _firestoreService.getResumesStream(userId).listen((resumes) {
-      _resumes = resumes;
-      notifyListeners();
-    });
+    _firestoreService
+        .getResumesStream(userId)
+        .listen(
+          (resumes) {
+            _resumes = resumes;
+            notifyListeners();
+          },
+          onError: (e) {
+            _error = 'Failed to sync resumes: $e';
+            notifyListeners();
+          },
+        );
   }
 
   Future<void> loadResumes(String userId) async {
