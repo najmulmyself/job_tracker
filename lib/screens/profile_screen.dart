@@ -1,5 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:intl/intl.dart';
 import '../providers/auth_provider.dart';
 import '../providers/resume_provider.dart';
 import '../providers/theme_provider.dart';
@@ -22,16 +25,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
-    final user = context.read<AuthProvider>().firebaseUser;
+    final authProvider = context.read<AuthProvider>();
+    final user = authProvider.firebaseUser;
+    final userModel = authProvider.userModel;
     _nameController = TextEditingController(
-      text: user?.displayName ?? 'Alex Doe',
+      text: userModel?.displayName ?? user?.displayName ?? '',
     );
     _emailController = TextEditingController(
-      text: user?.email ?? 'alex.doe@email.com',
+      text: userModel?.email ?? user?.email ?? '',
     );
-    _phoneController = TextEditingController(text: '+1 (123) 456-7890');
+    _phoneController = TextEditingController(text: userModel?.phone ?? '');
     _linkedInController = TextEditingController(
-      text: 'linkedin.com/in/alexdoe',
+      text: userModel?.linkedIn ?? '',
     );
   }
 
@@ -44,13 +49,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.dispose();
   }
 
-  void _saveProfile() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Profile saved successfully'),
-        backgroundColor: Colors.green,
-      ),
+  Future<void> _saveProfile() async {
+    final authProvider = context.read<AuthProvider>();
+    final success = await authProvider.updateUserProfile(
+      displayName: _nameController.text.trim(),
+      phone: _phoneController.text.trim().isNotEmpty
+          ? _phoneController.text.trim()
+          : null,
+      linkedIn: _linkedInController.text.trim().isNotEmpty
+          ? _linkedInController.text.trim()
+          : null,
     );
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            success ? 'Profile saved successfully' : 'Failed to save profile',
+          ),
+          backgroundColor: success ? Colors.green : Colors.red,
+        ),
+      );
+    }
   }
 
   @override
@@ -264,15 +283,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             children: [
                               _buildSectionHeader('MANAGE RESUMES', isDark),
                               GestureDetector(
-                                onTap: () {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                        'Resume upload coming soon!',
-                                      ),
-                                    ),
-                                  );
-                                },
+                                onTap: () => _uploadResume(context),
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 12,
@@ -310,29 +321,70 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           const SizedBox(height: 12),
                           Consumer<ResumeProvider>(
                             builder: (context, resumeProvider, _) {
-                              // Always show mock data for design purposes
+                              final resumes = resumeProvider.resumes;
+                              if (resumes.isEmpty) {
+                                return Container(
+                                  padding: const EdgeInsets.all(24),
+                                  decoration: BoxDecoration(
+                                    color: isDark
+                                        ? AppColors.darkCard
+                                        : Colors.white,
+                                    borderRadius: BorderRadius.circular(14),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      'No resumes uploaded yet',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: isDark
+                                            ? Colors.white54
+                                            : Colors.black45,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              }
                               return Column(
-                                children: [
-                                  _buildResumeCard(
-                                    name: 'Software_Engineer_Resume.pdf',
-                                    date: 'July 15, 2024',
-                                    isDefault: true,
-                                    isDark: isDark,
-                                    primaryColor: Theme.of(
-                                      context,
-                                    ).colorScheme.primary,
-                                  ),
-                                  const SizedBox(height: 12),
-                                  _buildResumeCard(
-                                    name: 'Design_Portfolio_2024.pdf',
-                                    date: 'June 02, 2024',
-                                    isDefault: false,
-                                    isDark: isDark,
-                                    primaryColor: Theme.of(
-                                      context,
-                                    ).colorScheme.primary,
-                                  ),
-                                ],
+                                children: resumes.map((resume) {
+                                  return Padding(
+                                    padding: const EdgeInsets.only(bottom: 12),
+                                    child: _buildResumeCard(
+                                      name: resume.fileName,
+                                      date: DateFormat(
+                                        'MMM dd, yyyy',
+                                      ).format(resume.uploadedAt),
+                                      isDefault: resume.isDefault,
+                                      isDark: isDark,
+                                      primaryColor: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
+                                      onSetDefault: () {
+                                        final userId = context
+                                            .read<AuthProvider>()
+                                            .firebaseUser
+                                            ?.uid;
+                                        if (userId != null) {
+                                          resumeProvider.setDefaultResume(
+                                            userId,
+                                            resume.id,
+                                          );
+                                        }
+                                      },
+                                      onDelete: () {
+                                        final userId = context
+                                            .read<AuthProvider>()
+                                            .firebaseUser
+                                            ?.uid;
+                                        if (userId != null) {
+                                          resumeProvider.deleteResume(
+                                            userId,
+                                            resume.id,
+                                          );
+                                        }
+                                      },
+                                    ),
+                                  );
+                                }).toList(),
                               );
                             },
                           ),
@@ -348,6 +400,40 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _uploadResume(BuildContext context) async {
+    final userId = context.read<AuthProvider>().firebaseUser?.uid;
+    if (userId == null) return;
+    final resumeProvider = context.read<ResumeProvider>();
+
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pdf', 'doc', 'docx'],
+    );
+    if (result == null || result.files.single.path == null) return;
+
+    final file = File(result.files.single.path!);
+    final fileName = result.files.single.name;
+
+    final success = await resumeProvider.uploadResume(
+      userId: userId,
+      name: fileName,
+      file: file,
+      fileName: fileName,
+      setAsDefault: resumeProvider.resumes.isEmpty,
+    );
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            success ? 'Resume uploaded!' : 'Failed to upload resume',
+          ),
+          backgroundColor: success ? Colors.green : Colors.red,
+        ),
+      );
+    }
   }
 
   Widget _buildDefaultAvatar(bool isDark) {
@@ -525,6 +611,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     required bool isDefault,
     required bool isDark,
     required Color primaryColor,
+    VoidCallback? onSetDefault,
+    VoidCallback? onDelete,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -581,9 +669,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
                 // More Options
-                Icon(
-                  Icons.more_horiz,
-                  color: isDark ? Colors.white38 : Colors.black38,
+                PopupMenuButton<String>(
+                  icon: Icon(
+                    Icons.more_horiz,
+                    color: isDark ? Colors.white38 : Colors.black38,
+                  ),
+                  itemBuilder: (context) => [
+                    const PopupMenuItem(
+                      value: 'delete',
+                      child: Text(
+                        'Delete',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ),
+                  ],
+                  onSelected: (value) {
+                    if (value == 'delete' && onDelete != null) {
+                      onDelete();
+                    }
+                  },
                 ),
               ],
             ),
@@ -610,7 +714,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   scale: 0.85,
                   child: Switch(
                     value: isDefault,
-                    onChanged: (value) {},
+                    onChanged: (value) {
+                      if (value && onSetDefault != null) {
+                        onSetDefault();
+                      }
+                    },
                     activeThumbColor: Colors.white,
                     activeTrackColor: primaryColor,
                     inactiveThumbColor: Colors.white,

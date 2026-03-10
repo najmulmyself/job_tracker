@@ -52,17 +52,30 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
   }
 
   String _getJobType() {
-    // You can add jobType field to model later
-    // For now, returning a default
-    return 'Full-time';
+    return widget.job.jobType.displayName;
   }
 
   void _toggleReminder(bool value) async {
+    final stage = widget.job.stage;
+
+    // Only applicable for applied, interviewCalled, or interviewed stages
+    if (stage != ApplicationStage.applied &&
+        stage != ApplicationStage.interviewCalled &&
+        stage != ApplicationStage.interviewed) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Not applicable for this job'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
     // Check if interview is scheduled
     if (widget.job.interviewScheduledDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please set an interview date first'),
+          content: Text('Select an interview date first'),
           duration: Duration(seconds: 2),
         ),
       );
@@ -306,8 +319,21 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                   isDark: isDark,
                   trailing: Switch(
                     value: reminderEnabled,
-                    onChanged: _toggleReminder,
+                    onChanged:
+                        (widget.job.stage == ApplicationStage.applied ||
+                            widget.job.stage ==
+                                ApplicationStage.interviewCalled ||
+                            widget.job.stage == ApplicationStage.interviewed)
+                        ? _toggleReminder
+                        : (val) => _toggleReminder(val),
                     activeThumbColor: AppColors.primaryBlue,
+                    inactiveThumbColor:
+                        (widget.job.stage != ApplicationStage.applied &&
+                            widget.job.stage !=
+                                ApplicationStage.interviewCalled &&
+                            widget.job.stage != ApplicationStage.interviewed)
+                        ? Colors.grey
+                        : null,
                   ),
                 ),
               ],

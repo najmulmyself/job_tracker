@@ -29,13 +29,13 @@ class AppColors {
     247,
     181,
     50,
-  ); // Purple - Interview
+  ); // Orange/Gold - Interview
   static const Color statusApplied = Color.fromARGB(
     255,
     154,
     231,
     102,
-  ); // Red/Coral - Applied
+  ); // Green - Applied
   static const Color statusRejected = Color(0xFFF44336); // Red - Rejected
   static const Color statusOffer = Color.fromARGB(
     255,

@@ -113,6 +113,10 @@ class NotificationService {
     );
   }
 
+  // Consistent notification ID generation (non-negative, ranged by type)
+  static int _notificationId(String key, int offset) =>
+      (key.hashCode.abs() % 100000) + offset;
+
   // Schedule interview reminders
   Future<void> scheduleInterviewReminders({
     required String jobId,
@@ -141,7 +145,7 @@ class NotificationService {
 
     if (onInterviewDay.isAfter(now)) {
       await _scheduleNotification(
-        id: '${jobId}_day'.hashCode,
+        id: _notificationId(jobId, 100000),
         title: 'Interview Today! 🎯',
         body: 'You have an interview with $companyName for $jobTitle',
         scheduledDate: onInterviewDay,
@@ -156,7 +160,7 @@ class NotificationService {
 
     if (thirtyMinsBefore.isAfter(now)) {
       await _scheduleNotification(
-        id: '${jobId}_30min'.hashCode,
+        id: _notificationId(jobId, 200000),
         title: 'Interview in 30 Minutes! ⏰',
         body: 'Get ready for your interview with $companyName',
         scheduledDate: thirtyMinsBefore,
@@ -169,9 +173,8 @@ class NotificationService {
   Future<void> cancelInterviewReminders(String jobId) async {
     if (!_initialized) await initialize();
 
-    // Cancel both notifications for this job
-    await _notifications.cancel('${jobId}_day'.hashCode);
-    await _notifications.cancel('${jobId}_30min'.hashCode);
+    await _notifications.cancel(_notificationId(jobId, 100000));
+    await _notifications.cancel(_notificationId(jobId, 200000));
   }
 
   // Generic schedule notification

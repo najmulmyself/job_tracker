@@ -148,4 +148,33 @@ class AuthProvider with ChangeNotifier {
     _error = null;
     notifyListeners();
   }
+
+  Future<bool> updateUserProfile({
+    required String displayName,
+    String? phone,
+    String? linkedIn,
+  }) async {
+    if (_userModel == null) return false;
+    try {
+      _isLoading = true;
+      notifyListeners();
+
+      _userModel = _userModel!.copyWith(
+        displayName: displayName,
+        phone: phone,
+        linkedIn: linkedIn,
+        updatedAt: DateTime.now(),
+      );
+      await _firestoreService.updateUser(_userModel!);
+
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _error = e.toString();
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
 }

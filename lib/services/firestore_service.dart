@@ -221,25 +221,31 @@ class FirestoreService {
         .delete();
   }
 
-  // Set default resume
+  // Set default resume using batch writes for atomicity
   Future<void> setDefaultResume(String userId, String resumeId) async {
-    // Get all resumes
     final resumes = await getResumes(userId);
+    final batch = _firestore.batch();
 
-    // Update all resumes to not be default
     for (var resume in resumes) {
-      await updateResume(resume.copyWith(isDefault: false));
+      final ref = _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('resumes')
+          .doc(resume.id);
+      batch.update(ref, {
+        'isDefault': resume.id == resumeId,
+        'updatedAt': DateTime.now().toIso8601String(),
+      });
     }
 
-    // Set the selected resume as default
-    final selectedResume = resumes.firstWhere((r) => r.id == resumeId);
-    await updateResume(selectedResume.copyWith(isDefault: true));
-
     // Update user's default resume ID
-    await _firestore.collection('users').doc(userId).update({
+    final userRef = _firestore.collection('users').doc(userId);
+    batch.update(userRef, {
       'defaultResumeId': resumeId,
       'updatedAt': DateTime.now().toIso8601String(),
     });
+
+    await batch.commit();
   }
 
   // ============ COVER LETTER OPERATIONS ============

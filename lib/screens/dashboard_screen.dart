@@ -54,8 +54,8 @@ class DashboardScreen extends StatelessWidget {
                               Expanded(
                                 child: _StatsCard(
                                   title: 'TOTAL APPLIED',
-                                  value: jobProvider.totalJobs.toString(),
-                                  subtitle: '+12%',
+                                  value: jobProvider.totalApplied.toString(),
+                                  subtitle: jobProvider.monthlyGrowth,
                                   subtitleColor: Theme.of(
                                     context,
                                   ).colorScheme.primary,
@@ -67,7 +67,11 @@ class DashboardScreen extends StatelessWidget {
                                 child: _StatsCard(
                                   title: 'INTERVIEWS',
                                   value: jobProvider.interviewCount.toString(),
-                                  subtitle: _getInterviewRate(jobProvider),
+                                  subtitle:
+                                      '${jobProvider.interviewRate.toStringAsFixed(1)}%',
+                                  subtitleColor: Theme.of(
+                                    context,
+                                  ).colorScheme.primary,
                                   hasAccentBar: true,
                                   isDark: isDark,
                                 ),
@@ -81,7 +85,8 @@ class DashboardScreen extends StatelessWidget {
                                 child: _StatsCard(
                                   title: 'OFFERS REC.',
                                   value: jobProvider.offerCount.toString(),
-                                  subtitle: 'Active',
+                                  subtitle:
+                                      '${jobProvider.offerRate.toStringAsFixed(1)}%',
                                   subtitleColor: Theme.of(
                                     context,
                                   ).colorScheme.primary,
@@ -92,8 +97,13 @@ class DashboardScreen extends StatelessWidget {
                               Expanded(
                                 child: _StatsCard(
                                   title: 'AVG. RESPONSE',
-                                  value: '6.2',
-                                  subtitle: 'Days',
+                                  value: jobProvider.avgResponseDays != null
+                                      ? jobProvider.avgResponseDays!
+                                            .toStringAsFixed(1)
+                                      : '—',
+                                  subtitle: jobProvider.avgResponseDays != null
+                                      ? 'Days'
+                                      : 'No data',
                                   isDark: isDark,
                                 ),
                               ),
@@ -103,13 +113,15 @@ class DashboardScreen extends StatelessWidget {
                       ),
                     ),
 
-                    // Application Funnel
+                    // Stage Distribution
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: _ApplicationFunnel(
-                        total: jobProvider.totalJobs,
+                        total: jobProvider.totalApplied,
+                        interested: jobProvider.interestedCount,
                         applied: jobProvider.appliedCount,
-                        interview: jobProvider.interviewCount,
+                        interviewCalled: jobProvider.interviewCalledCount,
+                        interviewed: jobProvider.interviewedCount,
                         offer: jobProvider.offerCount,
                         rejected: jobProvider.rejectedCount,
                         isDark: isDark,
@@ -118,22 +130,22 @@ class DashboardScreen extends StatelessWidget {
 
                     const SizedBox(height: 16),
 
-                    // Monthly Activity
+                    // Monthly Activity (uses all jobs, not filtered)
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: _MonthlyActivity(
-                        jobs: jobProvider.jobs,
+                        jobs: jobProvider.allJobs,
                         isDark: isDark,
                       ),
                     ),
 
                     const SizedBox(height: 16),
 
-                    // Application Trend
+                    // Application Trend (uses all jobs, not filtered)
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: _ApplicationTrend(
-                        jobs: jobProvider.jobs,
+                        jobs: jobProvider.allJobs,
                         isDark: isDark,
                       ),
                     ),
@@ -147,12 +159,6 @@ class DashboardScreen extends StatelessWidget {
         },
       ),
     );
-  }
-
-  String _getInterviewRate(JobProvider provider) {
-    if (provider.totalJobs == 0) return '0%';
-    final rate = (provider.interviewCount / provider.totalJobs * 100);
-    return '${rate.toStringAsFixed(1)}%';
   }
 }
 
@@ -372,16 +378,20 @@ class _StatsCard extends StatelessWidget {
 
 class _ApplicationFunnel extends StatelessWidget {
   final int total;
+  final int interested;
   final int applied;
-  final int interview;
+  final int interviewCalled;
+  final int interviewed;
   final int offer;
   final int rejected;
   final bool isDark;
 
   const _ApplicationFunnel({
     required this.total,
+    required this.interested,
     required this.applied,
-    required this.interview,
+    required this.interviewCalled,
+    required this.interviewed,
     required this.offer,
     required this.rejected,
     required this.isDark,
@@ -389,7 +399,7 @@ class _ApplicationFunnel extends StatelessWidget {
 
   double _getInterviewRate() {
     if (total == 0) return 0;
-    return (interview / total * 100);
+    return ((interviewCalled + interviewed) / total * 100);
   }
 
   @override
@@ -417,12 +427,12 @@ class _ApplicationFunnel extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'Application Funnel',
+                    'Stage Distribution',
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Interview Rate',
+                    'Interview Rate: ${_getInterviewRate().toStringAsFixed(1)}%',
                     style: TextStyle(
                       fontSize: 14,
                       color: isDark ? Colors.white60 : Colors.black54,
@@ -454,8 +464,10 @@ class _ApplicationFunnel extends StatelessWidget {
                     CustomPaint(
                       size: const Size(140, 140),
                       painter: _DonutChartPainter(
+                        interested: interested,
                         applied: applied,
-                        interview: interview,
+                        interviewCalled: interviewCalled,
+                        interviewed: interviewed,
                         offer: offer,
                         rejected: rejected,
                         total: total,
@@ -466,14 +478,14 @@ class _ApplicationFunnel extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            '${_getInterviewRate().toStringAsFixed(1)}%',
+                            '$total',
                             style: const TextStyle(
                               fontSize: 28,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           Text(
-                            'Interview Rate',
+                            'Total',
                             style: TextStyle(
                               fontSize: 12,
                               color: isDark ? Colors.white60 : Colors.black54,
@@ -492,26 +504,32 @@ class _ApplicationFunnel extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _LegendItem(
-                      color: AppColors.statusApplied,
-                      label: 'Applied',
+                      color: AppColors.statusInterested,
+                      label: 'Interested ($interested)',
                       isDark: isDark,
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
+                    _LegendItem(
+                      color: AppColors.statusApplied,
+                      label: 'Applied ($applied)',
+                      isDark: isDark,
+                    ),
+                    const SizedBox(height: 8),
                     _LegendItem(
                       color: AppColors.statusInterview,
-                      label: 'Interview',
+                      label: 'Interview (${interviewCalled + interviewed})',
                       isDark: isDark,
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
                     _LegendItem(
-                      color: AppColors.primaryBlue,
-                      label: 'Offer',
+                      color: AppColors.statusOffer,
+                      label: 'Offer ($offer)',
                       isDark: isDark,
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
                     _LegendItem(
                       color: AppColors.statusRejected,
-                      label: 'Rejected',
+                      label: 'Rejected ($rejected)',
                       isDark: isDark,
                     ),
                   ],
@@ -559,15 +577,19 @@ class _LegendItem extends StatelessWidget {
 }
 
 class _DonutChartPainter extends CustomPainter {
+  final int interested;
   final int applied;
-  final int interview;
+  final int interviewCalled;
+  final int interviewed;
   final int offer;
   final int rejected;
   final int total;
 
   _DonutChartPainter({
+    required this.interested,
     required this.applied,
-    required this.interview,
+    required this.interviewCalled,
+    required this.interviewed,
     required this.offer,
     required this.rejected,
     required this.total,
@@ -602,11 +624,14 @@ class _DonutChartPainter extends CustomPainter {
     const double pi = 3.14159265359;
     double startAngle = -pi / 2; // Start at top (12 o'clock)
 
-    // Draw each segment with a tiny gap for visual separation
     final segments = [
+      {'count': interested, 'color': AppColors.statusInterested},
       {'count': applied, 'color': AppColors.statusApplied},
-      {'count': interview, 'color': AppColors.statusInterview},
-      {'count': offer, 'color': AppColors.primaryBlue},
+      {
+        'count': interviewCalled + interviewed,
+        'color': AppColors.statusInterview,
+      },
+      {'count': offer, 'color': AppColors.statusOffer},
       {'count': rejected, 'color': AppColors.statusRejected},
     ];
 
@@ -633,11 +658,18 @@ class _DonutChartPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
 
-class _MonthlyActivity extends StatelessWidget {
+class _MonthlyActivity extends StatefulWidget {
   final List<JobApplicationModel> jobs;
   final bool isDark;
 
   const _MonthlyActivity({required this.jobs, required this.isDark});
+
+  @override
+  State<_MonthlyActivity> createState() => _MonthlyActivityState();
+}
+
+class _MonthlyActivityState extends State<_MonthlyActivity> {
+  OverlayEntry? _overlayEntry;
 
   Map<String, int> _getMonthlyData() {
     final now = DateTime.now();
@@ -649,7 +681,7 @@ class _MonthlyActivity extends StatelessWidget {
       months[monthKey] = 0;
     }
 
-    for (var job in jobs) {
+    for (var job in widget.jobs) {
       final date = job.createdAt;
       final monthKey = _getMonthName(date.month);
       if (months.containsKey(monthKey)) {
@@ -680,13 +712,60 @@ class _MonthlyActivity extends StatelessWidget {
 
   int _getCurrentMonthCount() {
     final now = DateTime.now();
-    return jobs
+    return widget.jobs
         .where(
           (job) =>
               job.createdAt.year == now.year &&
               job.createdAt.month == now.month,
         )
         .length;
+  }
+
+  void _showTooltip(GlobalKey key, int count) {
+    _removeTooltip();
+    final renderBox = key.currentContext?.findRenderObject() as RenderBox?;
+    if (renderBox == null) return;
+
+    final offset = renderBox.localToGlobal(Offset.zero);
+    final size = renderBox.size;
+
+    _overlayEntry = OverlayEntry(
+      builder: (_) => Positioned(
+        left: offset.dx + size.width / 2 - 20,
+        top: offset.dy - 32,
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: widget.isDark ? Colors.white : Colors.black87,
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Text(
+              '$count',
+              style: TextStyle(
+                color: widget.isDark ? Colors.black : Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    Overlay.of(context).insert(_overlayEntry!);
+    Future.delayed(const Duration(seconds: 2), _removeTooltip);
+  }
+
+  void _removeTooltip() {
+    _overlayEntry?.remove();
+    _overlayEntry = null;
+  }
+
+  @override
+  void dispose() {
+    _removeTooltip();
+    super.dispose();
   }
 
   @override
@@ -697,11 +776,11 @@ class _MonthlyActivity extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.darkCard : Colors.white,
+        color: widget.isDark ? AppColors.darkCard : Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
+            color: Colors.black.withOpacity(widget.isDark ? 0.2 : 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -720,25 +799,12 @@ class _MonthlyActivity extends StatelessWidget {
             style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
-          Row(
-            children: [
-              Text(
-                'Last 6 months',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: isDark ? Colors.white60 : Colors.black54,
-                ),
-              ),
-              const SizedBox(width: 8),
-              const Text(
-                '+15%',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.green,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
+          Text(
+            'Last 6 months',
+            style: TextStyle(
+              fontSize: 14,
+              color: widget.isDark ? Colors.white60 : Colors.black54,
+            ),
           ),
           const SizedBox(height: 24),
           SizedBox(
@@ -747,6 +813,7 @@ class _MonthlyActivity extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: monthlyData.entries.map((entry) {
+                final barKey = GlobalKey();
                 final maxValue = monthlyData.values.reduce(
                   (a, b) => a > b ? a : b,
                 );
@@ -759,35 +826,43 @@ class _MonthlyActivity extends StatelessWidget {
                 final isCurrentMonth = entry.key == currentMonthName;
 
                 return Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 4),
-                        height: barHeight,
-                        decoration: BoxDecoration(
-                          color: isCurrentMonth
-                              ? AppColors.primaryBlue
-                              : (isDark ? Colors.white24 : Colors.black12),
-                          borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(4),
+                  child: GestureDetector(
+                    onTap: () => _showTooltip(barKey, entry.value),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Container(
+                          key: barKey,
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          height: barHeight,
+                          decoration: BoxDecoration(
+                            color: isCurrentMonth
+                                ? AppColors.primaryBlue
+                                : (widget.isDark
+                                      ? Colors.white24
+                                      : Colors.black12),
+                            borderRadius: const BorderRadius.vertical(
+                              top: Radius.circular(4),
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        entry.key,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: isCurrentMonth
-                              ? AppColors.primaryBlue
-                              : (isDark ? Colors.white60 : Colors.black54),
-                          fontWeight: isCurrentMonth
-                              ? FontWeight.bold
-                              : FontWeight.normal,
+                        const SizedBox(height: 8),
+                        Text(
+                          entry.key,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isCurrentMonth
+                                ? AppColors.primaryBlue
+                                : (widget.isDark
+                                      ? Colors.white60
+                                      : Colors.black54),
+                            fontWeight: isCurrentMonth
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 );
               }).toList(),
@@ -799,14 +874,22 @@ class _MonthlyActivity extends StatelessWidget {
   }
 }
 
-class _ApplicationTrend extends StatelessWidget {
+class _ApplicationTrend extends StatefulWidget {
   final List<JobApplicationModel> jobs;
   final bool isDark;
 
   const _ApplicationTrend({required this.jobs, required this.isDark});
 
+  @override
+  State<_ApplicationTrend> createState() => _ApplicationTrendState();
+}
+
+class _ApplicationTrendState extends State<_ApplicationTrend> {
+  int? _selectedIndex;
+  OverlayEntry? _overlayEntry;
+  final GlobalKey _chartKey = GlobalKey();
+
   List<double> _getTrendData() {
-    // Generate sample trend data based on last 12 weeks
     final data = <double>[];
     final now = DateTime.now();
 
@@ -814,11 +897,12 @@ class _ApplicationTrend extends StatelessWidget {
       final weekStart = now.subtract(Duration(days: 7 * i));
       final weekEnd = weekStart.add(const Duration(days: 7));
 
-      final count = jobs
-          .where((job) {
-            return job.createdAt.isAfter(weekStart) &&
-                job.createdAt.isBefore(weekEnd);
-          })
+      final count = widget.jobs
+          .where(
+            (job) =>
+                job.createdAt.isAfter(weekStart) &&
+                job.createdAt.isBefore(weekEnd),
+          )
           .length
           .toDouble();
 
@@ -828,18 +912,113 @@ class _ApplicationTrend extends StatelessWidget {
     return data;
   }
 
+  String _getTrendLabel() {
+    final data = _getTrendData();
+    if (data.length < 2) return 'No data';
+    final recent = data
+        .sublist(data.length ~/ 2)
+        .fold<double>(0, (a, b) => a + b);
+    final older = data
+        .sublist(0, data.length ~/ 2)
+        .fold<double>(0, (a, b) => a + b);
+    if (older == 0 && recent == 0) return 'No data';
+    if (older == 0) return 'Getting started';
+    final change = ((recent - older) / older * 100);
+    if (change > 0) return 'Trending Up';
+    if (change < 0) return 'Trending Down';
+    return 'Stable';
+  }
+
+  void _onTapOnChart(
+    TapDownDetails details,
+    List<double> data,
+    double chartWidth,
+  ) {
+    if (data.isEmpty || data.length < 2) return;
+
+    final stepX = chartWidth / (data.length - 1);
+    final tapX = details.localPosition.dx;
+    final index = (tapX / stepX).round().clamp(0, data.length - 1);
+
+    final maxValue = data.reduce((a, b) => a > b ? a : b);
+    final minValue = data.reduce((a, b) => a < b ? a : b);
+    final range = maxValue - minValue;
+    final normalizedValue = range > 0 ? (data[index] - minValue) / range : 0.5;
+    const chartHeight = 100.0;
+    final y =
+        chartHeight -
+        (normalizedValue * chartHeight * 0.8) -
+        (chartHeight * 0.1);
+
+    final chartBox = _chartKey.currentContext?.findRenderObject() as RenderBox?;
+    if (chartBox == null) return;
+    final chartGlobal = chartBox.localToGlobal(Offset.zero);
+    final pointGlobal = Offset(
+      chartGlobal.dx + index * stepX,
+      chartGlobal.dy + y,
+    );
+
+    setState(() => _selectedIndex = index);
+    _showTooltip(pointGlobal, data[index].toInt());
+  }
+
+  void _showTooltip(Offset globalPos, int count) {
+    _removeTooltip();
+
+    _overlayEntry = OverlayEntry(
+      builder: (_) => Positioned(
+        left: globalPos.dx - 20,
+        top: globalPos.dy - 36,
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: widget.isDark ? Colors.white : Colors.black87,
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Text(
+              '$count',
+              style: TextStyle(
+                color: widget.isDark ? Colors.black : Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    Overlay.of(context).insert(_overlayEntry!);
+    Future.delayed(const Duration(seconds: 2), _removeTooltip);
+  }
+
+  void _removeTooltip() {
+    _overlayEntry?.remove();
+    _overlayEntry = null;
+  }
+
+  @override
+  void dispose() {
+    _removeTooltip();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final trendData = _getTrendData();
+    final totalThisYear = widget.jobs
+        .where((j) => j.createdAt.year == DateTime.now().year)
+        .length;
 
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.darkCard : Colors.white,
+        color: widget.isDark ? AppColors.darkCard : Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
+            color: Colors.black.withOpacity(widget.isDark ? 0.2 : 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -853,40 +1032,37 @@ class _ApplicationTrend extends StatelessWidget {
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
-          const Text(
-            'Trending Up',
-            style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+          Text(
+            _getTrendLabel(),
+            style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
-          Row(
-            children: [
-              Text(
-                'This Year',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: isDark ? Colors.white60 : Colors.black54,
-                ),
-              ),
-              const SizedBox(width: 8),
-              const Text(
-                '+8%',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.green,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
+          Text(
+            '$totalThisYear this year · Last 12 weeks',
+            style: TextStyle(
+              fontSize: 14,
+              color: widget.isDark ? Colors.white60 : Colors.black54,
+            ),
           ),
           const SizedBox(height: 24),
           SizedBox(
             height: 100,
-            child: CustomPaint(
-              size: const Size(double.infinity, 100),
-              painter: _LineChartPainter(
-                data: trendData,
-                color: AppColors.primaryBlue,
-              ),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return GestureDetector(
+                  onTapDown: (details) =>
+                      _onTapOnChart(details, trendData, constraints.maxWidth),
+                  child: CustomPaint(
+                    key: _chartKey,
+                    size: Size(constraints.maxWidth, 100),
+                    painter: _LineChartPainter(
+                      data: trendData,
+                      color: AppColors.primaryBlue,
+                      selectedIndex: _selectedIndex,
+                    ),
+                  ),
+                );
+              },
             ),
           ),
         ],
@@ -898,8 +1074,13 @@ class _ApplicationTrend extends StatelessWidget {
 class _LineChartPainter extends CustomPainter {
   final List<double> data;
   final Color color;
+  final int? selectedIndex;
 
-  _LineChartPainter({required this.data, required this.color});
+  _LineChartPainter({
+    required this.data,
+    required this.color,
+    this.selectedIndex,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -950,6 +1131,31 @@ class _LineChartPainter extends CustomPainter {
       ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
 
     canvas.drawPath(fillPath, fillPaint);
+
+    // Draw selected point dot
+    if (selectedIndex != null &&
+        selectedIndex! >= 0 &&
+        selectedIndex! < data.length) {
+      final x = selectedIndex! * stepX;
+      final normalizedValue = range > 0
+          ? (data[selectedIndex!] - minValue) / range
+          : 0.5;
+      final y =
+          size.height -
+          (normalizedValue * size.height * 0.8) -
+          (size.height * 0.1);
+
+      final dotPaint = Paint()
+        ..color = color
+        ..style = PaintingStyle.fill;
+      canvas.drawCircle(Offset(x, y), 5, dotPaint);
+
+      final ringPaint = Paint()
+        ..color = Colors.white
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2;
+      canvas.drawCircle(Offset(x, y), 5, ringPaint);
+    }
   }
 
   @override

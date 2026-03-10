@@ -29,6 +29,7 @@ class _JobFormScreenState extends State<JobFormScreen> {
   JobSource _selectedSource = JobSource.linkedin;
   ApplicationStage _selectedStage = ApplicationStage.applied;
   SalaryCurrency _selectedCurrency = SalaryCurrency.usd;
+  JobType _selectedJobType = JobType.remote;
   DateTime? _applicationDate;
   DateTime? _deadline;
   String? _selectedResumeId;
@@ -59,6 +60,7 @@ class _JobFormScreenState extends State<JobFormScreen> {
     _jobDescriptionController.text = job.jobDescription;
     _selectedStage = job.stage;
     _selectedCurrency = job.salaryCurrency;
+    _selectedJobType = job.jobType;
     _applicationDate = job.applicationDate;
     _deadline = job.deadline;
     _selectedResumeId = job.resumeId;
@@ -66,12 +68,19 @@ class _JobFormScreenState extends State<JobFormScreen> {
 
     // Parse salary range if exists
     if (job.salaryRange != null) {
-      final parts = job.salaryRange!.split('-');
-      if (parts.length == 2) {
-        _minSalary =
-            double.tryParse(parts[0].replaceAll(RegExp(r'[^\d.]'), '')) ?? 60.0;
-        _maxSalary =
-            double.tryParse(parts[1].replaceAll(RegExp(r'[^\d.]'), '')) ?? 90.0;
+      // Extract all numbers from the salary range string
+      final numbers = RegExp(r'\d+\.?\d*').allMatches(job.salaryRange!);
+      final parsed = numbers
+          .map((m) => double.tryParse(m.group(0)!) ?? 0)
+          .toList();
+      if (parsed.length >= 2) {
+        _minSalary = parsed[0];
+        _maxSalary = parsed[1];
+        _salaryMinController.text = _minSalary.toInt().toString();
+        _salaryMaxController.text = _maxSalary.toInt().toString();
+      } else if (parsed.length == 1) {
+        _minSalary = parsed[0];
+        _maxSalary = parsed[0];
         _salaryMinController.text = _minSalary.toInt().toString();
         _salaryMaxController.text = _maxSalary.toInt().toString();
       }
@@ -106,8 +115,10 @@ class _JobFormScreenState extends State<JobFormScreen> {
       return;
     }
 
-    // Validate interview fields if stage is "Interview Called"
-    if (!asDraft && _selectedStage == ApplicationStage.interviewCalled) {
+    // Validate interview fields if stage is "Interview Called" or "Interviewed"
+    if (!asDraft &&
+        (_selectedStage == ApplicationStage.interviewCalled ||
+            _selectedStage == ApplicationStage.interviewed)) {
       if (_interviewScheduledDate == null || _interviewTime == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -144,9 +155,9 @@ class _JobFormScreenState extends State<JobFormScreen> {
       companyName: _companyController.text.trim(),
       jobTitle: _jobTitleController.text.trim(),
       source: _selectedSource,
-      salaryRange:
-          '${_selectedCurrency.symbol}${_minSalary.toInt()}K - ${_selectedCurrency.symbol}${_maxSalary.toInt()}K',
+      salaryRange: '${_minSalary.toInt()}K - ${_maxSalary.toInt()}K',
       salaryCurrency: _selectedCurrency,
+      jobType: _selectedJobType,
       expectedSalary: _expectedSalaryController.text.trim().isNotEmpty
           ? _expectedSalaryController.text.trim()
           : null,
@@ -276,6 +287,20 @@ class _JobFormScreenState extends State<JobFormScreen> {
                   setState(() => _selectedSource = value);
                 }
               },
+            ),
+            const SizedBox(height: 20),
+
+            // Job Type
+            Text('Job Type', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                _buildJobTypeChip('Remote', JobType.remote, isDark),
+                _buildJobTypeChip('Onsite', JobType.onsite, isDark),
+                _buildJobTypeChip('Hybrid', JobType.hybrid, isDark),
+              ],
             ),
             const SizedBox(height: 20),
 
@@ -459,8 +484,9 @@ class _JobFormScreenState extends State<JobFormScreen> {
             ),
             const SizedBox(height: 20),
 
-            // Interview Section (only show if stage is interviewCalled)
-            if (_selectedStage == ApplicationStage.interviewCalled) ...[
+            // Interview Section (show if stage is interviewCalled or interviewed)
+            if (_selectedStage == ApplicationStage.interviewCalled ||
+                _selectedStage == ApplicationStage.interviewed) ...[
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -860,6 +886,43 @@ class _JobFormScreenState extends State<JobFormScreen> {
             ),
             const SizedBox(height: 16),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildJobTypeChip(String label, JobType type, bool isDark) {
+    final isSelected = _selectedJobType == type;
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedJobType = type;
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? Theme.of(context).colorScheme.primary
+              : (isDark ? Colors.grey[800] : Colors.grey[100]),
+          borderRadius: BorderRadius.circular(20),
+          border: isSelected
+              ? null
+              : Border.all(
+                  color: isDark ? Colors.white24 : Colors.black12,
+                  width: 1,
+                ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected
+                ? Colors.white
+                : (isDark ? Colors.white70 : Colors.black87),
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+            fontSize: 14,
+          ),
         ),
       ),
     );

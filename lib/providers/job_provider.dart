@@ -16,34 +16,102 @@ class JobProvider with ChangeNotifier {
   bool _showDraftsOnly = false;
 
   List<JobApplicationModel> get jobs => _filteredJobs;
+  List<JobApplicationModel> get allJobs => _jobs;
   bool get isLoading => _isLoading;
   String? get error => _error;
   ApplicationStage? get filterStage => _filterStage;
   String get sortBy => _sortBy;
   bool get showDraftsOnly => _showDraftsOnly;
 
+  // Non-draft jobs for accurate statistics (interested stage is also treated as draft)
+  List<JobApplicationModel> get _nonDraftJobs => _jobs
+      .where((job) => !job.isDraft && job.stage != ApplicationStage.interested)
+      .toList();
+
   int get totalJobs => _jobs.length;
+  int get totalApplied => _nonDraftJobs.length;
   int get draftCount => _jobs.where((job) => job.isDraft).length;
-  int get appliedCount =>
-      _jobs.where((job) => job.stage == ApplicationStage.applied).length;
-  int get interviewCount => _jobs
-      .where(
-        (job) =>
-            job.stage == ApplicationStage.interviewCalled ||
-            job.stage == ApplicationStage.interviewed,
-      )
+  int get interestedCount => _nonDraftJobs
+      .where((job) => job.stage == ApplicationStage.interested)
       .length;
+  int get appliedCount => _nonDraftJobs
+      .where((job) => job.stage == ApplicationStage.applied)
+      .length;
+  int get interviewCalledCount => _nonDraftJobs
+      .where((job) => job.stage == ApplicationStage.interviewCalled)
+      .length;
+  int get interviewedCount => _nonDraftJobs
+      .where((job) => job.stage == ApplicationStage.interviewed)
+      .length;
+  int get interviewCount => interviewCalledCount + interviewedCount;
   int get offerCount =>
-      _jobs.where((job) => job.stage == ApplicationStage.offer).length;
-  int get rejectedCount =>
-      _jobs.where((job) => job.stage == ApplicationStage.rejected).length;
+      _nonDraftJobs.where((job) => job.stage == ApplicationStage.offer).length;
+  int get rejectedCount => _nonDraftJobs
+      .where((job) => job.stage == ApplicationStage.rejected)
+      .length;
+
+  /// Average days between applicationDate and interviewCallDate
+  /// for jobs that have both dates set. Returns null if no data.
+  double? get avgResponseDays {
+    final jobsWithResponse = _nonDraftJobs.where(
+      (job) => job.applicationDate != null && job.interviewCallDate != null,
+    );
+    if (jobsWithResponse.isEmpty) return null;
+
+    final totalDays = jobsWithResponse.fold<double>(0, (sum, job) {
+      return sum +
+          job.interviewCallDate!.difference(job.applicationDate!).inDays.abs();
+    });
+    return totalDays / jobsWithResponse.length;
+  }
+
+  /// Interview rate: percentage of non-draft jobs that reached interview stage
+  double get interviewRate {
+    if (totalApplied == 0) return 0;
+    return (interviewCount / totalApplied) * 100;
+  }
+
+  /// Offer rate: percentage of non-draft jobs that received offers
+  double get offerRate {
+    if (totalApplied == 0) return 0;
+    return (offerCount / totalApplied) * 100;
+  }
+
+  /// Month-over-month growth percentage for non-draft jobs
+  String get monthlyGrowth {
+    final now = DateTime.now();
+    final thisMonth = _nonDraftJobs.where(
+      (job) =>
+          job.createdAt.year == now.year && job.createdAt.month == now.month,
+    );
+    final lastMonth = _nonDraftJobs.where((job) {
+      final lm = DateTime(now.year, now.month - 1);
+      return job.createdAt.year == lm.year && job.createdAt.month == lm.month;
+    });
+
+    if (lastMonth.isEmpty) {
+      return thisMonth.isEmpty ? '0%' : '+${thisMonth.length}';
+    }
+    final change =
+        ((thisMonth.length - lastMonth.length) / lastMonth.length * 100);
+    if (change >= 0) return '+${change.toStringAsFixed(0)}%';
+    return '${change.toStringAsFixed(0)}%';
+  }
 
   void listenToJobs(String userId) {
-    _firestoreService.getJobApplicationsStream(userId).listen((jobs) {
-      _jobs = jobs;
-      _applyFiltersAndSort();
-      notifyListeners();
-    });
+    _firestoreService
+        .getJobApplicationsStream(userId)
+        .listen(
+          (jobs) {
+            _jobs = jobs;
+            _applyFiltersAndSort();
+            notifyListeners();
+          },
+          onError: (e) {
+            _error = 'Failed to sync jobs: $e';
+            notifyListeners();
+          },
+        );
   }
 
   Future<void> loadJobs(String userId) async {
@@ -176,9 +244,11 @@ class JobProvider with ChangeNotifier {
           .toList();
     }
 
-    // Apply draft filter
+    // Apply draft filter (only interested stage counts as draft)
     if (_showDraftsOnly) {
-      _filteredJobs = _filteredJobs.where((job) => job.isDraft).toList();
+      _filteredJobs = _filteredJobs
+          .where((job) => job.stage == ApplicationStage.interested)
+          .toList();
     }
 
     // Apply sorting
@@ -187,7 +257,11 @@ class JobProvider with ChangeNotifier {
         _filteredJobs.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
         break;
       case 'createdAt':
-        _filteredJobs.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        _filteredJobs.sort((a, b) {
+          final aDate = a.applicationDate ?? a.createdAt;
+          final bDate = b.applicationDate ?? b.createdAt;
+          return bDate.compareTo(aDate);
+        });
         break;
       case 'deadline':
         _filteredJobs.sort((a, b) {
