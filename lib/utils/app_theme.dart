@@ -2,19 +2,16 @@ import 'package:flutter/material.dart';
 import '../models/job_application_model.dart';
 
 class AppColors {
-  // Brand Colors - Deep Forest Green + Orange Accent theme
-  static const Color primaryGreen = Color(0xFF1B4332); // Deep forest green
-  static const Color primaryGreenDark = Color(0xFF163B2B); // Darker shade
-  static const Color primaryDark = Color(
-    0xFF0D2818,
-  ); // Darkest green for contrast
-  static const Color accentOrange = Colors.black;
-  //  Color.fromARGB(255, 232, 152, 23); // Orange accent
-  static const Color accentOrangeDark = Color(0xFFE09000); // Darker orange
+  // Brand Colors - Blue Primary theme
+  static const Color primaryGreen = Color(0xFF2F6BF4); // Primary blue
+  static const Color primaryGreenDark = Color(0xFF1A56E0); // Darker shade
+  static const Color primaryDark = Color(0xFF1A56E0); // Dark for contrast
+  static const Color accentOrange = Color(0xFF2F6BF4); // Same as primary
+  static const Color accentOrangeDark = Color(0xFF1A56E0); // Darker shade
 
   // Legacy aliases for compatibility
-  static const Color primaryBlue = primaryGreen;
-  static const Color accentBlue = accentOrange;
+  static const Color primaryBlue = Color(0xFF2F6BF4); // Primary color
+  static const Color accentBlue = primaryBlue;
 
   // Light Theme Colors (Default)
   static const Color lightBackground = Color(0xFFF8F9FA); // Soft off-white
@@ -26,14 +23,29 @@ class AppColors {
   static const Color darkSurface = Color(0xFF171717); // Slightly lighter
   static const Color darkCard = Color(0xFF1C1C1C); // Card background
 
-  // Status Colors (matching reference images)
-  static const Color statusInterview = Color(0xFFB8DB80); // Green - Interview
-  static const Color statusApplied = Color(
-    0xFFFFB946,
-  ); // Yellow/Orange - Applied
-  static const Color statusRejected = Color(0xFFFF6B6B); // Red - Rejected
-  static const Color statusOffer = Color(0xFF9C27B0); // Purple - Offer
-  static const Color statusInterested = Color(0xFF64B5F6); // Blue - Interested
+  // Status Colors
+  static const Color statusInterview = Color.fromARGB(
+    255,
+    247,
+    181,
+    50,
+  ); // Purple - Interview
+  static const Color statusApplied = Color.fromARGB(
+    255,
+    154,
+    231,
+    102,
+  ); // Red/Coral - Applied
+  static const Color statusRejected = Color(0xFFF44336); // Red - Rejected
+  static const Color statusOffer = Color.fromARGB(
+    255,
+    113,
+    8,
+    212,
+  ); // Blue - Offer
+  static const Color statusInterested = Color(
+    0xFF2F6BF4,
+  ); // Primary Blue - Interested
 
   // Text Colors - Light Theme
   static const Color lightTextPrimary = Color(0xFF1A1F2E);
@@ -61,9 +73,9 @@ class AppColors {
       case ApplicationStage.applied:
         return statusApplied;
       case ApplicationStage.interviewCalled:
-        return const Color(0xFF00BCD4); // Cyan - Called for interview
+        return statusInterview; // Purple - Called for interview
       case ApplicationStage.interviewed:
-        return statusInterview; // Green - Already interviewed
+        return statusInterview; // Purple - Already interviewed
       case ApplicationStage.offer:
         return statusOffer;
       case ApplicationStage.rejected:

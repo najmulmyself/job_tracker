@@ -45,8 +45,6 @@ class SettingsScreen extends StatelessWidget {
                   _buildSectionHeader('APPEARANCE', isDark),
                   const SizedBox(height: 12),
                   _buildAppearanceCard(context, isDark),
-                  const SizedBox(height: 16),
-                  _buildColorPaletteCard(context, isDark),
                   const SizedBox(height: 24),
 
                   // General Section
@@ -263,116 +261,6 @@ class SettingsScreen extends StatelessWidget {
                     ),
                   ),
                 ],
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildColorPaletteCard(BuildContext context, bool isDark) {
-    return Consumer<ThemeProvider>(
-      builder: (context, themeProvider, _) {
-        return Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: isDark ? AppColors.darkCard : Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      gradient: themeProvider.primaryGradient,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Icon(
-                      Icons.palette_outlined,
-                      color: themeProvider.onPrimaryColor,
-                      size: 22,
-                    ),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Color Palette',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: isDark
-                                ? Colors.white
-                                : AppColors.primaryDark,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          'Choose your primary accent color',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: isDark ? Colors.white54 : Colors.black54,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Wrap(
-                spacing: 12,
-                runSpacing: 12,
-                children: AppColorPalette.values.map((palette) {
-                  final isSelected = themeProvider.colorPalette == palette;
-                  return GestureDetector(
-                    onTap: () => themeProvider.setColorPalette(palette),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: palette.primaryColor,
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: isSelected
-                              ? (isDark ? Colors.white : AppColors.primaryDark)
-                              : Colors.transparent,
-                          width: 3,
-                        ),
-                        boxShadow: isSelected
-                            ? [
-                                BoxShadow(
-                                  color: palette.primaryColor.withOpacity(0.4),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ]
-                            : null,
-                      ),
-                      child: isSelected
-                          ? Icon(
-                              Icons.check,
-                              color: palette.onPrimaryColor,
-                              size: 22,
-                            )
-                          : null,
-                    ),
-                  );
-                }).toList(),
               ),
             ],
           ),

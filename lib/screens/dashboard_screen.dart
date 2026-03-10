@@ -340,7 +340,7 @@ class _StatsCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 40,
                       fontWeight: FontWeight.bold,
-                      color: isDark ? Colors.white : AppColors.primaryDark,
+                      color: isDark ? Colors.white : AppColors.lightTextPrimary,
                       height: 1,
                     ),
                   ),
