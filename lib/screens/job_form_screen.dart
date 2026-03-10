@@ -231,367 +231,570 @@ class _JobFormScreenState extends State<JobFormScreen> {
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(16),
           children: [
-            // Company Name
-            Text(
-              'Company Name',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 8),
-            TextFormField(
-              controller: _companyController,
-              style: Theme.of(context).textTheme.bodyLarge,
-              decoration: const InputDecoration(
-                hintText: 'Enter company name',
-                border: OutlineInputBorder(),
-              ),
-              validator: Validators.validateCompanyName,
-            ),
-            const SizedBox(height: 20),
-
-            // Job Title
-            Text('Job Title', style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 8),
-            TextFormField(
-              controller: _jobTitleController,
-              style: Theme.of(context).textTheme.bodyLarge,
-              decoration: const InputDecoration(
-                hintText: 'Enter job title',
-                border: OutlineInputBorder(),
-              ),
-              validator: Validators.validateJobTitle,
-            ),
-            const SizedBox(height: 20),
-
-            // Source
-            Text('Source', style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 8),
-            DropdownButtonFormField<JobSource>(
-              initialValue: _selectedSource,
-              style: Theme.of(context).textTheme.bodyLarge,
-              decoration: const InputDecoration(
-                hintText: 'e.g., LinkedIn, Indeed, Referral',
-                border: OutlineInputBorder(),
-              ),
-              items: JobSource.values
-                  .map(
-                    (source) => DropdownMenuItem(
-                      value: source,
-                      child: Text(source.displayName),
-                    ),
-                  )
-                  .toList(),
-              onChanged: (value) {
-                if (value != null) {
-                  setState(() => _selectedSource = value);
-                }
-              },
-            ),
-            const SizedBox(height: 20),
-
-            // Job Type
-            Text('Job Type', style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
+            // Card 1: Basic Info
+            _buildSectionCard(
+              context,
+              isDark,
+              title: 'Basic Information',
+              icon: Icons.business_outlined,
               children: [
-                _buildJobTypeChip('Remote', JobType.remote, isDark),
-                _buildJobTypeChip('Onsite', JobType.onsite, isDark),
-                _buildJobTypeChip('Hybrid', JobType.hybrid, isDark),
-              ],
-            ),
-            const SizedBox(height: 20),
-
-            // Salary Currency
-            Text(
-              'Salary Currency',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                _buildCurrencyChip('BDT', SalaryCurrency.bdt, isDark),
-                _buildCurrencyChip('USD', SalaryCurrency.usd, isDark),
-                _buildCurrencyChip('EUR', SalaryCurrency.eur, isDark),
-                _buildCurrencyChip('INR', SalaryCurrency.inr, isDark),
-                _buildCurrencyChip('GBP', SalaryCurrency.gbp, isDark),
-                _buildCurrencyChip('Other', SalaryCurrency.other, isDark),
-              ],
-            ),
-            const SizedBox(height: 20),
-
-            // Salary Range (Slider)
-            Text(
-              'Salary Range (Advertised)',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 16),
-
-            // Manual input fields for salary range
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    controller: _salaryMinController,
-                    keyboardType: TextInputType.number,
-                    style: Theme.of(context).textTheme.bodyLarge,
-                    decoration: InputDecoration(
-                      labelText: 'Min (K)',
-                      prefixText: _selectedCurrency.symbol,
-                      border: const OutlineInputBorder(),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 14,
-                      ),
-                    ),
-                    onChanged: (value) {
-                      final parsed = double.tryParse(value);
-                      if (parsed != null && parsed >= 0 && parsed <= 200) {
-                        setState(() {
-                          _minSalary = parsed;
-                          if (_minSalary > _maxSalary) {
-                            _maxSalary = _minSalary;
-                            _salaryMaxController.text = _maxSalary
-                                .toInt()
-                                .toString();
-                          }
-                        });
-                      }
-                    },
+                // Company Name
+                Text(
+                  'Company Name',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                const SizedBox(height: 8),
+                TextFormField(
+                  controller: _companyController,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                  decoration: const InputDecoration(
+                    hintText: 'Enter company name',
+                    border: OutlineInputBorder(),
                   ),
+                  validator: Validators.validateCompanyName,
                 ),
-                const SizedBox(width: 16),
-                const Text('—', style: TextStyle(fontSize: 20)),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: TextFormField(
-                    controller: _salaryMaxController,
-                    keyboardType: TextInputType.number,
-                    style: Theme.of(context).textTheme.bodyLarge,
-                    decoration: InputDecoration(
-                      labelText: 'Max (K)',
-                      prefixText: _selectedCurrency.symbol,
-                      border: const OutlineInputBorder(),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 14,
-                      ),
-                    ),
-                    onChanged: (value) {
-                      final parsed = double.tryParse(value);
-                      if (parsed != null && parsed >= 0 && parsed <= 200) {
-                        setState(() {
-                          _maxSalary = parsed;
-                          if (_maxSalary < _minSalary) {
-                            _minSalary = _maxSalary;
-                            _salaryMinController.text = _minSalary
-                                .toInt()
-                                .toString();
-                          }
-                        });
-                      }
-                    },
+                const SizedBox(height: 16),
+
+                // Job Title
+                Text(
+                  'Job Title',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                const SizedBox(height: 8),
+                TextFormField(
+                  controller: _jobTitleController,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                  decoration: const InputDecoration(
+                    hintText: 'Enter job title',
+                    border: OutlineInputBorder(),
                   ),
+                  validator: Validators.validateJobTitle,
+                ),
+                const SizedBox(height: 16),
+
+                // Source
+                Text('Source', style: Theme.of(context).textTheme.titleSmall),
+                const SizedBox(height: 8),
+                DropdownButtonFormField<JobSource>(
+                  initialValue: _selectedSource,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                  decoration: const InputDecoration(
+                    hintText: 'e.g., LinkedIn, Indeed, Referral',
+                    border: OutlineInputBorder(),
+                  ),
+                  items: JobSource.values
+                      .map(
+                        (source) => DropdownMenuItem(
+                          value: source,
+                          child: Text(source.displayName),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() => _selectedSource = value);
+                    }
+                  },
                 ),
               ],
             ),
             const SizedBox(height: 12),
 
-            // Slider for quick adjustment
-            RangeSlider(
-              values: RangeValues(_minSalary, _maxSalary),
-              min: 0,
-              max: 200,
-              divisions: 40,
-              labels: RangeLabels(
-                '${_selectedCurrency.symbol}${_minSalary.toInt()}K',
-                '${_selectedCurrency.symbol}${_maxSalary.toInt()}K',
-              ),
-              onChanged: (RangeValues values) {
-                setState(() {
-                  _minSalary = values.start;
-                  _maxSalary = values.end;
-                  _salaryMinController.text = _minSalary.toInt().toString();
-                  _salaryMaxController.text = _maxSalary.toInt().toString();
-                });
-              },
-            ),
-            const SizedBox(height: 20),
-
-            // Expected Salary
-            Text(
-              'Expected Salary',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 8),
-            TextFormField(
-              controller: _expectedSalaryController,
-              keyboardType: TextInputType.number,
-              style: Theme.of(context).textTheme.bodyLarge,
-              decoration: const InputDecoration(
-                hintText: 'Your target salary',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // Job Description
-            Text(
-              'Job Description',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 8),
-            TextFormField(
-              controller: _jobDescriptionController,
-              style: Theme.of(context).textTheme.bodyLarge,
-              maxLines: 5,
-              decoration: const InputDecoration(
-                hintText: 'Paste the job description here...',
-                border: OutlineInputBorder(),
-                alignLabelWithHint: true,
-              ),
-              validator: Validators.validateJobDescription,
-            ),
-            const SizedBox(height: 20),
-
-            // Application Stage
-            Text(
-              'Application Stage',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 8),
-            DropdownButtonFormField<ApplicationStage>(
-              initialValue: _selectedStage,
-              style: Theme.of(context).textTheme.bodyLarge,
-              decoration: const InputDecoration(border: OutlineInputBorder()),
-              items: ApplicationStage.values
-                  .map(
-                    (stage) => DropdownMenuItem(
-                      value: stage,
-                      child: Text(stage.displayName),
-                    ),
-                  )
-                  .toList(),
-              onChanged: (value) {
-                if (value != null) {
-                  setState(() => _selectedStage = value);
-                }
-              },
-            ),
-            const SizedBox(height: 20),
-
-            // Interview Section (show if stage is interviewCalled or interviewed)
-            if (_selectedStage == ApplicationStage.interviewCalled ||
-                _selectedStage == ApplicationStage.interviewed) ...[
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? Colors.cyan.withOpacity(0.1)
-                      : Colors.cyan.withOpacity(0.05),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.cyan.withOpacity(0.3)),
+            // Card 2: Compensation
+            _buildSectionCard(
+              context,
+              isDark,
+              title: 'Compensation',
+              icon: Icons.payments_outlined,
+              children: [
+                // Salary Currency
+                Text(
+                  'Salary Currency',
+                  style: Theme.of(context).textTheme.titleSmall,
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
                   children: [
-                    Row(
+                    _buildCurrencyChip('BDT', SalaryCurrency.bdt, isDark),
+                    _buildCurrencyChip('USD', SalaryCurrency.usd, isDark),
+                    _buildCurrencyChip('EUR', SalaryCurrency.eur, isDark),
+                    _buildCurrencyChip('INR', SalaryCurrency.inr, isDark),
+                    _buildCurrencyChip('GBP', SalaryCurrency.gbp, isDark),
+                    _buildCurrencyChip('Other', SalaryCurrency.other, isDark),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                // Salary Range
+                Text(
+                  'Salary Range (Advertised)',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: _salaryMinController,
+                        keyboardType: TextInputType.number,
+                        style: Theme.of(context).textTheme.bodyLarge,
+                        decoration: InputDecoration(
+                          labelText: 'Min (K)',
+                          prefixText: _selectedCurrency.symbol,
+                          border: const OutlineInputBorder(),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 14,
+                          ),
+                        ),
+                        onChanged: (value) {
+                          final parsed = double.tryParse(value);
+                          if (parsed != null && parsed >= 0 && parsed <= 200) {
+                            setState(() {
+                              _minSalary = parsed;
+                              if (_minSalary > _maxSalary) {
+                                _maxSalary = _minSalary;
+                                _salaryMaxController.text = _maxSalary
+                                    .toInt()
+                                    .toString();
+                              }
+                            });
+                          }
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    const Text('—', style: TextStyle(fontSize: 20)),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: TextFormField(
+                        controller: _salaryMaxController,
+                        keyboardType: TextInputType.number,
+                        style: Theme.of(context).textTheme.bodyLarge,
+                        decoration: InputDecoration(
+                          labelText: 'Max (K)',
+                          prefixText: _selectedCurrency.symbol,
+                          border: const OutlineInputBorder(),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 14,
+                          ),
+                        ),
+                        onChanged: (value) {
+                          final parsed = double.tryParse(value);
+                          if (parsed != null && parsed >= 0 && parsed <= 200) {
+                            setState(() {
+                              _maxSalary = parsed;
+                              if (_maxSalary < _minSalary) {
+                                _minSalary = _maxSalary;
+                                _salaryMinController.text = _minSalary
+                                    .toInt()
+                                    .toString();
+                              }
+                            });
+                          }
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                RangeSlider(
+                  values: RangeValues(_minSalary, _maxSalary),
+                  min: 0,
+                  max: 200,
+                  divisions: 40,
+                  labels: RangeLabels(
+                    '${_selectedCurrency.symbol}${_minSalary.toInt()}K',
+                    '${_selectedCurrency.symbol}${_maxSalary.toInt()}K',
+                  ),
+                  onChanged: (RangeValues values) {
+                    setState(() {
+                      _minSalary = values.start;
+                      _maxSalary = values.end;
+                      _salaryMinController.text = _minSalary.toInt().toString();
+                      _salaryMaxController.text = _maxSalary.toInt().toString();
+                    });
+                  },
+                ),
+                const SizedBox(height: 12),
+
+                // Expected Salary
+                Text(
+                  'Expected Salary',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                const SizedBox(height: 8),
+                TextFormField(
+                  controller: _expectedSalaryController,
+                  keyboardType: TextInputType.number,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                  decoration: const InputDecoration(
+                    hintText: 'Your target salary',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            // Card 3: Job Details
+            _buildSectionCard(
+              context,
+              isDark,
+              title: 'Job Details',
+              icon: Icons.work_outline,
+              children: [
+                // Job Type
+                Text('Job Type', style: Theme.of(context).textTheme.titleSmall),
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _buildJobTypeChip('Remote', JobType.remote, isDark),
+                    _buildJobTypeChip('Onsite', JobType.onsite, isDark),
+                    _buildJobTypeChip('Hybrid', JobType.hybrid, isDark),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                // Job Description
+                Text(
+                  'Job Description',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                const SizedBox(height: 8),
+                TextFormField(
+                  controller: _jobDescriptionController,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                  maxLines: 5,
+                  decoration: const InputDecoration(
+                    hintText: 'Paste the job description here...',
+                    border: OutlineInputBorder(),
+                    alignLabelWithHint: true,
+                  ),
+                  validator: Validators.validateJobDescription,
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            // Card 4: Application & Tracking
+            _buildSectionCard(
+              context,
+              isDark,
+              title: 'Application & Tracking',
+              icon: Icons.timeline_outlined,
+              children: [
+                // Application Stage
+                Text(
+                  'Application Stage',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                const SizedBox(height: 8),
+                DropdownButtonFormField<ApplicationStage>(
+                  initialValue: _selectedStage,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                  ),
+                  items: ApplicationStage.values
+                      .map(
+                        (stage) => DropdownMenuItem(
+                          value: stage,
+                          child: Text(stage.displayName),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() => _selectedStage = value);
+                    }
+                  },
+                ),
+                const SizedBox(height: 16),
+
+                // Interview Section (conditional)
+                if (_selectedStage == ApplicationStage.interviewCalled ||
+                    _selectedStage == ApplicationStage.interviewed) ...[
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? Colors.cyan.withOpacity(0.1)
+                          : Colors.cyan.withOpacity(0.05),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.cyan.withOpacity(0.3)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(Icons.phone_in_talk, color: Colors.cyan),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Interview Call Information',
-                                style: Theme.of(context).textTheme.titleMedium
-                                    ?.copyWith(
-                                      color: Colors.cyan,
-                                      fontWeight: FontWeight.bold,
+                        Row(
+                          children: [
+                            const Icon(Icons.phone_in_talk, color: Colors.cyan),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Interview Call Information',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(
+                                          color: Colors.cyan,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                  ),
+                                  Text(
+                                    '* Interview date & time required',
+                                    style: Theme.of(context).textTheme.bodySmall
+                                        ?.copyWith(
+                                          color: Colors.red,
+                                          fontSize: 12,
+                                        ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Interview Call Date
+                        Text(
+                          'Interview Call Received',
+                          style: Theme.of(context).textTheme.titleSmall,
+                        ),
+                        const SizedBox(height: 8),
+                        InkWell(
+                          onTap: () async {
+                            final date = await showDatePicker(
+                              context: context,
+                              initialDate: _interviewCallDate ?? DateTime.now(),
+                              firstDate: DateTime(2020),
+                              lastDate: DateTime.now(),
+                            );
+                            if (date != null) {
+                              setState(() => _interviewCallDate = date);
+                            }
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: isDark
+                                    ? Colors.white.withOpacity(0.2)
+                                    : Colors.black.withOpacity(0.2),
+                              ),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    _interviewCallDate != null
+                                        ? '${_interviewCallDate!.day}/${_interviewCallDate!.month}/${_interviewCallDate!.year}'
+                                        : 'Select date',
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.bodyLarge,
+                                  ),
+                                ),
+                                const Icon(
+                                  Icons.calendar_today_outlined,
+                                  size: 20,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Interview Scheduled Date
+                        Text(
+                          'Interview Scheduled Date',
+                          style: Theme.of(context).textTheme.titleSmall,
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: InkWell(
+                                onTap: () async {
+                                  final date = await showDatePicker(
+                                    context: context,
+                                    initialDate:
+                                        _interviewScheduledDate ??
+                                        DateTime.now(),
+                                    firstDate: DateTime.now(),
+                                    lastDate: DateTime(2030),
+                                  );
+                                  if (date != null) {
+                                    setState(
+                                      () => _interviewScheduledDate = date,
+                                    );
+                                  }
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: isDark
+                                          ? Colors.white.withOpacity(0.2)
+                                          : Colors.black.withOpacity(0.2),
                                     ),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          _interviewScheduledDate != null
+                                              ? '${_interviewScheduledDate!.day}/${_interviewScheduledDate!.month}/${_interviewScheduledDate!.year}'
+                                              : 'Select date',
+                                          style: Theme.of(
+                                            context,
+                                          ).textTheme.bodyLarge,
+                                        ),
+                                      ),
+                                      const Icon(
+                                        Icons.calendar_today_outlined,
+                                        size: 20,
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ),
-                              Text(
-                                '* Interview date & time required',
-                                style: Theme.of(context).textTheme.bodySmall
-                                    ?.copyWith(color: Colors.red, fontSize: 12),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: InkWell(
+                                onTap: () async {
+                                  final time = await showTimePicker(
+                                    context: context,
+                                    initialTime:
+                                        _interviewTime ?? TimeOfDay.now(),
+                                  );
+                                  if (time != null) {
+                                    setState(() => _interviewTime = time);
+                                  }
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: isDark
+                                          ? Colors.white.withOpacity(0.2)
+                                          : Colors.black.withOpacity(0.2),
+                                    ),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          _interviewTime != null
+                                              ? _interviewTime!.format(context)
+                                              : 'Select time',
+                                          style: Theme.of(
+                                            context,
+                                          ).textTheme.bodyLarge,
+                                        ),
+                                      ),
+                                      const Icon(Icons.access_time, size: 20),
+                                    ],
+                                  ),
+                                ),
                               ),
-                            ],
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Interview Type
+                        Text(
+                          'Interview Type',
+                          style: Theme.of(context).textTheme.titleSmall,
+                        ),
+                        const SizedBox(height: 8),
+                        DropdownButtonFormField<String>(
+                          initialValue: _interviewType,
+                          style: Theme.of(context).textTheme.bodyLarge,
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                            hintText: 'Select interview type',
+                          ),
+                          items: const [
+                            DropdownMenuItem(
+                              value: 'Phone',
+                              child: Text('Phone'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'Video',
+                              child: Text('Video'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'In-Person',
+                              child: Text('In-Person'),
+                            ),
+                          ],
+                          onChanged: (value) {
+                            setState(() => _interviewType = value);
+                          },
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Interview Notes
+                        Text(
+                          'Interview Notes',
+                          style: Theme.of(context).textTheme.titleSmall,
+                        ),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: _interviewNotesController,
+                          style: Theme.of(context).textTheme.bodyLarge,
+                          maxLines: 3,
+                          decoration: const InputDecoration(
+                            hintText: 'Notes from the interview call...',
+                            border: OutlineInputBorder(),
+                            alignLabelWithHint: true,
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
+                  ),
+                  const SizedBox(height: 16),
+                ],
 
-                    // Interview Call Date
-                    Text(
-                      'Interview Call Received',
-                      style: Theme.of(context).textTheme.titleSmall,
-                    ),
-                    const SizedBox(height: 8),
-                    InkWell(
-                      onTap: () async {
-                        final date = await showDatePicker(
-                          context: context,
-                          initialDate: _interviewCallDate ?? DateTime.now(),
-                          firstDate: DateTime(2020),
-                          lastDate: DateTime.now(),
-                        );
-                        if (date != null) {
-                          setState(() => _interviewCallDate = date);
-                        }
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: isDark
-                                ? Colors.white.withOpacity(0.2)
-                                : Colors.black.withOpacity(0.2),
+                // Date Pickers Row
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Application Date',
+                            style: Theme.of(context).textTheme.titleSmall,
                           ),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                _interviewCallDate != null
-                                    ? '${_interviewCallDate!.day}/${_interviewCallDate!.month}/${_interviewCallDate!.year}'
-                                    : 'Select date',
-                                style: Theme.of(context).textTheme.bodyLarge,
-                              ),
-                            ),
-                            const Icon(Icons.calendar_today_outlined, size: 20),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Interview Scheduled Date
-                    Text(
-                      'Interview Scheduled Date',
-                      style: Theme.of(context).textTheme.titleSmall,
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: InkWell(
+                          const SizedBox(height: 8),
+                          InkWell(
                             onTap: () async {
                               final date = await showDatePicker(
                                 context: context,
-                                initialDate:
-                                    _interviewScheduledDate ?? DateTime.now(),
-                                firstDate: DateTime.now(),
+                                initialDate: _applicationDate ?? DateTime.now(),
+                                firstDate: DateTime(2020),
                                 lastDate: DateTime(2030),
                               );
                               if (date != null) {
-                                setState(() => _interviewScheduledDate = date);
+                                setState(() => _applicationDate = date);
                               }
                             },
                             child: Container(
@@ -608,8 +811,8 @@ class _JobFormScreenState extends State<JobFormScreen> {
                                 children: [
                                   Expanded(
                                     child: Text(
-                                      _interviewScheduledDate != null
-                                          ? '${_interviewScheduledDate!.day}/${_interviewScheduledDate!.month}/${_interviewScheduledDate!.year}'
+                                      _applicationDate != null
+                                          ? '${_applicationDate!.day}/${_applicationDate!.month}/${_applicationDate!.year}'
                                           : 'Select date',
                                       style: Theme.of(
                                         context,
@@ -624,17 +827,29 @@ class _JobFormScreenState extends State<JobFormScreen> {
                               ),
                             ),
                           ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: InkWell(
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Follow-up Deadline',
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
+                          const SizedBox(height: 8),
+                          InkWell(
                             onTap: () async {
-                              final time = await showTimePicker(
+                              final date = await showDatePicker(
                                 context: context,
-                                initialTime: _interviewTime ?? TimeOfDay.now(),
+                                initialDate: _deadline ?? DateTime.now(),
+                                firstDate: DateTime.now(),
+                                lastDate: DateTime(2030),
                               );
-                              if (time != null) {
-                                setState(() => _interviewTime = time);
+                              if (date != null) {
+                                setState(() => _deadline = date);
                               }
                             },
                             child: Container(
@@ -651,221 +866,70 @@ class _JobFormScreenState extends State<JobFormScreen> {
                                 children: [
                                   Expanded(
                                     child: Text(
-                                      _interviewTime != null
-                                          ? _interviewTime!.format(context)
-                                          : 'Select time',
+                                      _deadline != null
+                                          ? '${_deadline!.day}/${_deadline!.month}/${_deadline!.year}'
+                                          : 'Select date',
                                       style: Theme.of(
                                         context,
                                       ).textTheme.bodyLarge,
                                     ),
                                   ),
-                                  const Icon(Icons.access_time, size: 20),
+                                  const Icon(
+                                    Icons.calendar_today_outlined,
+                                    size: 20,
+                                  ),
                                 ],
                               ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Interview Type
-                    Text(
-                      'Interview Type',
-                      style: Theme.of(context).textTheme.titleSmall,
-                    ),
-                    const SizedBox(height: 8),
-                    DropdownButtonFormField<String>(
-                      initialValue: _interviewType,
-                      style: Theme.of(context).textTheme.bodyLarge,
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                        hintText: 'Select interview type',
-                      ),
-                      items: const [
-                        DropdownMenuItem(value: 'Phone', child: Text('Phone')),
-                        DropdownMenuItem(value: 'Video', child: Text('Video')),
-                        DropdownMenuItem(
-                          value: 'In-Person',
-                          child: Text('In-Person'),
-                        ),
-                      ],
-                      onChanged: (value) {
-                        setState(() => _interviewType = value);
-                      },
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Interview Notes
-                    Text(
-                      'Interview Notes',
-                      style: Theme.of(context).textTheme.titleSmall,
-                    ),
-                    const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _interviewNotesController,
-                      style: Theme.of(context).textTheme.bodyLarge,
-                      maxLines: 3,
-                      decoration: const InputDecoration(
-                        hintText: 'Notes from the interview call...',
-                        border: OutlineInputBorder(),
-                        alignLabelWithHint: true,
+                        ],
                       ),
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(height: 20),
-            ],
+                const SizedBox(height: 16),
 
-            // Date Pickers Row
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Application Date',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      const SizedBox(height: 8),
-                      InkWell(
-                        onTap: () async {
-                          final date = await showDatePicker(
-                            context: context,
-                            initialDate: _applicationDate ?? DateTime.now(),
-                            firstDate: DateTime(2020),
-                            lastDate: DateTime(2030),
-                          );
-                          if (date != null) {
-                            setState(() => _applicationDate = date);
-                          }
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: isDark
-                                  ? Colors.white.withOpacity(0.2)
-                                  : Colors.black.withOpacity(0.2),
-                            ),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  _applicationDate != null
-                                      ? '${_applicationDate!.day}/${_applicationDate!.month}/${_applicationDate!.year}'
-                                      : 'Select date',
-                                  style: Theme.of(context).textTheme.bodyLarge,
-                                ),
-                              ),
-                              const Icon(
-                                Icons.calendar_today_outlined,
-                                size: 20,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                // Resume Used
+                Text(
+                  'Resume Used',
+                  style: Theme.of(context).textTheme.titleSmall,
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Follow-up Deadline',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      const SizedBox(height: 8),
-                      InkWell(
-                        onTap: () async {
-                          final date = await showDatePicker(
-                            context: context,
-                            initialDate: _deadline ?? DateTime.now(),
-                            firstDate: DateTime.now(),
-                            lastDate: DateTime(2030),
-                          );
-                          if (date != null) {
-                            setState(() => _deadline = date);
-                          }
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: isDark
-                                  ? Colors.white.withOpacity(0.2)
-                                  : Colors.black.withOpacity(0.2),
-                            ),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  _deadline != null
-                                      ? '${_deadline!.day}/${_deadline!.month}/${_deadline!.year}'
-                                      : 'Select date',
-                                  style: Theme.of(context).textTheme.bodyLarge,
-                                ),
-                              ),
-                              const Icon(
-                                Icons.calendar_today_outlined,
-                                size: 20,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
+                const SizedBox(height: 8),
+                DropdownButtonFormField<String>(
+                  initialValue: _selectedResumeId,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                  decoration: const InputDecoration(
+                    hintText: 'Select a resume version',
+                    border: OutlineInputBorder(),
+                  ),
+                  items: const [
+                    DropdownMenuItem(
+                      value: null,
+                      child: Text('Select a resume version'),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    setState(() => _selectedResumeId = value);
+                  },
+                ),
+                const SizedBox(height: 16),
+
+                // Notes
+                Text('Notes', style: Theme.of(context).textTheme.titleSmall),
+                const SizedBox(height: 8),
+                TextFormField(
+                  controller: _notesController,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                  maxLines: 5,
+                  decoration: const InputDecoration(
+                    hintText: 'Add contact info, thoughts, or reminders...',
+                    border: OutlineInputBorder(),
+                    alignLabelWithHint: true,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 20),
-
-            // Resume Used (placeholder)
-            Text('Resume Used', style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 8),
-            DropdownButtonFormField<String>(
-              initialValue: _selectedResumeId,
-              style: Theme.of(context).textTheme.bodyLarge,
-              decoration: const InputDecoration(
-                hintText: 'Select a resume version',
-                border: OutlineInputBorder(),
-              ),
-              items: const [
-                DropdownMenuItem(
-                  value: null,
-                  child: Text('Select a resume version'),
-                ),
-              ],
-              onChanged: (value) {
-                setState(() => _selectedResumeId = value);
-              },
-            ),
-            const SizedBox(height: 20),
-
-            // Notes
-            Text('Notes', style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 8),
-            TextFormField(
-              controller: _notesController,
-              style: Theme.of(context).textTheme.bodyLarge,
-              maxLines: 5,
-              decoration: const InputDecoration(
-                hintText: 'Add contact info, thoughts, or reminders...',
-                border: OutlineInputBorder(),
-                alignLabelWithHint: true,
-              ),
-            ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 24),
 
             // Save Button
             SizedBox(
@@ -885,6 +949,47 @@ class _JobFormScreenState extends State<JobFormScreen> {
               ),
             ),
             const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionCard(
+    BuildContext context,
+    bool isDark, {
+    required String title,
+    required IconData icon,
+    required List<Widget> children,
+  }) {
+    return Card(
+      elevation: isDark ? 1 : 2,
+      shadowColor: isDark ? Colors.black45 : Colors.black12,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      color: isDark ? Colors.grey[900] : Colors.white,
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  icon,
+                  size: 20,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  title,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+            const Divider(height: 24),
+            ...children,
           ],
         ),
       ),
