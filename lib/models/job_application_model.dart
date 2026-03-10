@@ -20,6 +20,8 @@ enum JobSource {
   other,
 }
 
+enum JobType { remote, onsite, hybrid }
+
 class JobApplicationModel {
   final String id;
   final String userId;
@@ -45,6 +47,7 @@ class JobApplicationModel {
   final DateTime? interviewScheduledDate;
   final String? interviewType; // phone, video, in-person
   final bool interviewReminderEnabled;
+  final JobType jobType;
 
   JobApplicationModel({
     required this.id,
@@ -69,6 +72,7 @@ class JobApplicationModel {
     this.interviewScheduledDate,
     this.interviewType,
     this.interviewReminderEnabled = false,
+    this.jobType = JobType.remote,
   });
 
   // Helper method to parse stage with backward compatibility
@@ -123,6 +127,10 @@ class JobApplicationModel {
       interviewType: json['interviewType'] as String?,
       interviewReminderEnabled:
           json['interviewReminderEnabled'] as bool? ?? false,
+      jobType: JobType.values.firstWhere(
+        (e) => e.toString() == 'JobType.${json['jobType']}',
+        orElse: () => JobType.remote,
+      ),
     );
   }
 
@@ -150,6 +158,7 @@ class JobApplicationModel {
       'interviewScheduledDate': interviewScheduledDate?.toIso8601String(),
       'interviewType': interviewType,
       'interviewReminderEnabled': interviewReminderEnabled,
+      'jobType': jobType.toString().split('.').last,
     };
   }
 
@@ -176,6 +185,7 @@ class JobApplicationModel {
     DateTime? interviewScheduledDate,
     String? interviewType,
     bool? interviewReminderEnabled,
+    JobType? jobType,
   }) {
     return JobApplicationModel(
       id: id ?? this.id,
@@ -202,6 +212,7 @@ class JobApplicationModel {
       interviewType: interviewType ?? this.interviewType,
       interviewReminderEnabled:
           interviewReminderEnabled ?? this.interviewReminderEnabled,
+      jobType: jobType ?? this.jobType,
     );
   }
 }
@@ -281,6 +292,19 @@ extension SalaryCurrencyExtension on SalaryCurrency {
         return 'GBP';
       case SalaryCurrency.other:
         return 'Other';
+    }
+  }
+}
+
+extension JobTypeExtension on JobType {
+  String get displayName {
+    switch (this) {
+      case JobType.remote:
+        return 'Remote';
+      case JobType.onsite:
+        return 'Onsite';
+      case JobType.hybrid:
+        return 'Hybrid';
     }
   }
 }

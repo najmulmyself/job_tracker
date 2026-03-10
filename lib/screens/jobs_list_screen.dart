@@ -73,7 +73,12 @@ class _JobsListScreenState extends State<JobsListScreen> {
         builder: (context, jobProvider, _) {
           final filteredJobs = _filterJobs(jobProvider.jobs);
           final activeJobsCount = jobProvider.jobs
-              .where((job) => job.stage != ApplicationStage.rejected)
+              .where(
+                (job) =>
+                    job.stage != ApplicationStage.rejected &&
+                    job.stage != ApplicationStage.offer &&
+                    job.stage != ApplicationStage.interested,
+              )
               .length;
 
           return GestureDetector(
@@ -599,25 +604,6 @@ class _JobCardNew extends StatelessWidget {
     }
   }
 
-  String _getTimeAgo(DateTime date) {
-    final now = DateTime.now();
-    final difference = now.difference(date);
-
-    if (difference.inDays == 0) {
-      return 'Today';
-    } else if (difference.inDays == 1) {
-      return '1 day ago';
-    } else if (difference.inDays < 7) {
-      return '${difference.inDays} days ago';
-    } else if (difference.inDays < 30) {
-      final weeks = (difference.inDays / 7).floor();
-      return '$weeks ${weeks == 1 ? 'week' : 'weeks'} ago';
-    } else {
-      final months = (difference.inDays / 30).floor();
-      return '$months ${months == 1 ? 'month' : 'months'} ago';
-    }
-  }
-
   String _formatDate(DateTime date) {
     final months = [
       'Jan',
@@ -739,93 +725,61 @@ class _JobCardNew extends StatelessWidget {
 
             const SizedBox(height: 16),
 
-            // Info Rows based on status
-            if (job.stage == ApplicationStage.interviewCalled ||
-                job.stage == ApplicationStage.interviewed) ...[
-              // Interview info
-              if (job.interviewScheduledDate != null) ...[
-                _buildInfoRow(
-                  Icons.calendar_today_outlined,
-                  'Next Round:',
-                  _formatInterviewDate(job.interviewScheduledDate!),
-                  isDark,
-                ),
-                const SizedBox(height: 8),
-              ],
+            // Row 1: Date info based on stage
+            if (job.stage == ApplicationStage.interviewCalled) ...[
               _buildInfoRow(
-                Icons.location_on_outlined,
-                '',
-                job.interviewType ?? 'Remote',
+                Icons.calendar_today_outlined,
+                '${job.interviewType ?? 'Interview'}:',
+                _formatDateTime(job.updatedAt),
+                isDark,
+              ),
+            ] else if (job.stage == ApplicationStage.interviewed) ...[
+              _buildInfoRow(
+                Icons.calendar_today_outlined,
+                'Interviewed on:',
+                _formatDateTime(job.updatedAt),
+                isDark,
+              ),
+            ] else if (job.stage == ApplicationStage.offer) ...[
+              _buildInfoRow(
+                Icons.card_giftcard_outlined,
+                'Got offer:',
+                _formatDate(job.updatedAt),
                 isDark,
               ),
             ] else if (job.stage == ApplicationStage.rejected) ...[
-              // Rejected info
               _buildInfoRow(
                 Icons.event_busy_outlined,
-                'Closed on',
+                'Closed on:',
                 _formatDate(job.updatedAt),
                 isDark,
               ),
             ] else ...[
-              // Applied/Interested info
+              // Applied, Interested/Draft
               _buildInfoRow(
                 Icons.access_time_rounded,
-                'Applied',
-                _getTimeAgo(job.applicationDate ?? job.createdAt),
-                isDark,
-              ),
-              const SizedBox(height: 8),
-              _buildInfoRow(
-                Icons.share_outlined,
-                'Source:',
-                job.source.displayName,
+                'Applied on:',
+                _formatDate(job.applicationDate ?? job.createdAt),
                 isDark,
               ),
             ],
+            const SizedBox(height: 8),
 
-            const SizedBox(height: 16),
+            // Row 2: Job type (remote/onsite/hybrid)
+            _buildInfoRow(
+              Icons.location_on_outlined,
+              '',
+              job.jobType.displayName,
+              isDark,
+            ),
+            const SizedBox(height: 8),
 
-            // Footer Row
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                if (job.stage == ApplicationStage.applied ||
-                    job.stage == ApplicationStage.interested)
-                  Text(
-                    'Waiting for response',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontStyle: FontStyle.italic,
-                      color: isDark ? Colors.white38 : Colors.black38,
-                    ),
-                  )
-                else
-                  const SizedBox(),
-
-                if (job.stage == ApplicationStage.interviewCalled ||
-                    job.stage == ApplicationStage.interviewed)
-                  TextButton(
-                    onPressed: onTap,
-                    style: TextButton.styleFrom(
-                      padding: EdgeInsets.zero,
-                      minimumSize: Size.zero,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    child: Text(
-                      'View Details',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                    ),
-                  )
-                else
-                  Icon(
-                    Icons.more_horiz,
-                    color: isDark ? Colors.white38 : Colors.black38,
-                  ),
-              ],
+            // Row 3: Salary
+            _buildInfoRow(
+              Icons.payments_outlined,
+              '',
+              _getSalaryDisplay(),
+              isDark,
             ),
           ],
         ),
@@ -860,22 +814,23 @@ class _JobCardNew extends StatelessWidget {
     );
   }
 
-  String _formatInterviewDate(DateTime date) {
-    final now = DateTime.now();
-    final tomorrow = DateTime(now.year, now.month, now.day + 1);
-
-    if (date.year == tomorrow.year &&
-        date.month == tomorrow.month &&
-        date.day == tomorrow.day) {
-      final hour = date.hour > 12 ? date.hour - 12 : date.hour;
-      final period = date.hour >= 12 ? 'PM' : 'AM';
-      return 'Tomorrow, ${hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')} $period';
-    }
-
+  String _formatDateTime(DateTime date) {
     final hour = date.hour > 12
         ? date.hour - 12
         : (date.hour == 0 ? 12 : date.hour);
     final period = date.hour >= 12 ? 'PM' : 'AM';
     return '${_formatDate(date)} ${hour.toString()}:${date.minute.toString().padLeft(2, '0')} $period';
+  }
+
+  String _getSalaryDisplay() {
+    if (job.salaryRange == null || job.salaryRange!.isEmpty) {
+      return 'Negotiable';
+    }
+    final symbol = job.salaryCurrency.symbol;
+    // Strip any existing currency symbols to avoid duplication
+    final cleaned = job.salaryRange!
+        .replaceAll(RegExp(r'[^\d\s\-\.K]'), '')
+        .trim();
+    return '$symbol$cleaned';
   }
 }
