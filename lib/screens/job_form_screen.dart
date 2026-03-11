@@ -154,7 +154,7 @@ class _JobFormScreenState extends State<JobFormScreen> {
           : description.length < 20
           ? 'Must be at least 20 characters'
           : null;
-      String? expectedErr = expectedSalary.isEmpty
+      String? expectedErr = (!_isNegotiable && expectedSalary.isEmpty)
           ? 'Expected salary is required'
           : null;
 
