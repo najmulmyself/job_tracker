@@ -4,7 +4,6 @@ import 'package:uuid/uuid.dart';
 import '../models/job_application_model.dart';
 import '../providers/auth_provider.dart';
 import '../providers/job_provider.dart';
-import '../utils/validators.dart';
 
 class JobFormScreen extends StatefulWidget {
   final JobApplicationModel? job;
@@ -19,8 +18,8 @@ class _JobFormScreenState extends State<JobFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _companyController = TextEditingController();
   final _jobTitleController = TextEditingController();
-  final _salaryMinController = TextEditingController(text: '60');
-  final _salaryMaxController = TextEditingController(text: '90');
+  final _salaryMinController = TextEditingController();
+  final _salaryMaxController = TextEditingController();
   final _expectedSalaryController = TextEditingController();
   final _jobDescriptionController = TextEditingController();
   final _notesController = TextEditingController();
@@ -34,8 +33,8 @@ class _JobFormScreenState extends State<JobFormScreen> {
   DateTime? _deadline;
   String? _selectedResumeId;
 
-  double _minSalary = 60.0;
-  double _maxSalary = 90.0;
+  double _minSalary = 0;
+  double _maxSalary = 0;
   bool _isNegotiable = false;
   bool _isUpTo = false;
 
@@ -44,6 +43,23 @@ class _JobFormScreenState extends State<JobFormScreen> {
   DateTime? _interviewScheduledDate;
   TimeOfDay? _interviewTime;
   String? _interviewType;
+
+  // Validation error states for non-TextFormField fields
+  String? _salaryRangeError;
+  String? _applicationDateError;
+  String? _deadlineError;
+  String? _interviewCallDateError;
+  String? _interviewScheduledError;
+  String? _interviewTimeError;
+  String? _interviewTypeError;
+
+  // Validation error states for text fields
+  String? _companyError;
+  String? _jobTitleError;
+  String? _salaryMinError;
+  String? _salaryMaxError;
+  String? _expectedSalaryError;
+  String? _jobDescriptionError;
 
   @override
   void initState() {
@@ -124,22 +140,99 @@ class _JobFormScreenState extends State<JobFormScreen> {
   }
 
   Future<void> _saveJob({required bool asDraft}) async {
-    if (!asDraft && !_formKey.currentState!.validate()) {
-      return;
-    }
+    if (!asDraft) {
+      // Validate all fields manually and set errors
+      final company = _companyController.text.trim();
+      final title = _jobTitleController.text.trim();
+      final description = _jobDescriptionController.text.trim();
+      final expectedSalary = _expectedSalaryController.text.trim();
 
-    // Validate interview fields if stage is "Interview Called" or "Interviewed"
-    if (!asDraft &&
-        (_selectedStage == ApplicationStage.interviewCalled ||
-            _selectedStage == ApplicationStage.interviewed)) {
-      if (_interviewScheduledDate == null || _interviewTime == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Please set interview date and time'),
-            backgroundColor: Colors.red,
-            duration: Duration(seconds: 3),
-          ),
-        );
+      String? companyErr = company.isEmpty ? 'Company name is required' : null;
+      String? titleErr = title.isEmpty ? 'Job title is required' : null;
+      String? descErr = description.isEmpty
+          ? 'Job description is required'
+          : description.length < 20
+          ? 'Must be at least 20 characters'
+          : null;
+      String? expectedErr = expectedSalary.isEmpty
+          ? 'Expected salary is required'
+          : null;
+
+      // Salary range
+      String? salaryErr;
+      String? salaryMinErr;
+      String? salaryMaxErr;
+      if (!_isNegotiable) {
+        if (_isUpTo) {
+          if (_salaryMaxController.text.trim().isEmpty) {
+            salaryMaxErr = 'Required';
+            salaryErr = 'Salary amount is required';
+          }
+        } else {
+          if (_salaryMinController.text.trim().isEmpty) {
+            salaryMinErr = 'Required';
+          }
+          if (_salaryMaxController.text.trim().isEmpty) {
+            salaryMaxErr = 'Required';
+          }
+          if (salaryMinErr != null || salaryMaxErr != null) {
+            salaryErr = 'Salary range is required';
+          }
+        }
+      }
+
+      // Date validations
+      String? appDateErr;
+      String? deadlineErr;
+      String? callDateErr;
+      String? scheduledErr;
+      String? timeErr;
+      String? typeErr;
+
+      if (_selectedStage != ApplicationStage.interested) {
+        if (_applicationDate == null) appDateErr = 'Required';
+        if (_selectedStage != ApplicationStage.offer &&
+            _selectedStage != ApplicationStage.rejected &&
+            _deadline == null) {
+          deadlineErr = 'Required';
+        }
+      }
+
+      if (_selectedStage == ApplicationStage.interviewCalled) {
+        if (_interviewCallDate == null) callDateErr = 'Required';
+        if (_interviewScheduledDate == null) scheduledErr = 'Required';
+        if (_interviewTime == null) timeErr = 'Required';
+        if (_interviewType == null) typeErr = 'Required';
+      }
+
+      // Apply all errors at once
+      setState(() {
+        _companyError = companyErr;
+        _jobTitleError = titleErr;
+        _jobDescriptionError = descErr;
+        _expectedSalaryError = expectedErr;
+        _salaryRangeError = salaryErr;
+        _salaryMinError = salaryMinErr;
+        _salaryMaxError = salaryMaxErr;
+        _applicationDateError = appDateErr;
+        _deadlineError = deadlineErr;
+        _interviewCallDateError = callDateErr;
+        _interviewScheduledError = scheduledErr;
+        _interviewTimeError = timeErr;
+        _interviewTypeError = typeErr;
+      });
+
+      if (companyErr != null ||
+          titleErr != null ||
+          descErr != null ||
+          expectedErr != null ||
+          salaryErr != null ||
+          appDateErr != null ||
+          deadlineErr != null ||
+          callDateErr != null ||
+          scheduledErr != null ||
+          timeErr != null ||
+          typeErr != null) {
         return;
       }
     }
@@ -227,23 +320,38 @@ class _JobFormScreenState extends State<JobFormScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isEditing = widget.job != null;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () => Navigator.of(context).pop(),
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 8),
+          child: Center(
+            child: SizedBox(
+              height: 36,
+              child: TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                style: TextButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: const Text(
+                  'Cancel',
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                ),
+              ),
+            ),
+          ),
         ),
+        leadingWidth: 90,
         title: Text(
           widget.job == null ? 'New Application' : 'Edit Application',
         ),
-        actions: [
-          TextButton(
-            onPressed: () => _saveJob(asDraft: true),
-            child: const Text('Saved', style: TextStyle(fontSize: 16)),
-          ),
-        ],
       ),
       body: Form(
         key: _formKey,
@@ -266,11 +374,16 @@ class _JobFormScreenState extends State<JobFormScreen> {
                 TextFormField(
                   controller: _companyController,
                   style: Theme.of(context).textTheme.bodyLarge,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     hintText: 'Enter company name',
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
+                    errorText: _companyError,
                   ),
-                  validator: Validators.validateCompanyName,
+                  onChanged: (v) {
+                    if (_companyError != null && v.trim().isNotEmpty) {
+                      setState(() => _companyError = null);
+                    }
+                  },
                 ),
                 const SizedBox(height: 16),
 
@@ -283,11 +396,16 @@ class _JobFormScreenState extends State<JobFormScreen> {
                 TextFormField(
                   controller: _jobTitleController,
                   style: Theme.of(context).textTheme.bodyLarge,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     hintText: 'Enter job title',
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
+                    errorText: _jobTitleError,
                   ),
-                  validator: Validators.validateJobTitle,
+                  onChanged: (v) {
+                    if (_jobTitleError != null && v.trim().isNotEmpty) {
+                      setState(() => _jobTitleError = null);
+                    }
+                  },
                 ),
                 const SizedBox(height: 16),
 
@@ -383,16 +501,22 @@ class _JobFormScreenState extends State<JobFormScreen> {
                         labelText: 'Amount (K)',
                         prefixText: _selectedCurrency.symbol,
                         border: const OutlineInputBorder(),
+                        errorText: _salaryMaxError,
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 12,
                           vertical: 14,
                         ),
                       ),
                       onChanged: (value) {
-                        final parsed = double.tryParse(value);
-                        if (parsed != null && parsed >= 0) {
-                          _maxSalary = parsed;
+                        if (_salaryMaxError != null &&
+                            value.trim().isNotEmpty) {
+                          setState(() {
+                            _salaryMaxError = null;
+                            _salaryRangeError = null;
+                          });
                         }
+                        final parsed = double.tryParse(value);
+                        if (parsed != null && parsed >= 0) _maxSalary = parsed;
                       },
                     ),
                   ] else ...[
@@ -407,12 +531,20 @@ class _JobFormScreenState extends State<JobFormScreen> {
                               labelText: 'Min (K)',
                               prefixText: _selectedCurrency.symbol,
                               border: const OutlineInputBorder(),
+                              errorText: _salaryMinError,
                               contentPadding: const EdgeInsets.symmetric(
                                 horizontal: 12,
                                 vertical: 14,
                               ),
                             ),
                             onChanged: (value) {
+                              if (_salaryMinError != null &&
+                                  value.trim().isNotEmpty) {
+                                setState(() {
+                                  _salaryMinError = null;
+                                  _salaryRangeError = null;
+                                });
+                              }
                               final parsed = double.tryParse(value);
                               if (parsed != null && parsed >= 0) {
                                 _minSalary = parsed;
@@ -432,12 +564,20 @@ class _JobFormScreenState extends State<JobFormScreen> {
                               labelText: 'Max (K)',
                               prefixText: _selectedCurrency.symbol,
                               border: const OutlineInputBorder(),
+                              errorText: _salaryMaxError,
                               contentPadding: const EdgeInsets.symmetric(
                                 horizontal: 12,
                                 vertical: 14,
                               ),
                             ),
                             onChanged: (value) {
+                              if (_salaryMaxError != null &&
+                                  value.trim().isNotEmpty) {
+                                setState(() {
+                                  _salaryMaxError = null;
+                                  _salaryRangeError = null;
+                                });
+                              }
                               final parsed = double.tryParse(value);
                               if (parsed != null && parsed >= 0) {
                                 _maxSalary = parsed;
@@ -448,6 +588,7 @@ class _JobFormScreenState extends State<JobFormScreen> {
                       ],
                     ),
                   ],
+                  _buildFieldError(_salaryRangeError),
                   const SizedBox(height: 16),
 
                   // Expected Salary
@@ -460,10 +601,16 @@ class _JobFormScreenState extends State<JobFormScreen> {
                     controller: _expectedSalaryController,
                     keyboardType: TextInputType.number,
                     style: Theme.of(context).textTheme.bodyLarge,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       hintText: 'Your target salary',
-                      border: OutlineInputBorder(),
+                      border: const OutlineInputBorder(),
+                      errorText: _expectedSalaryError,
                     ),
+                    onChanged: (v) {
+                      if (_expectedSalaryError != null && v.trim().isNotEmpty) {
+                        setState(() => _expectedSalaryError = null);
+                      }
+                    },
                   ),
                 ],
               ],
@@ -501,12 +648,17 @@ class _JobFormScreenState extends State<JobFormScreen> {
                   controller: _jobDescriptionController,
                   style: Theme.of(context).textTheme.bodyLarge,
                   maxLines: 5,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     hintText: 'Paste the job description here...',
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                     alignLabelWithHint: true,
+                    errorText: _jobDescriptionError,
                   ),
-                  validator: Validators.validateJobDescription,
+                  onChanged: (v) {
+                    if (_jobDescriptionError != null && v.trim().length >= 20) {
+                      setState(() => _jobDescriptionError = null);
+                    }
+                  },
                 ),
               ],
             ),
@@ -546,8 +698,10 @@ class _JobFormScreenState extends State<JobFormScreen> {
                 const SizedBox(height: 16),
 
                 // Interview Section (conditional)
-                if (_selectedStage == ApplicationStage.interviewCalled ||
-                    _selectedStage == ApplicationStage.interviewed) ...[
+                if (isEditing
+                    ? (_selectedStage == ApplicationStage.interviewCalled ||
+                          _selectedStage == ApplicationStage.interviewed)
+                    : _selectedStage == ApplicationStage.interviewCalled) ...[
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
@@ -608,7 +762,10 @@ class _JobFormScreenState extends State<JobFormScreen> {
                               lastDate: DateTime.now(),
                             );
                             if (date != null) {
-                              setState(() => _interviewCallDate = date);
+                              setState(() {
+                                _interviewCallDate = date;
+                                _interviewCallDateError = null;
+                              });
                             }
                           },
                           child: Container(
@@ -641,6 +798,7 @@ class _JobFormScreenState extends State<JobFormScreen> {
                             ),
                           ),
                         ),
+                        _buildFieldError(_interviewCallDateError),
                         const SizedBox(height: 16),
 
                         // Interview Scheduled Date
@@ -663,9 +821,10 @@ class _JobFormScreenState extends State<JobFormScreen> {
                                     lastDate: DateTime(2030),
                                   );
                                   if (date != null) {
-                                    setState(
-                                      () => _interviewScheduledDate = date,
-                                    );
+                                    setState(() {
+                                      _interviewScheduledDate = date;
+                                      _interviewScheduledError = null;
+                                    });
                                   }
                                 },
                                 child: Container(
@@ -709,7 +868,10 @@ class _JobFormScreenState extends State<JobFormScreen> {
                                         _interviewTime ?? TimeOfDay.now(),
                                   );
                                   if (time != null) {
-                                    setState(() => _interviewTime = time);
+                                    setState(() {
+                                      _interviewTime = time;
+                                      _interviewTimeError = null;
+                                    });
                                   }
                                 },
                                 child: Container(
@@ -742,6 +904,9 @@ class _JobFormScreenState extends State<JobFormScreen> {
                             ),
                           ],
                         ),
+                        _buildFieldError(
+                          _interviewScheduledError ?? _interviewTimeError,
+                        ),
                         const SizedBox(height: 16),
 
                         // Interview Type
@@ -765,9 +930,13 @@ class _JobFormScreenState extends State<JobFormScreen> {
                             label: type ?? '',
                           ),
                           onSelected: (type) {
-                            setState(() => _interviewType = type);
+                            setState(() {
+                              _interviewType = type;
+                              _interviewTypeError = null;
+                            });
                           },
                         ),
+                        _buildFieldError(_interviewTypeError),
                         const SizedBox(height: 16),
 
                         // Interview Notes
@@ -792,146 +961,163 @@ class _JobFormScreenState extends State<JobFormScreen> {
                   const SizedBox(height: 16),
                 ],
 
-                // Date Pickers Row
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Application Date',
-                            style: Theme.of(context).textTheme.titleSmall,
-                          ),
-                          const SizedBox(height: 8),
-                          InkWell(
-                            onTap: () async {
-                              final date = await showDatePicker(
-                                context: context,
-                                initialDate: _applicationDate ?? DateTime.now(),
-                                firstDate: DateTime(2020),
-                                lastDate: DateTime(2030),
-                              );
-                              if (date != null) {
-                                setState(() => _applicationDate = date);
-                              }
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: isDark
-                                      ? Colors.white.withOpacity(0.2)
-                                      : Colors.black.withOpacity(0.2),
+                // Date Pickers (conditional based on stage)
+                if (_selectedStage != ApplicationStage.interested) ...[
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Application Date',
+                              style: Theme.of(context).textTheme.titleSmall,
+                            ),
+                            const SizedBox(height: 8),
+                            InkWell(
+                              onTap: () async {
+                                final date = await showDatePicker(
+                                  context: context,
+                                  initialDate:
+                                      _applicationDate ?? DateTime.now(),
+                                  firstDate: DateTime(2020),
+                                  lastDate: DateTime(2030),
+                                );
+                                if (date != null) {
+                                  setState(() {
+                                    _applicationDate = date;
+                                    _applicationDateError = null;
+                                  });
+                                }
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: isDark
+                                        ? Colors.white.withOpacity(0.2)
+                                        : Colors.black.withOpacity(0.2),
+                                  ),
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      _applicationDate != null
-                                          ? '${_applicationDate!.day}/${_applicationDate!.month}/${_applicationDate!.year}'
-                                          : 'Select date',
-                                      style: Theme.of(
-                                        context,
-                                      ).textTheme.bodyLarge,
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        _applicationDate != null
+                                            ? '${_applicationDate!.day}/${_applicationDate!.month}/${_applicationDate!.year}'
+                                            : 'Select date',
+                                        style: Theme.of(
+                                          context,
+                                        ).textTheme.bodyLarge,
+                                      ),
                                     ),
-                                  ),
-                                  const Icon(
-                                    Icons.calendar_today_outlined,
-                                    size: 20,
-                                  ),
-                                ],
+                                    const Icon(
+                                      Icons.calendar_today_outlined,
+                                      size: 20,
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                            _buildFieldError(_applicationDateError),
+                          ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Follow-up Deadline',
-                            style: Theme.of(context).textTheme.titleSmall,
-                          ),
-                          const SizedBox(height: 8),
-                          InkWell(
-                            onTap: () async {
-                              final date = await showDatePicker(
-                                context: context,
-                                initialDate: _deadline ?? DateTime.now(),
-                                firstDate: DateTime.now(),
-                                lastDate: DateTime(2030),
-                              );
-                              if (date != null) {
-                                setState(() => _deadline = date);
-                              }
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: isDark
-                                      ? Colors.white.withOpacity(0.2)
-                                      : Colors.black.withOpacity(0.2),
-                                ),
-                                borderRadius: BorderRadius.circular(12),
+                      // Follow-up Deadline: hidden for interested/offer/rejected
+                      if (_selectedStage != ApplicationStage.offer &&
+                          _selectedStage != ApplicationStage.rejected) ...[
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Follow-up Deadline',
+                                style: Theme.of(context).textTheme.titleSmall,
                               ),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      _deadline != null
-                                          ? '${_deadline!.day}/${_deadline!.month}/${_deadline!.year}'
-                                          : 'Select date',
-                                      style: Theme.of(
-                                        context,
-                                      ).textTheme.bodyLarge,
+                              const SizedBox(height: 8),
+                              InkWell(
+                                onTap: () async {
+                                  final date = await showDatePicker(
+                                    context: context,
+                                    initialDate: _deadline ?? DateTime.now(),
+                                    firstDate: DateTime.now(),
+                                    lastDate: DateTime(2030),
+                                  );
+                                  if (date != null) {
+                                    setState(() {
+                                      _deadline = date;
+                                      _deadlineError = null;
+                                    });
+                                  }
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: isDark
+                                          ? Colors.white.withOpacity(0.2)
+                                          : Colors.black.withOpacity(0.2),
                                     ),
+                                    borderRadius: BorderRadius.circular(12),
                                   ),
-                                  const Icon(
-                                    Icons.calendar_today_outlined,
-                                    size: 20,
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          _deadline != null
+                                              ? '${_deadline!.day}/${_deadline!.month}/${_deadline!.year}'
+                                              : 'Select date',
+                                          style: Theme.of(
+                                            context,
+                                          ).textTheme.bodyLarge,
+                                        ),
+                                      ),
+                                      const Icon(
+                                        Icons.calendar_today_outlined,
+                                        size: 20,
+                                      ),
+                                    ],
                                   ),
-                                ],
+                                ),
                               ),
-                            ),
+                              _buildFieldError(_deadlineError),
+                            ],
                           ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-
-                // Resume Used
-                Text(
-                  'Resume Used',
-                  style: Theme.of(context).textTheme.titleSmall,
-                ),
-                const SizedBox(height: 8),
-                _buildSheetSelector<String?>(
-                  context: context,
-                  isDark: isDark,
-                  value: _selectedResumeId,
-                  hint: 'Select a resume version',
-                  displayText: _selectedResumeId ?? 'Select a resume version',
-                  icon: Icons.description_outlined,
-                  items: const <String?>[null],
-                  sheetTitle: 'Select Resume',
-                  itemBuilder: (_) => const _SheetItem(
-                    icon: Icons.description_outlined,
-                    label: 'No resumes uploaded yet',
+                        ),
+                      ],
+                    ],
                   ),
-                  onSelected: (value) {
-                    setState(() => _selectedResumeId = value);
-                  },
-                ),
-                const SizedBox(height: 16),
+                  const SizedBox(height: 16),
+                ],
+
+                // Resume Used (hidden for interested stage)
+                if (_selectedStage != ApplicationStage.interested) ...[
+                  Text(
+                    'Resume Used',
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                  const SizedBox(height: 8),
+                  _buildSheetSelector<String?>(
+                    context: context,
+                    isDark: isDark,
+                    value: _selectedResumeId,
+                    hint: 'Select a resume version',
+                    displayText: _selectedResumeId ?? 'Select a resume version',
+                    icon: Icons.description_outlined,
+                    items: const <String?>[null],
+                    sheetTitle: 'Select Resume',
+                    itemBuilder: (_) => const _SheetItem(
+                      icon: Icons.description_outlined,
+                      label: 'No resumes uploaded yet',
+                    ),
+                    onSelected: (value) {
+                      setState(() => _selectedResumeId = value);
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                ],
 
                 // Notes
                 Text('Notes', style: Theme.of(context).textTheme.titleSmall),
@@ -1237,6 +1423,20 @@ class _JobFormScreenState extends State<JobFormScreen> {
       default:
         return Icons.help_outline;
     }
+  }
+
+  Widget _buildFieldError(String? error) {
+    if (error == null) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: 6, left: 12),
+      child: Text(
+        error,
+        style: TextStyle(
+          color: Theme.of(context).colorScheme.error,
+          fontSize: 12,
+        ),
+      ),
+    );
   }
 
   Widget _buildToggleRow({
