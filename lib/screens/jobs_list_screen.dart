@@ -827,10 +827,13 @@ class _JobCardNew extends StatelessWidget {
       return 'Negotiable';
     }
     final symbol = job.salaryCurrency.symbol;
+    final range = job.salaryRange!;
+    if (range.toLowerCase().startsWith('up to')) {
+      final cleaned = range.replaceAll(RegExp(r'[^\d\s\.K]'), '').trim();
+      return 'Up to $symbol$cleaned';
+    }
     // Strip any existing currency symbols to avoid duplication
-    final cleaned = job.salaryRange!
-        .replaceAll(RegExp(r'[^\d\s\-\.K]'), '')
-        .trim();
+    final cleaned = range.replaceAll(RegExp(r'[^\d\s\-\.K]'), '').trim();
     return '$symbol$cleaned';
   }
 }

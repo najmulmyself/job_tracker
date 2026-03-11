@@ -36,6 +36,8 @@ class _JobFormScreenState extends State<JobFormScreen> {
 
   double _minSalary = 60.0;
   double _maxSalary = 90.0;
+  bool _isNegotiable = false;
+  bool _isUpTo = false;
 
   // Interview call tracking
   DateTime? _interviewCallDate;
@@ -67,8 +69,19 @@ class _JobFormScreenState extends State<JobFormScreen> {
     _notesController.text = job.notes;
 
     // Parse salary range if exists
-    if (job.salaryRange != null) {
-      // Extract all numbers from the salary range string
+    if (job.salaryRange == null || job.salaryRange!.isEmpty) {
+      _isNegotiable = true;
+    } else if (job.salaryRange!.toLowerCase().startsWith('up to')) {
+      _isUpTo = true;
+      final numbers = RegExp(r'\d+\.?\d*').allMatches(job.salaryRange!);
+      final parsed = numbers
+          .map((m) => double.tryParse(m.group(0)!) ?? 0)
+          .toList();
+      if (parsed.isNotEmpty) {
+        _maxSalary = parsed[0];
+        _salaryMaxController.text = _maxSalary.toInt().toString();
+      }
+    } else {
       final numbers = RegExp(r'\d+\.?\d*').allMatches(job.salaryRange!);
       final parsed = numbers
           .map((m) => double.tryParse(m.group(0)!) ?? 0)
@@ -155,7 +168,11 @@ class _JobFormScreenState extends State<JobFormScreen> {
       companyName: _companyController.text.trim(),
       jobTitle: _jobTitleController.text.trim(),
       source: _selectedSource,
-      salaryRange: '${_minSalary.toInt()}K - ${_maxSalary.toInt()}K',
+      salaryRange: _isNegotiable
+          ? null
+          : _isUpTo
+          ? 'Up to ${_maxSalary.toInt()}K'
+          : '${_minSalary.toInt()}K - ${_maxSalary.toInt()}K',
       salaryCurrency: _selectedCurrency,
       jobType: _selectedJobType,
       expectedSalary: _expectedSalaryController.text.trim().isNotEmpty
@@ -277,25 +294,21 @@ class _JobFormScreenState extends State<JobFormScreen> {
                 // Source
                 Text('Source', style: Theme.of(context).textTheme.titleSmall),
                 const SizedBox(height: 8),
-                DropdownButtonFormField<JobSource>(
-                  initialValue: _selectedSource,
-                  style: Theme.of(context).textTheme.bodyLarge,
-                  decoration: const InputDecoration(
-                    hintText: 'e.g., LinkedIn, Indeed, Referral',
-                    border: OutlineInputBorder(),
+                _buildSheetSelector<JobSource>(
+                  context: context,
+                  isDark: isDark,
+                  value: _selectedSource,
+                  hint: 'Select source',
+                  displayText: _selectedSource.displayName,
+                  icon: _getSourceIcon(_selectedSource),
+                  items: JobSource.values,
+                  sheetTitle: 'Select Source',
+                  itemBuilder: (source) => _SheetItem(
+                    icon: _getSourceIcon(source),
+                    label: source.displayName,
                   ),
-                  items: JobSource.values
-                      .map(
-                        (source) => DropdownMenuItem(
-                          value: source,
-                          child: Text(source.displayName),
-                        ),
-                      )
-                      .toList(),
-                  onChanged: (value) {
-                    if (value != null) {
-                      setState(() => _selectedSource = value);
-                    }
+                  onSelected: (source) {
+                    setState(() => _selectedSource = source);
                   },
                 ),
               ],
@@ -329,115 +342,130 @@ class _JobFormScreenState extends State<JobFormScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // Salary Range
-                Text(
-                  'Salary Range (Advertised)',
-                  style: Theme.of(context).textTheme.titleSmall,
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextFormField(
-                        controller: _salaryMinController,
-                        keyboardType: TextInputType.number,
-                        style: Theme.of(context).textTheme.bodyLarge,
-                        decoration: InputDecoration(
-                          labelText: 'Min (K)',
-                          prefixText: _selectedCurrency.symbol,
-                          border: const OutlineInputBorder(),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 14,
-                          ),
-                        ),
-                        onChanged: (value) {
-                          final parsed = double.tryParse(value);
-                          if (parsed != null && parsed >= 0 && parsed <= 200) {
-                            setState(() {
-                              _minSalary = parsed;
-                              if (_minSalary > _maxSalary) {
-                                _maxSalary = _minSalary;
-                                _salaryMaxController.text = _maxSalary
-                                    .toInt()
-                                    .toString();
-                              }
-                            });
-                          }
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    const Text('—', style: TextStyle(fontSize: 20)),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: TextFormField(
-                        controller: _salaryMaxController,
-                        keyboardType: TextInputType.number,
-                        style: Theme.of(context).textTheme.bodyLarge,
-                        decoration: InputDecoration(
-                          labelText: 'Max (K)',
-                          prefixText: _selectedCurrency.symbol,
-                          border: const OutlineInputBorder(),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 14,
-                          ),
-                        ),
-                        onChanged: (value) {
-                          final parsed = double.tryParse(value);
-                          if (parsed != null && parsed >= 0 && parsed <= 200) {
-                            setState(() {
-                              _maxSalary = parsed;
-                              if (_maxSalary < _minSalary) {
-                                _minSalary = _maxSalary;
-                                _salaryMinController.text = _minSalary
-                                    .toInt()
-                                    .toString();
-                              }
-                            });
-                          }
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                RangeSlider(
-                  values: RangeValues(_minSalary, _maxSalary),
-                  min: 0,
-                  max: 200,
-                  divisions: 40,
-                  labels: RangeLabels(
-                    '${_selectedCurrency.symbol}${_minSalary.toInt()}K',
-                    '${_selectedCurrency.symbol}${_maxSalary.toInt()}K',
-                  ),
-                  onChanged: (RangeValues values) {
+                // Negotiable toggle
+                _buildToggleRow(
+                  context: context,
+                  isDark: isDark,
+                  label: 'Negotiable',
+                  subtitle: 'Salary is open to discussion',
+                  value: _isNegotiable,
+                  onChanged: (val) {
                     setState(() {
-                      _minSalary = values.start;
-                      _maxSalary = values.end;
-                      _salaryMinController.text = _minSalary.toInt().toString();
-                      _salaryMaxController.text = _maxSalary.toInt().toString();
+                      _isNegotiable = val;
+                      if (val) _isUpTo = false;
                     });
                   },
                 ),
-                const SizedBox(height: 12),
 
-                // Expected Salary
-                Text(
-                  'Expected Salary',
-                  style: Theme.of(context).textTheme.titleSmall,
-                ),
-                const SizedBox(height: 8),
-                TextFormField(
-                  controller: _expectedSalaryController,
-                  keyboardType: TextInputType.number,
-                  style: Theme.of(context).textTheme.bodyLarge,
-                  decoration: const InputDecoration(
-                    hintText: 'Your target salary',
-                    border: OutlineInputBorder(),
+                if (!_isNegotiable) ...[
+                  const SizedBox(height: 12),
+
+                  // Up To toggle
+                  _buildToggleRow(
+                    context: context,
+                    isDark: isDark,
+                    label: 'Up to',
+                    subtitle: 'Single max amount (e.g. Up to 45K)',
+                    value: _isUpTo,
+                    onChanged: (val) {
+                      setState(() => _isUpTo = val);
+                    },
                   ),
-                ),
+                  const SizedBox(height: 16),
+
+                  // Salary fields
+                  if (_isUpTo) ...[
+                    TextFormField(
+                      controller: _salaryMaxController,
+                      keyboardType: TextInputType.number,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                      decoration: InputDecoration(
+                        labelText: 'Amount (K)',
+                        prefixText: _selectedCurrency.symbol,
+                        border: const OutlineInputBorder(),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 14,
+                        ),
+                      ),
+                      onChanged: (value) {
+                        final parsed = double.tryParse(value);
+                        if (parsed != null && parsed >= 0) {
+                          _maxSalary = parsed;
+                        }
+                      },
+                    ),
+                  ] else ...[
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            controller: _salaryMinController,
+                            keyboardType: TextInputType.number,
+                            style: Theme.of(context).textTheme.bodyLarge,
+                            decoration: InputDecoration(
+                              labelText: 'Min (K)',
+                              prefixText: _selectedCurrency.symbol,
+                              border: const OutlineInputBorder(),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 14,
+                              ),
+                            ),
+                            onChanged: (value) {
+                              final parsed = double.tryParse(value);
+                              if (parsed != null && parsed >= 0) {
+                                _minSalary = parsed;
+                              }
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        const Text('—', style: TextStyle(fontSize: 20)),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: TextFormField(
+                            controller: _salaryMaxController,
+                            keyboardType: TextInputType.number,
+                            style: Theme.of(context).textTheme.bodyLarge,
+                            decoration: InputDecoration(
+                              labelText: 'Max (K)',
+                              prefixText: _selectedCurrency.symbol,
+                              border: const OutlineInputBorder(),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 14,
+                              ),
+                            ),
+                            onChanged: (value) {
+                              final parsed = double.tryParse(value);
+                              if (parsed != null && parsed >= 0) {
+                                _maxSalary = parsed;
+                              }
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                  const SizedBox(height: 16),
+
+                  // Expected Salary
+                  Text(
+                    'Expected Salary',
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    controller: _expectedSalaryController,
+                    keyboardType: TextInputType.number,
+                    style: Theme.of(context).textTheme.bodyLarge,
+                    decoration: const InputDecoration(
+                      hintText: 'Your target salary',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ],
               ],
             ),
             const SizedBox(height: 12),
@@ -497,24 +525,22 @@ class _JobFormScreenState extends State<JobFormScreen> {
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
                 const SizedBox(height: 8),
-                DropdownButtonFormField<ApplicationStage>(
-                  initialValue: _selectedStage,
-                  style: Theme.of(context).textTheme.bodyLarge,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
+                _buildSheetSelector<ApplicationStage>(
+                  context: context,
+                  isDark: isDark,
+                  value: _selectedStage,
+                  hint: 'Select stage',
+                  displayText: _selectedStage.displayName,
+                  icon: _getStageIcon(_selectedStage),
+                  items: ApplicationStage.values,
+                  sheetTitle: 'Select Stage',
+                  itemBuilder: (stage) => _SheetItem(
+                    icon: _getStageIcon(stage),
+                    label: stage.displayName,
+                    color: _getStageColor(stage),
                   ),
-                  items: ApplicationStage.values
-                      .map(
-                        (stage) => DropdownMenuItem(
-                          value: stage,
-                          child: Text(stage.displayName),
-                        ),
-                      )
-                      .toList(),
-                  onChanged: (value) {
-                    if (value != null) {
-                      setState(() => _selectedStage = value);
-                    }
+                  onSelected: (stage) {
+                    setState(() => _selectedStage = stage);
                   },
                 ),
                 const SizedBox(height: 16),
@@ -724,29 +750,22 @@ class _JobFormScreenState extends State<JobFormScreen> {
                           style: Theme.of(context).textTheme.titleSmall,
                         ),
                         const SizedBox(height: 8),
-                        DropdownButtonFormField<String>(
-                          initialValue: _interviewType,
-                          style: Theme.of(context).textTheme.bodyLarge,
-                          decoration: const InputDecoration(
-                            border: OutlineInputBorder(),
-                            hintText: 'Select interview type',
+                        _buildSheetSelector<String?>(
+                          context: context,
+                          isDark: isDark,
+                          value: _interviewType,
+                          hint: 'Select interview type',
+                          displayText:
+                              _interviewType ?? 'Select interview type',
+                          icon: _getInterviewTypeIcon(_interviewType),
+                          items: const ['Phone', 'Video', 'In-Person'],
+                          sheetTitle: 'Interview Type',
+                          itemBuilder: (type) => _SheetItem(
+                            icon: _getInterviewTypeIcon(type),
+                            label: type ?? '',
                           ),
-                          items: const [
-                            DropdownMenuItem(
-                              value: 'Phone',
-                              child: Text('Phone'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'Video',
-                              child: Text('Video'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'In-Person',
-                              child: Text('In-Person'),
-                            ),
-                          ],
-                          onChanged: (value) {
-                            setState(() => _interviewType = value);
+                          onSelected: (type) {
+                            setState(() => _interviewType = type);
                           },
                         ),
                         const SizedBox(height: 16),
@@ -895,20 +914,20 @@ class _JobFormScreenState extends State<JobFormScreen> {
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
                 const SizedBox(height: 8),
-                DropdownButtonFormField<String>(
-                  initialValue: _selectedResumeId,
-                  style: Theme.of(context).textTheme.bodyLarge,
-                  decoration: const InputDecoration(
-                    hintText: 'Select a resume version',
-                    border: OutlineInputBorder(),
+                _buildSheetSelector<String?>(
+                  context: context,
+                  isDark: isDark,
+                  value: _selectedResumeId,
+                  hint: 'Select a resume version',
+                  displayText: _selectedResumeId ?? 'Select a resume version',
+                  icon: Icons.description_outlined,
+                  items: const <String?>[null],
+                  sheetTitle: 'Select Resume',
+                  itemBuilder: (_) => const _SheetItem(
+                    icon: Icons.description_outlined,
+                    label: 'No resumes uploaded yet',
                   ),
-                  items: const [
-                    DropdownMenuItem(
-                      value: null,
-                      child: Text('Select a resume version'),
-                    ),
-                  ],
-                  onChanged: (value) {
+                  onSelected: (value) {
                     setState(() => _selectedResumeId = value);
                   },
                 ),
@@ -996,6 +1015,263 @@ class _JobFormScreenState extends State<JobFormScreen> {
     );
   }
 
+  // --- Modern bottom sheet selector ---
+
+  Widget _buildSheetSelector<T>({
+    required BuildContext context,
+    required bool isDark,
+    required T value,
+    required String hint,
+    required String displayText,
+    required IconData icon,
+    required List<T> items,
+    required String sheetTitle,
+    required _SheetItem Function(T item) itemBuilder,
+    required ValueChanged<T> onSelected,
+  }) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final isPlaceholder = displayText == hint;
+
+    return InkWell(
+      onTap: () => _showSelectionSheet<T>(
+        context: context,
+        isDark: isDark,
+        title: sheetTitle,
+        items: items,
+        selectedValue: value,
+        itemBuilder: itemBuilder,
+        onSelected: onSelected,
+      ),
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: isDark ? Colors.white24 : Colors.black12),
+          color: isDark ? const Color(0xFF1E1E1E) : Colors.grey[50],
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 20, color: isPlaceholder ? Colors.grey : primary),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                displayText,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: isPlaceholder ? FontWeight.w400 : FontWeight.w500,
+                  color: isPlaceholder
+                      ? (isDark ? Colors.white38 : Colors.black38)
+                      : (isDark ? Colors.white : Colors.black87),
+                ),
+              ),
+            ),
+            Icon(
+              Icons.keyboard_arrow_down_rounded,
+              color: isDark ? Colors.white38 : Colors.black38,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showSelectionSheet<T>({
+    required BuildContext context,
+    required bool isDark,
+    required String title,
+    required List<T> items,
+    required T selectedValue,
+    required _SheetItem Function(T item) itemBuilder,
+    required ValueChanged<T> onSelected,
+  }) {
+    final primary = Theme.of(context).colorScheme.primary;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: isDark ? Colors.grey[900] : Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(ctx).size.height * 0.6,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 8),
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: isDark ? Colors.white24 : Colors.black12,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Text(
+                    title,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Divider(height: 1),
+                Flexible(
+                  child: ListView(
+                    shrinkWrap: true,
+                    children: items.map((item) {
+                      final sheet = itemBuilder(item);
+                      final isSelected = item == selectedValue;
+                      return ListTile(
+                        leading: Icon(
+                          sheet.icon,
+                          size: 22,
+                          color: isSelected
+                              ? primary
+                              : (sheet.color ??
+                                    (isDark ? Colors.white54 : Colors.black45)),
+                        ),
+                        title: Text(
+                          sheet.label,
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: isSelected
+                                ? FontWeight.w600
+                                : FontWeight.w400,
+                            color: isSelected
+                                ? primary
+                                : (isDark ? Colors.white : Colors.black87),
+                          ),
+                        ),
+                        trailing: isSelected
+                            ? Icon(Icons.check_circle, color: primary, size: 22)
+                            : null,
+                        onTap: () {
+                          Navigator.pop(ctx);
+                          onSelected(item);
+                        },
+                      );
+                    }).toList(),
+                  ),
+                ),
+                const SizedBox(height: 8),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  IconData _getSourceIcon(JobSource source) {
+    switch (source) {
+      case JobSource.linkedin:
+        return Icons.link;
+      case JobSource.indeed:
+        return Icons.search;
+      case JobSource.email:
+        return Icons.email_outlined;
+      case JobSource.referral:
+        return Icons.people_outlined;
+      case JobSource.companyWebsite:
+        return Icons.language;
+      case JobSource.wellfound:
+        return Icons.rocket_launch_outlined;
+      case JobSource.remoteOk:
+        return Icons.wifi;
+      case JobSource.other:
+        return Icons.more_horiz;
+    }
+  }
+
+  IconData _getStageIcon(ApplicationStage stage) {
+    switch (stage) {
+      case ApplicationStage.interested:
+        return Icons.bookmark_outline;
+      case ApplicationStage.applied:
+        return Icons.send_outlined;
+      case ApplicationStage.interviewCalled:
+        return Icons.phone_outlined;
+      case ApplicationStage.interviewed:
+        return Icons.record_voice_over_outlined;
+      case ApplicationStage.offer:
+        return Icons.card_giftcard_outlined;
+      case ApplicationStage.rejected:
+        return Icons.cancel_outlined;
+    }
+  }
+
+  Color _getStageColor(ApplicationStage stage) {
+    switch (stage) {
+      case ApplicationStage.interested:
+        return Colors.grey;
+      case ApplicationStage.applied:
+        return Colors.blue;
+      case ApplicationStage.interviewCalled:
+        return Colors.orange;
+      case ApplicationStage.interviewed:
+        return Colors.cyan;
+      case ApplicationStage.offer:
+        return Colors.green;
+      case ApplicationStage.rejected:
+        return Colors.red;
+    }
+  }
+
+  IconData _getInterviewTypeIcon(String? type) {
+    switch (type) {
+      case 'Phone':
+        return Icons.phone_outlined;
+      case 'Video':
+        return Icons.videocam_outlined;
+      case 'In-Person':
+        return Icons.person_outlined;
+      default:
+        return Icons.help_outline;
+    }
+  }
+
+  Widget _buildToggleRow({
+    required BuildContext context,
+    required bool isDark,
+    required String label,
+    required String subtitle,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
+    return Row(
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label, style: Theme.of(context).textTheme.titleSmall),
+              Text(
+                subtitle,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: isDark ? Colors.white38 : Colors.black38,
+                ),
+              ),
+            ],
+          ),
+        ),
+        Switch(
+          value: value,
+          onChanged: onChanged,
+          activeThumbColor: Theme.of(context).colorScheme.primary,
+        ),
+      ],
+    );
+  }
+
   Widget _buildJobTypeChip(String label, JobType type, bool isDark) {
     final isSelected = _selectedJobType == type;
 
@@ -1073,4 +1349,12 @@ class _JobFormScreenState extends State<JobFormScreen> {
       ),
     );
   }
+}
+
+class _SheetItem {
+  final IconData icon;
+  final String label;
+  final Color? color;
+
+  const _SheetItem({required this.icon, required this.label, this.color});
 }
