@@ -34,8 +34,8 @@ class Validators {
     if (value == null || value.trim().isEmpty) {
       return 'Job description is required';
     }
-    if (value.length < 10) {
-      return 'Job description must be at least 10 characters';
+    if (value.trim().length < 20) {
+      return 'Job description must be at least 20 characters';
     }
     return null;
   }

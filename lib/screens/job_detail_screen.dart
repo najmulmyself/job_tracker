@@ -18,12 +18,14 @@ class JobDetailScreen extends StatefulWidget {
 }
 
 class _JobDetailScreenState extends State<JobDetailScreen> {
+  late JobApplicationModel _job;
   late bool reminderEnabled;
 
   @override
   void initState() {
     super.initState();
-    reminderEnabled = widget.job.interviewReminderEnabled;
+    _job = widget.job;
+    reminderEnabled = _job.interviewReminderEnabled;
   }
 
   String _formatDate(DateTime? date) {
@@ -37,26 +39,25 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
   }
 
   String _formatSalary() {
-    if (widget.job.salaryRange != null && widget.job.salaryRange!.isNotEmpty) {
-      return widget.job.salaryRange!;
+    if (_job.salaryRange != null && _job.salaryRange!.isNotEmpty) {
+      return _job.salaryRange!;
     }
-    if (widget.job.expectedSalary != null &&
-        widget.job.expectedSalary!.isNotEmpty) {
-      return widget.job.expectedSalary!;
+    if (_job.expectedSalary != null && _job.expectedSalary!.isNotEmpty) {
+      return _job.expectedSalary!;
     }
     return 'Not specified';
   }
 
   Color _getStatusColor() {
-    return AppColors.getStageColor(widget.job.stage);
+    return AppColors.getStageColor(_job.stage);
   }
 
   String _getJobType() {
-    return widget.job.jobType.displayName;
+    return _job.jobType.displayName;
   }
 
   void _toggleReminder(bool value) async {
-    final stage = widget.job.stage;
+    final stage = _job.stage;
 
     // Only applicable for applied, interviewCalled, or interviewed stages
     if (stage != ApplicationStage.applied &&
@@ -72,7 +73,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
     }
 
     // Check if interview is scheduled
-    if (widget.job.interviewScheduledDate == null) {
+    if (_job.interviewScheduledDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Select an interview date first'),
@@ -87,7 +88,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
     });
 
     final jobProvider = Provider.of<JobProvider>(context, listen: false);
-    final updatedJob = widget.job.copyWith(
+    final updatedJob = _job.copyWith(
       interviewReminderEnabled: value,
       updatedAt: DateTime.now(),
     );
@@ -98,10 +99,10 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
     final notificationService = NotificationService();
     if (value) {
       await notificationService.scheduleInterviewReminders(
-        jobId: widget.job.id,
-        companyName: widget.job.companyName,
-        jobTitle: widget.job.jobTitle,
-        interviewDateTime: widget.job.interviewScheduledDate!,
+        jobId: _job.id,
+        companyName: _job.companyName,
+        jobTitle: _job.jobTitle,
+        interviewDateTime: _job.interviewScheduledDate!,
       );
 
       if (mounted) {
@@ -113,7 +114,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
         );
       }
     } else {
-      await notificationService.cancelInterviewReminders(widget.job.id);
+      await notificationService.cancelInterviewReminders(_job.id);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -146,7 +147,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                 context,
                 listen: false,
               );
-              await jobProvider.deleteJob(widget.job.userId, widget.job.id);
+              await jobProvider.deleteJob(_job.userId, _job.id);
               if (mounted) {
                 Navigator.of(context).pop(); // Go back to home screen
               }
@@ -167,7 +168,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
           ? AppColors.darkBackground
           : AppColors.lightBackground,
       appBar: AppBar(
-        title: Text(widget.job.companyName),
+        title: Text(_job.companyName),
         actions: [
           PopupMenuButton<String>(
             onSelected: (value) {
@@ -205,7 +206,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                 children: [
                   // Job Title
                   Text(
-                    widget.job.jobTitle,
+                    _job.jobTitle,
                     style: const TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
@@ -227,7 +228,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
-                          widget.job.stage.displayName,
+                          _job.stage.displayName,
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.w600,
@@ -270,7 +271,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
               children: [
                 _buildDetailItem(
                   icon: Icons.business,
-                  label: widget.job.source.displayName,
+                  label: _job.source.displayName,
                   isDark: isDark,
                 ),
                 _buildDetailItem(
@@ -294,7 +295,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                   label: 'Date Applied',
                   isDark: isDark,
                   trailing: Text(
-                    _formatDate(widget.job.applicationDate),
+                    _formatDate(_job.applicationDate),
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
@@ -306,7 +307,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                   label: 'Deadline',
                   isDark: isDark,
                   trailing: Text(
-                    _formatDate(widget.job.deadline),
+                    _formatDate(_job.deadline),
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
@@ -320,18 +321,16 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                   trailing: Switch(
                     value: reminderEnabled,
                     onChanged:
-                        (widget.job.stage == ApplicationStage.applied ||
-                            widget.job.stage ==
-                                ApplicationStage.interviewCalled ||
-                            widget.job.stage == ApplicationStage.interviewed)
+                        (_job.stage == ApplicationStage.applied ||
+                            _job.stage == ApplicationStage.interviewCalled ||
+                            _job.stage == ApplicationStage.interviewed)
                         ? _toggleReminder
                         : (val) => _toggleReminder(val),
                     activeThumbColor: AppColors.primaryBlue,
                     inactiveThumbColor:
-                        (widget.job.stage != ApplicationStage.applied &&
-                            widget.job.stage !=
-                                ApplicationStage.interviewCalled &&
-                            widget.job.stage != ApplicationStage.interviewed)
+                        (_job.stage != ApplicationStage.applied &&
+                            _job.stage != ApplicationStage.interviewCalled &&
+                            _job.stage != ApplicationStage.interviewed)
                         ? Colors.grey
                         : null,
                   ),
@@ -342,46 +341,46 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
             const SizedBox(height: 16),
 
             // Interview Call Section
-            if (widget.job.stage == ApplicationStage.interviewCalled ||
-                widget.job.stage == ApplicationStage.interviewed)
+            if (_job.stage == ApplicationStage.interviewCalled ||
+                _job.stage == ApplicationStage.interviewed)
               _buildSection(
                 context: context,
                 title: 'Interview Information',
                 isDark: isDark,
                 children: [
-                  if (widget.job.interviewCallDate != null)
+                  if (_job.interviewCallDate != null)
                     _buildDetailItem(
                       icon: Icons.phone_callback,
                       label: 'Interview Call Received',
                       isDark: isDark,
                       trailing: Text(
-                        _formatDate(widget.job.interviewCallDate),
+                        _formatDate(_job.interviewCallDate),
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
                     ),
-                  if (widget.job.interviewScheduledDate != null) ...[
+                  if (_job.interviewScheduledDate != null) ...[
                     _buildDetailItem(
                       icon: Icons.event_available,
                       label: 'Interview Scheduled',
                       isDark: isDark,
                       trailing: Text(
-                        '${_formatDate(widget.job.interviewScheduledDate)} ${_formatTime(widget.job.interviewScheduledDate)}',
+                        '${_formatDate(_job.interviewScheduledDate)} ${_formatTime(_job.interviewScheduledDate)}',
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
                     ),
-                    if (widget.job.interviewType != null)
+                    if (_job.interviewType != null)
                       _buildDetailItem(
                         icon: Icons.video_call,
                         label: 'Interview Type',
                         isDark: isDark,
                         trailing: Text(
-                          widget.job.interviewType!,
+                          _job.interviewType!,
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
@@ -399,8 +398,8 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                       ),
                     ),
                   ],
-                  if (widget.job.interviewCallNotes != null &&
-                      widget.job.interviewCallNotes!.isNotEmpty)
+                  if (_job.interviewCallNotes != null &&
+                      _job.interviewCallNotes!.isNotEmpty)
                     Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 20,
@@ -419,7 +418,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            widget.job.interviewCallNotes!,
+                            _job.interviewCallNotes!,
                             style: TextStyle(
                               fontSize: 15,
                               height: 1.5,
@@ -432,12 +431,12 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                 ],
               ),
 
-            if (widget.job.stage == ApplicationStage.interviewCalled ||
-                widget.job.stage == ApplicationStage.interviewed)
+            if (_job.stage == ApplicationStage.interviewCalled ||
+                _job.stage == ApplicationStage.interviewed)
               const SizedBox(height: 16),
 
             // Notes Section
-            if (widget.job.notes.isNotEmpty)
+            if (_job.notes.isNotEmpty)
               _buildSection(
                 context: context,
                 title: 'Notes',
@@ -449,7 +448,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                       vertical: 12,
                     ),
                     child: Text(
-                      widget.job.notes,
+                      _job.notes,
                       style: TextStyle(
                         fontSize: 15,
                         height: 1.5,
@@ -480,12 +479,26 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
           child: SizedBox(
             height: 56,
             child: ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).push(
-                  CupertinoPageRoute(
-                    builder: (_) => JobFormScreen(job: widget.job),
-                  ),
+              onPressed: () async {
+                await Navigator.of(context).push(
+                  CupertinoPageRoute(builder: (_) => JobFormScreen(job: _job)),
                 );
+                // Refresh job data from provider after editing
+                if (mounted) {
+                  final jobProvider = Provider.of<JobProvider>(
+                    context,
+                    listen: false,
+                  );
+                  final updated = jobProvider.allJobs
+                      .where((j) => j.id == _job.id)
+                      .firstOrNull;
+                  if (updated != null) {
+                    setState(() {
+                      _job = updated;
+                      reminderEnabled = _job.interviewReminderEnabled;
+                    });
+                  }
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryBlue,
